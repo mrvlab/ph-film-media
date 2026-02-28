@@ -8,7 +8,7 @@ import type {
   FetchHomeResult,
   FetchFooterResult,
   SettingsQueryResult,
-} from '../../../sanity.types';
+} from '../../../../sanity.types';
 
 export { generateMetadata };
 
