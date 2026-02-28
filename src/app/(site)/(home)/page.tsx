@@ -4,16 +4,25 @@ import { generateMetadata } from '@/utils/generateMetadata';
 import BlockRenderer from '@/components/PageBuilder/BlockRenderer';
 import JsonLd from '@/components/JsonLd';
 import { getOrganizationJsonLd, getWebSiteJsonLd } from '@/utils/jsonld';
+import type {
+  FetchHomeResult,
+  FetchFooterResult,
+  SettingsQueryResult,
+} from '../../../sanity.types';
 
 export { generateMetadata };
 
 export default async function HomePage() {
-  // Fetch all data in parallel
-  const [{ data }, { data: footer }, { data: settings }] = await Promise.all([
-    sanityFetch({ query: fetchHome, params: { slug: '/' } }),
-    sanityFetch({ query: fetchFooter }),
-    sanityFetch({ query: settingsQuery }),
-  ]);
+  const { data }: { data: FetchHomeResult } = await sanityFetch({
+    query: fetchHome,
+    params: { slug: '/' },
+  });
+  const { data: footer }: { data: FetchFooterResult } = await sanityFetch({
+    query: fetchFooter,
+  });
+  const { data: settings }: { data: SettingsQueryResult } = await sanityFetch({
+    query: settingsQuery,
+  });
 
   if (!data?.blockList) return null;
 
