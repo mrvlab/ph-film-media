@@ -11,6 +11,6 @@ export const client = createClient({
   useCdn: true,
   token: token,
   stega: {
-    studioUrl: studioUrl,
+    studioUrl: `${studioUrl}/studio`,
   },
 });
