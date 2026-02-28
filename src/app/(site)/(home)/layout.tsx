@@ -2,7 +2,7 @@ import '@/app/globals.css';
 import Footer from '@/components/Footer/Footer';
 import Header from '@/components/Header/Header';
 import { fetchFooter, fetchHome } from '@/sanity/lib/queries';
-import { FetchFooterResult } from '../../../sanity.types';
+import { FetchFooterResult } from '../../../../sanity.types';
 import { sanityFetch } from '@/sanity/lib/live';
 
 export default async function HomeLayout({

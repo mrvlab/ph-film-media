@@ -10,8 +10,11 @@ import { notFound } from 'next/navigation';
 import { generateMetadata } from '@/utils/generateMetadata';
 import type {
   FetchAllDistributionMovieSlugsResult,
+  FetchDistributionMovieResult,
   FetchDistributionParentSlugResult,
-} from '../../../../../sanity.types';
+  FetchPageResult,
+  SettingsQueryResult,
+} from '../../../../../../sanity.types';
 import { getMovieJsonLd, getBreadcrumbJsonLd } from '@/utils/jsonld';
 import JsonLd from '@/components/JsonLd';
 import MovieDetailHero from '@/components/Blocks/DistributionList/DistributionMovieDetail/MovieDetailHero';
@@ -54,16 +57,18 @@ type Props = {
 export default async function MoviePage({ params }: Props) {
   const { slug, movieSlug } = await params;
 
-  // Fetch all data in parallel
-  const [{ data: movie }, { data: settings }, { data: parentPage }] =
-    await Promise.all([
-      sanityFetch({
-        query: fetchDistributionMovie,
-        params: { slug: movieSlug },
-      }),
-      sanityFetch({ query: settingsQuery }),
-      sanityFetch({ query: fetchPage, params: { slug } }),
-    ]);
+  const { data: movie }: { data: FetchDistributionMovieResult } =
+    await sanityFetch({
+      query: fetchDistributionMovie,
+      params: { slug: movieSlug },
+    });
+  const { data: settings }: { data: SettingsQueryResult } = await sanityFetch({
+    query: settingsQuery,
+  });
+  const { data: parentPage }: { data: FetchPageResult } = await sanityFetch({
+    query: fetchPage,
+    params: { slug },
+  });
 
   if (!movie) notFound();
 
