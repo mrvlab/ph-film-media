@@ -11,7 +11,7 @@ import { generateMetadata } from '@/utils/generateMetadata';
 import type {
   FetchAllDistributionMovieSlugsResult,
   FetchDistributionParentSlugResult,
-} from '../../../../../sanity.types';
+} from '../../../../../../sanity.types';
 import { getMovieJsonLd, getBreadcrumbJsonLd } from '@/utils/jsonld';
 import JsonLd from '@/components/JsonLd';
 import MovieDetailHero from '@/components/Blocks/DistributionList/DistributionMovieDetail/MovieDetailHero';

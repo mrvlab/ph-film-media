@@ -11,7 +11,7 @@ import type {
   FetchPageResult,
   FetchFooterResult,
   FetchAllPageSlugsResult,
-} from '../../../../sanity.types';
+} from '../../../../../sanity.types';
 import Header from '@/components/Header/Header';
 import Footer from '@/components/Footer/Footer';
 import { client } from '@/sanity/lib/client';
