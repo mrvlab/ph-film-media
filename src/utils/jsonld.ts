@@ -2,17 +2,21 @@
 export function getWebSiteJsonLd({
   name,
   url,
+  alternateName,
   searchUrl,
 }: {
   name: string;
   url: string;
+  alternateName?: string;
   searchUrl?: string;
 }) {
   const schema: Record<string, unknown> = {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
     name,
+    ...(alternateName && { alternateName }),
     url,
+    inLanguage: 'sv-SE',
   };
 
   // Add search action if search functionality exists
@@ -34,6 +38,7 @@ export function getWebSiteJsonLd({
 export function getOrganizationJsonLd({
   name,
   url,
+  alternateName,
   logo,
   description,
   email,
@@ -41,6 +46,7 @@ export function getOrganizationJsonLd({
 }: {
   name: string;
   url: string;
+  alternateName?: string;
   logo?: string;
   description?: string;
   email?: string;
@@ -50,6 +56,7 @@ export function getOrganizationJsonLd({
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name,
+    ...(alternateName && { alternateName }),
     url,
     logo,
     description,

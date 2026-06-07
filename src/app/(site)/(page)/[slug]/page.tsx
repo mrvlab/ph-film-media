@@ -15,6 +15,9 @@ import type {
 import Header from '@/components/Header/Header';
 import Footer from '@/components/Footer/Footer';
 import { client } from '@/sanity/lib/client';
+import JsonLd from '@/components/JsonLd';
+import { getBreadcrumbJsonLd } from '@/utils/jsonld';
+import { getSiteUrl, SITE_NAME } from '@/utils/siteUrl';
 
 export { generateMetadata };
 
@@ -54,8 +57,22 @@ export default async function Page({
     query: fetchFooter,
   });
 
+  // Breadcrumb hierarchy (Home › <Page>) so this page is understood as part of
+  // the site rather than a standalone URL.
+  const baseUrl = getSiteUrl();
+  const breadcrumbJsonLd = getBreadcrumbJsonLd({
+    items: [
+      { name: SITE_NAME, url: `${baseUrl}/` },
+      {
+        name: data.pageTitle || slug,
+        url: `${baseUrl}/${slug.replace(/^\/+/, '')}`,
+      },
+    ],
+  });
+
   return (
     <>
+      <JsonLd data={breadcrumbJsonLd} />
       <Header />
       <main
         className="grid grid-cols-1 max-lg:pt-[22%] mt-[var(--header-height-mobile)] lg:mt-0 lg:col-span-10 lg:row-span-full lg:overflow-y-scroll lg:py-p-desktop"

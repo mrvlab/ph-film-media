@@ -4,6 +4,11 @@ import { generateMetadata } from '@/utils/generateMetadata';
 import BlockRenderer from '@/components/PageBuilder/BlockRenderer';
 import JsonLd from '@/components/JsonLd';
 import { getOrganizationJsonLd, getWebSiteJsonLd } from '@/utils/jsonld';
+import {
+  getSiteUrl,
+  SITE_NAME,
+  SITE_ALTERNATE_NAME,
+} from '@/utils/siteUrl';
 import type {
   FetchHomeResult,
   FetchFooterResult,
@@ -26,9 +31,7 @@ export default async function HomePage() {
 
   if (!data?.blockList) return null;
 
-  const baseUrl =
-    (process.env.NEXT_PUBLIC_SANITY_STUDIO_PREVIEW_URL || '').trim() ||
-    'http://localhost:3000';
+  const baseUrl = getSiteUrl();
 
   // Extract social media links for Organization schema
   const socialLinks =
@@ -47,13 +50,15 @@ export default async function HomePage() {
 
   // WebSite schema for enhanced search appearance
   const websiteJsonLd = getWebSiteJsonLd({
-    name: data.pageTitle || 'PH Film & Media',
+    name: SITE_NAME,
+    alternateName: SITE_ALTERNATE_NAME,
     url: baseUrl,
   });
 
   // Organization schema for knowledge panel
   const orgJsonLd = getOrganizationJsonLd({
-    name: settings?.seo?.metaTitle || data.pageTitle || 'PH Film & Media',
+    name: SITE_NAME,
+    alternateName: SITE_ALTERNATE_NAME,
     url: baseUrl,
     description:
       settings?.seo?.metaDescription ||

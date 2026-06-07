@@ -7,6 +7,7 @@ import {
   fetchDistributionMovie,
 } from '@/sanity/lib/queries';
 import { sanityFetch } from '@/sanity/lib/live';
+import { getSiteUrl, SITE_NAME } from '@/utils/siteUrl';
 
 // ============================================================================
 // Types & Constants
@@ -229,10 +230,8 @@ export async function generateMetadata(
   const isHome = !slug || slug === '/';
   const isDistributionMovie = !!(slug && movieSlug);
 
-  // Safely get baseUrl - handle empty strings and invalid values
-  const envUrl = process.env.NEXT_PUBLIC_SANITY_STUDIO_PREVIEW_URL;
-  const baseUrl =
-    envUrl && envUrl.trim() ? envUrl.trim() : 'http://localhost:3000';
+  // Canonical base URL (phmedia.se in production), decoupled from preview URL.
+  const baseUrl = getSiteUrl();
 
   // Fetch all data in parallel
   const [{ data: settings }, { data: page }, { data: movie }] =
@@ -267,12 +266,6 @@ export async function generateMetadata(
     slug,
     movieSlug
   );
-  const siteName =
-    movie?.title ||
-    page?.pageTitle ||
-    settings?.seo?.metaTitle ||
-    DEFAULTS.TITLE;
-
   const previousImages = (await parent).openGraph?.images || [];
 
   // Safely create metadataBase - only include if URL is valid
@@ -296,6 +289,10 @@ export async function generateMetadata(
     openGraph: {
       title,
       description,
+      url: canonical,
+      siteName: SITE_NAME,
+      locale: 'sv_SE',
+      type: 'website',
       images: [ogImage, ...previousImages],
     },
     twitter: {
@@ -305,8 +302,8 @@ export async function generateMetadata(
       images: [ogImage.url],
     },
     other: {
-      'og:site_name': siteName,
-      'og:locale': 'en_US',
+      'og:site_name': SITE_NAME,
+      'og:locale': 'sv_SE',
       'og:type': 'website',
       'og:image:width': String(DEFAULTS.IMAGE_WIDTH),
       'og:image:height': String(DEFAULTS.IMAGE_HEIGHT),

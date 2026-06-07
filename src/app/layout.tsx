@@ -38,7 +38,7 @@ export default async function RootLayout({
 }>) {
   return (
     <ViewTransitions>
-      <html lang="en">
+      <html lang="sv">
         <body
           className={`grid lg:grid-cols-12 lg:grid-rows-6 lg:gap-x-p-desktop lg:h-screen lg:overflow-hidden antialiased ${lato.variable} ${oswald.variable}`}
         >

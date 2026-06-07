@@ -16,6 +16,7 @@ import type {
   SettingsQueryResult,
 } from '../../../../../../sanity.types';
 import { getMovieJsonLd, getBreadcrumbJsonLd } from '@/utils/jsonld';
+import { getSiteUrl, SITE_NAME } from '@/utils/siteUrl';
 import JsonLd from '@/components/JsonLd';
 import MovieDetailHero from '@/components/Blocks/DistributionList/DistributionMovieDetail/MovieDetailHero';
 import MovieDetail from '@/components/Blocks/DistributionList/DistributionMovieDetail/MovieDetail';
@@ -72,9 +73,7 @@ export default async function MoviePage({ params }: Props) {
 
   if (!movie) notFound();
 
-  const baseUrl =
-    (process.env.NEXT_PUBLIC_SANITY_STUDIO_PREVIEW_URL || '').trim() ||
-    'http://localhost:3000';
+  const baseUrl = getSiteUrl();
 
   // Movie schema for rich snippets
   const movieJsonLd = getMovieJsonLd({
@@ -91,7 +90,7 @@ export default async function MoviePage({ params }: Props) {
   // Breadcrumb schema for navigation
   const breadcrumbJsonLd = getBreadcrumbJsonLd({
     items: [
-      { name: 'Home', url: baseUrl },
+      { name: SITE_NAME, url: `${baseUrl}/` },
       {
         name: parentPage?.pageTitle || 'Distribution',
         url: `${baseUrl}/${slug}`,

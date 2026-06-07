@@ -5,6 +5,7 @@ import {
   fetchAllDistributionMovieSlugs,
   fetchDistributionParentSlug,
 } from '@/sanity/lib/queries';
+import { getSiteUrl } from '@/utils/siteUrl';
 import type {
   FetchAllPageSlugsResult,
   FetchAllDistributionMovieSlugsResult,
@@ -12,9 +13,7 @@ import type {
 } from '../../sanity.types';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl =
-    (process.env.NEXT_PUBLIC_SANITY_STUDIO_PREVIEW_URL || '').trim() ||
-    'http://localhost:3000';
+  const baseUrl = getSiteUrl();
 
   // Fetch all data in parallel
   const [pages, movies, parent] = await Promise.all([
