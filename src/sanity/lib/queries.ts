@@ -205,6 +205,34 @@ export const fetchHome = defineQuery(`
           }
         }
       },
+      // Screens List Block
+      _type == "screensList" => {
+        _key,
+        _type,
+        screens[]->{
+          _id,
+          title,
+          screenImage{
+            _type,
+            media{
+              _type,
+              alt,
+              crop,
+              hotspot,
+              asset->{ ... }
+            }
+          },
+          link{
+            linkType,
+            externalLink,
+            internalLink->{
+              _id,
+              pageTitle,
+              slug
+            }
+          }
+        }
+      },
       // Movie Hero Block
       _type == "moviesHeroCarousel" => {
         _type,
@@ -460,6 +488,34 @@ export const fetchPage = defineQuery(`
               crop,
               hotspot,
               asset->{ ... }
+            }
+          }
+        }
+      },
+      // Screens List Block
+      _type == "screensList" => {
+        _key,
+        _type,
+        screens[]->{
+          _id,
+          title,
+          screenImage{
+            _type,
+            media{
+              _type,
+              alt,
+              crop,
+              hotspot,
+              asset->{ ... }
+            }
+          },
+          link{
+            linkType,
+            externalLink,
+            internalLink->{
+              _id,
+              pageTitle,
+              slug
             }
           }
         }

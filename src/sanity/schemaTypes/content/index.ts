@@ -5,3 +5,4 @@ export { directors } from './directors';
 export { writers } from './writers';
 export { movieClub } from './movieClub';
 export { projects } from './projects';
+export { screen } from './screen';

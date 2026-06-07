@@ -12,6 +12,8 @@
  * ---------------------------------------------------------------------------------
  */
 
+export declare const internalGroqTypeReferenceTo: unique symbol;
+
 // Source: schema.json
 export type Settings = {
   _id: string;
@@ -36,6 +38,47 @@ export type Settings = {
   };
 };
 
+export type Footer = {
+  _id: string;
+  _type: "footer";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  title?: string;
+  email?: string;
+  socialMediaLinks?: Array<
+    {
+      _key: string;
+    } & LinkType
+  >;
+  text?: RichText;
+  rights?: string;
+};
+
+export type RichText = Array<
+  | {
+      children?: Array<{
+        marks?: Array<string>;
+        text?: string;
+        _type: "span";
+        _key: string;
+      }>;
+      style?: "normal" | "h2" | "h3" | "blockquote";
+      listItem?: "bullet";
+      markDefs?: Array<
+        {
+          _key: string;
+        } & LinkType
+      >;
+      level?: number;
+      _type: "block";
+      _key: string;
+    }
+  | ({
+      _key: string;
+    } & MediaType)
+>;
+
 export type Header = {
   _id: string;
   _type: "header";
@@ -51,41 +94,68 @@ export type Header = {
     _key: string;
   }>;
   homeMenuItemLabel?: string;
-  socialMediaLinks?: Array<{
-    _key: string;
-  } & LinkType>;
+  socialMediaLinks?: Array<
+    {
+      _key: string;
+    } & LinkType
+  >;
 };
 
-export type Footer = {
-  _id: string;
-  _type: "footer";
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  title?: string;
-  email?: string;
-  socialMediaLinks?: Array<{
-    _key: string;
-  } & LinkType>;
-  text?: Array<{
-    children?: Array<{
-      marks?: Array<string>;
-      text?: string;
-      _type: "span";
-      _key: string;
-    }>;
-    style?: "normal" | "h2" | "h3" | "blockquote";
-    listItem?: "bullet";
-    markDefs?: Array<{
-      _key: string;
-    } & LinkType>;
-    level?: number;
-    _type: "block";
-    _key: string;
-  } | {
-    _key: string;
-  } & MediaType>;
-  rights?: string;
+export type PageReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "page";
+};
+
+export type LinkType = {
+  _type: "linkType";
+  linkType?: "internalLink" | "externalLink";
+  internalLink?: PageReference;
+  externalLink?: string;
+};
+
+export type SanityImageAssetReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "sanity.imageAsset";
+};
+
+export type MediaType = {
+  _type: "mediaType";
+  media?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt?: string;
+    _type: "image";
+  };
+};
+
+export type VisibilityType = {
+  _type: "visibilityType";
+  hideOnMobile?: boolean;
+  hideOnDesktop?: boolean;
+};
+
+export type ButtonType = {
+  _type: "buttonType";
+  buttonLabel?: string;
+  buttonLink?: LinkType;
+};
+
+export type TicketType = {
+  _type: "ticketType";
+  ticketLinkLabel?: string;
+  ticketLink?: LinkType;
+};
+
+export type TrailerType = {
+  _type: "trailerType";
+  trailerLinkLabel?: string;
+  trailerLink?: LinkType;
 };
 
 export type Seo = {
@@ -99,34 +169,10 @@ export type Seo = {
   metaImage?: MediaType;
 };
 
-export type RichText = Array<{
-  children?: Array<{
-    marks?: Array<string>;
-    text?: string;
-    _type: "span";
-    _key: string;
-  }>;
-  style?: "normal" | "h2" | "h3" | "blockquote";
-  listItem?: "bullet";
-  markDefs?: Array<{
-    _key: string;
-  } & LinkType>;
-  level?: number;
-  _type: "block";
-  _key: string;
-} | {
-  _key: string;
-} & MediaType>;
-
 export type MediaGallery = {
   _type: "mediaGallery";
   mediaItems?: Array<{
-    asset?: {
-      _ref: string;
-      _type: "reference";
-      _weak?: boolean;
-      [internalGroqTypeReferenceTo]?: "sanity.imageAsset";
-    };
+    asset?: SanityImageAssetReference;
     media?: unknown;
     hotspot?: SanityImageHotspot;
     crop?: SanityImageCrop;
@@ -136,13 +182,31 @@ export type MediaGallery = {
   }>;
 };
 
-export type Writers = {
+export type SanityImageCrop = {
+  _type: "sanity.imageCrop";
+  top?: number;
+  bottom?: number;
+  left?: number;
+  right?: number;
+};
+
+export type SanityImageHotspot = {
+  _type: "sanity.imageHotspot";
+  x?: number;
+  y?: number;
+  height?: number;
+  width?: number;
+};
+
+export type Screen = {
   _id: string;
-  _type: "writers";
+  _type: "screen";
   _createdAt: string;
   _updatedAt: string;
   _rev: string;
-  writer?: string;
+  title?: string;
+  screenImage?: MediaType;
+  link?: LinkType;
 };
 
 export type MovieClub = {
@@ -155,77 +219,13 @@ export type MovieClub = {
   movieBanner?: MediaType;
 };
 
-export type Languages = {
+export type Writers = {
   _id: string;
-  _type: "languages";
+  _type: "writers";
   _createdAt: string;
   _updatedAt: string;
   _rev: string;
-  language?: string;
-};
-
-export type Distributions = {
-  _id: string;
-  _type: "distributions";
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  title?: string;
-  slug?: Slug;
-  releaseDate?: string;
-  description?: RichText;
-  duration?: string;
-  languages?: Array<{
-    _ref: string;
-    _type: "reference";
-    _weak?: boolean;
-    _key: string;
-    [internalGroqTypeReferenceTo]?: "languages";
-  }>;
-  directors?: Array<{
-    _ref: string;
-    _type: "reference";
-    _weak?: boolean;
-    _key: string;
-    [internalGroqTypeReferenceTo]?: "directors";
-  }>;
-  writers?: Array<{
-    _ref: string;
-    _type: "reference";
-    _weak?: boolean;
-    _key: string;
-    [internalGroqTypeReferenceTo]?: "writers";
-  }>;
-  actors?: Array<{
-    _ref: string;
-    _type: "reference";
-    _weak?: boolean;
-    _key: string;
-    [internalGroqTypeReferenceTo]?: "actors";
-  }>;
-  ticket?: TicketType;
-  button?: ButtonType;
-  trailer?: TrailerType;
-  movieBanner?: MediaType;
-  moviePoster?: MediaType;
-};
-
-export type TrailerType = {
-  _type: "trailerType";
-  trailerLinkLabel?: string;
-  trailerLink?: LinkType;
-};
-
-export type ButtonType = {
-  _type: "buttonType";
-  buttonLabel?: string;
-  buttonLink?: LinkType;
-};
-
-export type TicketType = {
-  _type: "ticketType";
-  ticketLinkLabel?: string;
-  ticketLink?: LinkType;
+  writer?: string;
 };
 
 export type Directors = {
@@ -246,15 +246,114 @@ export type Actors = {
   actor?: string;
 };
 
+export type Languages = {
+  _id: string;
+  _type: "languages";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  language?: string;
+};
+
+export type LanguagesReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "languages";
+};
+
+export type DirectorsReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "directors";
+};
+
+export type WritersReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "writers";
+};
+
+export type ActorsReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "actors";
+};
+
+export type Distributions = {
+  _id: string;
+  _type: "distributions";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  title?: string;
+  slug?: Slug;
+  releaseDate?: string;
+  description?: RichText;
+  duration?: string;
+  languages?: Array<
+    {
+      _key: string;
+    } & LanguagesReference
+  >;
+  directors?: Array<
+    {
+      _key: string;
+    } & DirectorsReference
+  >;
+  writers?: Array<
+    {
+      _key: string;
+    } & WritersReference
+  >;
+  actors?: Array<
+    {
+      _key: string;
+    } & ActorsReference
+  >;
+  ticket?: TicketType;
+  button?: ButtonType;
+  trailer?: TrailerType;
+  movieBanner?: MediaType;
+  moviePoster?: MediaType;
+};
+
+export type Slug = {
+  _type: "slug";
+  current?: string;
+  source?: string;
+};
+
+export type ScreenReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "screen";
+};
+
+export type ScreensList = {
+  _type: "screensList";
+  screens?: Array<
+    {
+      _key: string;
+    } & ScreenReference
+  >;
+};
+
+export type ProjectsReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "projects";
+};
+
 export type ProjectsList = {
   _type: "projectsList";
   showFeaturedProjectCard?: boolean;
-  featuredProjectCardOverride?: {
-    _ref: string;
-    _type: "reference";
-    _weak?: boolean;
-    [internalGroqTypeReferenceTo]?: "projects";
-  };
+  featuredProjectCardOverride?: ProjectsReference;
 };
 
 export type Projects = {
@@ -275,40 +374,6 @@ export type PageTitle = {
   title?: string;
   pageTitleImage?: MediaType;
   visibility?: VisibilityType;
-};
-
-export type VisibilityType = {
-  _type: "visibilityType";
-  hideOnMobile?: boolean;
-  hideOnDesktop?: boolean;
-};
-
-export type MoviesHeroCarousel = {
-  _type: "moviesHeroCarousel";
-  mediaItems?: Array<{
-    _key: string;
-  } & MediaType>;
-};
-
-export type MovieClubList = {
-  _type: "movieClubList";
-  movies?: Array<{
-    _ref: string;
-    _type: "reference";
-    _weak?: boolean;
-    _key: string;
-    [internalGroqTypeReferenceTo]?: "movieClub";
-  }>;
-};
-
-export type MediaCarousel = {
-  _type: "mediaCarousel";
-  carouselItems?: Array<{
-    mediaItem?: MediaType;
-    title?: string;
-    _type: "carouselItem";
-    _key: string;
-  }>;
 };
 
 export type LogoCarousel = {
@@ -332,6 +397,57 @@ export type ImageWithText = {
   }>;
 };
 
+export type MediaCarousel = {
+  _type: "mediaCarousel";
+  carouselItems?: Array<{
+    mediaItem?: MediaType;
+    title?: string;
+    _type: "carouselItem";
+    _key: string;
+  }>;
+};
+
+export type MovieClubReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "movieClub";
+};
+
+export type MovieClubList = {
+  _type: "movieClubList";
+  movies?: Array<
+    {
+      _key: string;
+    } & MovieClubReference
+  >;
+};
+
+export type DistributionsReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "distributions";
+};
+
+export type DistributionList = {
+  _type: "distributionList";
+  movies?: Array<
+    {
+      _key: string;
+    } & DistributionsReference
+  >;
+};
+
+export type MoviesHeroCarousel = {
+  _type: "moviesHeroCarousel";
+  mediaItems?: Array<
+    {
+      _key: string;
+    } & MediaType
+  >;
+};
+
 export type HeroCarousel = {
   _type: "heroCarousel";
   mediaCard?: Array<{
@@ -348,17 +464,6 @@ export type HeroCarousel = {
   }>;
 };
 
-export type DistributionList = {
-  _type: "distributionList";
-  movies?: Array<{
-    _ref: string;
-    _type: "reference";
-    _weak?: boolean;
-    _key: string;
-    [internalGroqTypeReferenceTo]?: "distributions";
-  }>;
-};
-
 export type Page = {
   _id: string;
   _type: "page";
@@ -367,59 +472,43 @@ export type Page = {
   _rev: string;
   pageTitle?: string;
   slug?: Slug;
-  blockList?: Array<{
-    _key: string;
-  } & DistributionList | {
-    _key: string;
-  } & HeroCarousel | {
-    _key: string;
-  } & ImageWithText | {
-    _key: string;
-  } & LogoCarousel | {
-    _key: string;
-  } & MediaCarousel | {
-    _key: string;
-  } & MovieClubList | {
-    _key: string;
-  } & MoviesHeroCarousel | {
-    _key: string;
-  } & PageTitle | {
-    _key: string;
-  } & ProjectsList>;
+  blockList?: Array<
+    | ({
+        _key: string;
+      } & HeroCarousel)
+    | ({
+        _key: string;
+      } & MoviesHeroCarousel)
+    | ({
+        _key: string;
+      } & DistributionList)
+    | ({
+        _key: string;
+      } & MovieClubList)
+    | ({
+        _key: string;
+      } & MediaCarousel)
+    | ({
+        _key: string;
+      } & ImageWithText)
+    | ({
+        _key: string;
+      } & LogoCarousel)
+    | ({
+        _key: string;
+      } & PageTitle)
+    | ({
+        _key: string;
+      } & ProjectsList)
+    | ({
+        _key: string;
+      } & ScreensList)
+  >;
   seo?: {
     metaTitle?: string;
     metaDescription?: string;
     metaImage?: MediaType;
     _type: "seo";
-  };
-};
-
-export type LinkType = {
-  _type: "linkType";
-  linkType?: "internalLink" | "externalLink";
-  internalLink?: {
-    _ref: string;
-    _type: "reference";
-    _weak?: boolean;
-    [internalGroqTypeReferenceTo]?: "page";
-  };
-  externalLink?: string;
-};
-
-export type MediaType = {
-  _type: "mediaType";
-  media?: {
-    asset?: {
-      _ref: string;
-      _type: "reference";
-      _weak?: boolean;
-      [internalGroqTypeReferenceTo]?: "sanity.imageAsset";
-    };
-    media?: unknown;
-    hotspot?: SanityImageHotspot;
-    crop?: SanityImageCrop;
-    alt?: string;
-    _type: "image";
   };
 };
 
@@ -458,20 +547,15 @@ export type SanityImageDimensions = {
   aspectRatio?: number;
 };
 
-export type SanityImageHotspot = {
-  _type: "sanity.imageHotspot";
-  x?: number;
-  y?: number;
-  height?: number;
-  width?: number;
-};
-
-export type SanityImageCrop = {
-  _type: "sanity.imageCrop";
-  top?: number;
-  bottom?: number;
-  left?: number;
-  right?: number;
+export type SanityImageMetadata = {
+  _type: "sanity.imageMetadata";
+  location?: Geopoint;
+  dimensions?: SanityImageDimensions;
+  palette?: SanityImagePalette;
+  lqip?: string;
+  blurHash?: string;
+  hasAlpha?: boolean;
+  isOpaque?: boolean;
 };
 
 export type SanityFileAsset = {
@@ -494,6 +578,13 @@ export type SanityFileAsset = {
   path?: string;
   url?: string;
   source?: SanityAssetSourceData;
+};
+
+export type SanityAssetSourceData = {
+  _type: "sanity.assetSourceData";
+  name?: string;
+  id?: string;
+  url?: string;
 };
 
 export type SanityImageAsset = {
@@ -519,17 +610,6 @@ export type SanityImageAsset = {
   source?: SanityAssetSourceData;
 };
 
-export type SanityImageMetadata = {
-  _type: "sanity.imageMetadata";
-  location?: Geopoint;
-  dimensions?: SanityImageDimensions;
-  palette?: SanityImagePalette;
-  lqip?: string;
-  blurHash?: string;
-  hasAlpha?: boolean;
-  isOpaque?: boolean;
-};
-
 export type Geopoint = {
   _type: "geopoint";
   lat?: number;
@@ -537,27 +617,69 @@ export type Geopoint = {
   alt?: number;
 };
 
-export type Slug = {
-  _type: "slug";
-  current?: string;
-  source?: string;
-};
+export type AllSanitySchemaTypes =
+  | Settings
+  | Footer
+  | RichText
+  | Header
+  | PageReference
+  | LinkType
+  | SanityImageAssetReference
+  | MediaType
+  | VisibilityType
+  | ButtonType
+  | TicketType
+  | TrailerType
+  | Seo
+  | MediaGallery
+  | SanityImageCrop
+  | SanityImageHotspot
+  | Screen
+  | MovieClub
+  | Writers
+  | Directors
+  | Actors
+  | Languages
+  | LanguagesReference
+  | DirectorsReference
+  | WritersReference
+  | ActorsReference
+  | Distributions
+  | Slug
+  | ScreenReference
+  | ScreensList
+  | ProjectsReference
+  | ProjectsList
+  | Projects
+  | PageTitle
+  | LogoCarousel
+  | ImageWithText
+  | MediaCarousel
+  | MovieClubReference
+  | MovieClubList
+  | DistributionsReference
+  | DistributionList
+  | MoviesHeroCarousel
+  | HeroCarousel
+  | Page
+  | MediaTag
+  | SanityImagePaletteSwatch
+  | SanityImagePalette
+  | SanityImageDimensions
+  | SanityImageMetadata
+  | SanityFileAsset
+  | SanityAssetSourceData
+  | SanityImageAsset
+  | Geopoint;
 
-export type SanityAssetSourceData = {
-  _type: "sanity.assetSourceData";
-  name?: string;
-  id?: string;
-  url?: string;
-};
-
-export type AllSanitySchemaTypes = Settings | Header | Footer | Seo | RichText | MediaGallery | Writers | MovieClub | Languages | Distributions | TrailerType | ButtonType | TicketType | Directors | Actors | ProjectsList | Projects | PageTitle | VisibilityType | MoviesHeroCarousel | MovieClubList | MediaCarousel | LogoCarousel | ImageWithText | HeroCarousel | DistributionList | Page | LinkType | MediaType | MediaTag | SanityImagePaletteSwatch | SanityImagePalette | SanityImageDimensions | SanityImageHotspot | SanityImageCrop | SanityFileAsset | SanityImageAsset | SanityImageMetadata | Geopoint | Slug | SanityAssetSourceData;
-export declare const internalGroqTypeReferenceTo: unique symbol;
-// Source: ./src/sanity/lib/queries.ts
+// Source: src/sanity/lib/queries.ts
 // Variable: fetchAllPageSlugs
 // Query: *[_type == "page" && defined(slug.current)]{    "slug": slug.current  }
 export type FetchAllPageSlugsResult = Array<{
   slug: string | null;
 }>;
+
+// Source: src/sanity/lib/queries.ts
 // Variable: settingsQuery
 // Query: *[_type == "settings"][0]{      _id,      _type,      seo {        metaTitle,        metaDescription,        metaImage {          _type,          media {            _type,            alt,            crop,            hotspot,            asset->{ ... }          }        }      },      distributionMovieDetailTitles {        descriptionLabel,        directorsLabel,        writersLabel,        actorsLabel,        languagesLabel,        releaseDateLabel,        durationLabel      }    }
 export type SettingsQueryResult = {
@@ -608,6 +730,8 @@ export type SettingsQueryResult = {
     durationLabel: string | null;
   } | null;
 } | null;
+
+// Source: src/sanity/lib/queries.ts
 // Variable: fetchHeader
 // Query: *[_type == "header"][0]{  mobileLogo{    _type,    media{      _type,      alt,      crop,      hotspot,      asset->{ ... }    }  },  desktopLogo{    _type,    media{      _type,      alt,      crop,      hotspot,      asset->{ ... }    }  },  linkReference[]{    _key,    label,    link{      linkType,      externalLink,      internalLink->{        _id,        pageTitle,        slug      }    }  },  homeMenuItemLabel,  socialMediaLinks[]{    _key,    linkType,    externalLink,    internalLink->{      _id,      pageTitle,      slug    }  }}
 export type FetchHeaderResult = {
@@ -698,6 +822,8 @@ export type FetchHeaderResult = {
     } | null;
   }> | null;
 } | null;
+
+// Source: src/sanity/lib/queries.ts
 // Variable: fetchFooter
 // Query: *[_type == "footer"][0]{    _id,    _type,    title,    email,    text[],    socialMediaLinks[]{      _key,      linkType,      externalLink,      internalLink->{        _id,        pageTitle,        slug      }    },    rights  }
 export type FetchFooterResult = {
@@ -705,24 +831,29 @@ export type FetchFooterResult = {
   _type: "footer";
   title: string | null;
   email: string | null;
-  text: Array<{
-    _key: string;
-  } & MediaType | {
-    children?: Array<{
-      marks?: Array<string>;
-      text?: string;
-      _type: "span";
-      _key: string;
-    }>;
-    style?: "blockquote" | "h2" | "h3" | "normal";
-    listItem?: "bullet";
-    markDefs?: Array<{
-      _key: string;
-    } & LinkType>;
-    level?: number;
-    _type: "block";
-    _key: string;
-  }> | null;
+  text: Array<
+    | ({
+        _key: string;
+      } & MediaType)
+    | {
+        children?: Array<{
+          marks?: Array<string>;
+          text?: string;
+          _type: "span";
+          _key: string;
+        }>;
+        style?: "blockquote" | "h2" | "h3" | "normal";
+        listItem?: "bullet";
+        markDefs?: Array<
+          {
+            _key: string;
+          } & LinkType
+        >;
+        level?: number;
+        _type: "block";
+        _key: string;
+      }
+  > | null;
   socialMediaLinks: Array<{
     _key: string;
     linkType: "externalLink" | "internalLink" | null;
@@ -735,410 +866,470 @@ export type FetchFooterResult = {
   }> | null;
   rights: string | null;
 } | null;
+
+// Source: src/sanity/lib/queries.ts
 // Variable: fetchHome
-// Query: *[_type == "page" && slug.current == '/'][0]{  _id,    _type,    pageTitle,    slug,    blockList[]{      // Page Title Block      _type == "pageTitle" => {        _key,        _type,        titleType,        title,        pageTitleImage{          _type,          media{            _type,            alt,            crop,            hotspot,            asset->{ ... }          }        },        visibility {          hideOnMobile,          hideOnDesktop        }      },      // Hero Block      _type == "heroCarousel" => {        _key,        _type,        mediaCard[]{          _key,          id,          cardImage{            _type,            media{              _type,              alt,              crop,              hotspot,              asset->{ ... }            }          },          title,          infoItems[]{            id,            infoItemTitle          },          cardLink{            linkType,            externalLink,            internalLink->{              _id,              pageTitle,              slug            }          }        },      },    // Media Carousel Block    _type == "mediaCarousel" => {      _key,      _type,      carouselItems[]{        _key,        title,        mediaItem{          _type,          media{            _type,            alt,            crop,            hotspot,            asset->{ ... }          }        },      }    },      // Movie Club List Block      _type == "movieClubList" => {          _key,          _type,          movies[]->{            _id,            title,            movieBanner{            _type,            media{              _type,              alt,              crop,              hotspot,              asset->{ ... }            }          }        }      },      // Movie Hero Block      _type == "moviesHeroCarousel" => {        _type,        mediaItems{          _type,          media{            _type,            alt,            crop,            hotspot,              asset->{ ... }          }        }      },      // Image With Text Block      _type == "imageWithText" => {        _key,        _type,        mediaItem{          _type,          media{            _type,            alt,            crop,            hotspot,            asset->{ ... }          }        },        mediaTitle,        textSection[]{          id,          title,          richText        }      },      // Logo Carousel Block      _type == "logoCarousel" => {        _key,        _type,        logoItems[]{          id,          mediaItem{            _type,            media{              _type,              alt,              crop,              hotspot,              asset->{ ... }            }          }        }      },            // Distribution List Block            _type == "distributionList" => {        _key,        _type,        movies[]->{        _id,        title,        slug{          _type,          current        },        releaseDate,        description,        duration,        languages[]->{          _id,          language        },        directors[]->{          _id,          director        },        writers[]->{          _id,          writer        },        actors[]->{          _id,          actor        },        ticket,        button,        trailer,        moviePoster{          _type,          media{            _type,            alt,            crop,            hotspot,            asset->{ ... }          }        },        movieBanner{          _type,          media{            _type,            alt,            crop,            hotspot,            asset->{ ... }          }        }      }      },      // Projects List Block      _type == "projectsList" => {        _key,        _type,        showFeaturedProjectCard,        featuredProjectCardOverride->{          _id,          _type,          _createdAt,          _updatedAt,          _rev,          title,          description,          projectImage {            _type,            media {              _type,              alt,              crop,              hotspot,              asset->{ ... }            }          },          link{            linkType,            externalLink,            internalLink->{              _id,              pageTitle,              slug            }          }        }      }    },    seo {      metaTitle,      metaDescription,      metaImage {        _type,        media {          _type,          alt,          crop,          hotspot,          asset->{ ... }        }      }    }  }
+// Query: *[_type == "page" && slug.current == '/'][0]{  _id,    _type,    pageTitle,    slug,    blockList[]{      // Page Title Block      _type == "pageTitle" => {        _key,        _type,        titleType,        title,        pageTitleImage{          _type,          media{            _type,            alt,            crop,            hotspot,            asset->{ ... }          }        },        visibility {          hideOnMobile,          hideOnDesktop        }      },      // Hero Block      _type == "heroCarousel" => {        _key,        _type,        mediaCard[]{          _key,          id,          cardImage{            _type,            media{              _type,              alt,              crop,              hotspot,              asset->{ ... }            }          },          title,          infoItems[]{            id,            infoItemTitle          },          cardLink{            linkType,            externalLink,            internalLink->{              _id,              pageTitle,              slug            }          }        },      },    // Media Carousel Block    _type == "mediaCarousel" => {      _key,      _type,      carouselItems[]{        _key,        title,        mediaItem{          _type,          media{            _type,            alt,            crop,            hotspot,            asset->{ ... }          }        },      }    },      // Movie Club List Block      _type == "movieClubList" => {          _key,          _type,          movies[]->{            _id,            title,            movieBanner{            _type,            media{              _type,              alt,              crop,              hotspot,              asset->{ ... }            }          }        }      },      // Screens List Block      _type == "screensList" => {        _key,        _type,        screens[]->{          _id,          title,          screenImage{            _type,            media{              _type,              alt,              crop,              hotspot,              asset->{ ... }            }          },          link{            linkType,            externalLink,            internalLink->{              _id,              pageTitle,              slug            }          }        }      },      // Movie Hero Block      _type == "moviesHeroCarousel" => {        _type,        mediaItems{          _type,          media{            _type,            alt,            crop,            hotspot,              asset->{ ... }          }        }      },      // Image With Text Block      _type == "imageWithText" => {        _key,        _type,        mediaItem{          _type,          media{            _type,            alt,            crop,            hotspot,            asset->{ ... }          }        },        mediaTitle,        textSection[]{          id,          title,          richText        }      },      // Logo Carousel Block      _type == "logoCarousel" => {        _key,        _type,        logoItems[]{          id,          mediaItem{            _type,            media{              _type,              alt,              crop,              hotspot,              asset->{ ... }            }          }        }      },            // Distribution List Block            _type == "distributionList" => {        _key,        _type,        movies[]->{        _id,        title,        slug{          _type,          current        },        releaseDate,        description,        duration,        languages[]->{          _id,          language        },        directors[]->{          _id,          director        },        writers[]->{          _id,          writer        },        actors[]->{          _id,          actor        },        ticket,        button,        trailer,        moviePoster{          _type,          media{            _type,            alt,            crop,            hotspot,            asset->{ ... }          }        },        movieBanner{          _type,          media{            _type,            alt,            crop,            hotspot,            asset->{ ... }          }        }      }      },      // Projects List Block      _type == "projectsList" => {        _key,        _type,        showFeaturedProjectCard,        featuredProjectCardOverride->{          _id,          _type,          _createdAt,          _updatedAt,          _rev,          title,          description,          projectImage {            _type,            media {              _type,              alt,              crop,              hotspot,              asset->{ ... }            }          },          link{            linkType,            externalLink,            internalLink->{              _id,              pageTitle,              slug            }          }        }      }    },    seo {      metaTitle,      metaDescription,      metaImage {        _type,        media {          _type,          alt,          crop,          hotspot,          asset->{ ... }        }      }    }  }
 export type FetchHomeResult = {
   _id: string;
   _type: "page";
   pageTitle: string | null;
   slug: Slug | null;
-  blockList: Array<{
-    _key: string;
-    _type: "distributionList";
-    movies: Array<{
-      _id: string;
-      title: string | null;
-      slug: {
-        _type: "slug";
-        current: string | null;
-      } | null;
-      releaseDate: string | null;
-      description: RichText | null;
-      duration: string | null;
-      languages: Array<{
-        _id: string;
-        language: string | null;
-      }> | null;
-      directors: Array<{
-        _id: string;
-        director: string | null;
-      }> | null;
-      writers: Array<{
-        _id: string;
-        writer: string | null;
-      }> | null;
-      actors: Array<{
-        _id: string;
-        actor: string | null;
-      }> | null;
-      ticket: TicketType | null;
-      button: ButtonType | null;
-      trailer: TrailerType | null;
-      moviePoster: {
-        _type: "mediaType";
-        media: {
-          _type: "image";
-          alt: string | null;
-          crop: SanityImageCrop | null;
-          hotspot: SanityImageHotspot | null;
-          asset: {
-            _id: string;
-            _type: "sanity.imageAsset";
-            _createdAt: string;
-            _updatedAt: string;
-            _rev: string;
-            originalFilename?: string;
-            label?: string;
-            title?: string;
-            description?: string;
-            altText?: string;
-            sha1hash?: string;
-            extension?: string;
-            mimeType?: string;
-            size?: number;
-            assetId?: string;
-            uploadId?: string;
-            path?: string;
-            url?: string;
-            metadata?: SanityImageMetadata;
-            source?: SanityAssetSourceData;
-          } | null;
-        } | null;
-      } | null;
-      movieBanner: {
-        _type: "mediaType";
-        media: {
-          _type: "image";
-          alt: string | null;
-          crop: SanityImageCrop | null;
-          hotspot: SanityImageHotspot | null;
-          asset: {
-            _id: string;
-            _type: "sanity.imageAsset";
-            _createdAt: string;
-            _updatedAt: string;
-            _rev: string;
-            originalFilename?: string;
-            label?: string;
-            title?: string;
-            description?: string;
-            altText?: string;
-            sha1hash?: string;
-            extension?: string;
-            mimeType?: string;
-            size?: number;
-            assetId?: string;
-            uploadId?: string;
-            path?: string;
-            url?: string;
-            metadata?: SanityImageMetadata;
-            source?: SanityAssetSourceData;
-          } | null;
-        } | null;
-      } | null;
-    }> | null;
-  } | {
-    _key: string;
-    _type: "heroCarousel";
-    mediaCard: Array<{
-      _key: string;
-      id: null;
-      cardImage: {
-        _type: "mediaType";
-        media: {
-          _type: "image";
-          alt: string | null;
-          crop: SanityImageCrop | null;
-          hotspot: SanityImageHotspot | null;
-          asset: {
-            _id: string;
-            _type: "sanity.imageAsset";
-            _createdAt: string;
-            _updatedAt: string;
-            _rev: string;
-            originalFilename?: string;
-            label?: string;
-            title?: string;
-            description?: string;
-            altText?: string;
-            sha1hash?: string;
-            extension?: string;
-            mimeType?: string;
-            size?: number;
-            assetId?: string;
-            uploadId?: string;
-            path?: string;
-            url?: string;
-            metadata?: SanityImageMetadata;
-            source?: SanityAssetSourceData;
-          } | null;
-        } | null;
-      } | null;
-      title: string | null;
-      infoItems: Array<{
-        id: null;
-        infoItemTitle: string | null;
-      }> | null;
-      cardLink: {
-        linkType: "externalLink" | "internalLink" | null;
-        externalLink: string | null;
-        internalLink: {
+  blockList: Array<
+    | {
+        _key: string;
+        _type: "distributionList";
+        movies: Array<{
           _id: string;
-          pageTitle: string | null;
-          slug: Slug | null;
+          title: string | null;
+          slug: {
+            _type: "slug";
+            current: string | null;
+          } | null;
+          releaseDate: string | null;
+          description: RichText | null;
+          duration: string | null;
+          languages: Array<{
+            _id: string;
+            language: string | null;
+          }> | null;
+          directors: Array<{
+            _id: string;
+            director: string | null;
+          }> | null;
+          writers: Array<{
+            _id: string;
+            writer: string | null;
+          }> | null;
+          actors: Array<{
+            _id: string;
+            actor: string | null;
+          }> | null;
+          ticket: TicketType | null;
+          button: ButtonType | null;
+          trailer: TrailerType | null;
+          moviePoster: {
+            _type: "mediaType";
+            media: {
+              _type: "image";
+              alt: string | null;
+              crop: SanityImageCrop | null;
+              hotspot: SanityImageHotspot | null;
+              asset: {
+                _id: string;
+                _type: "sanity.imageAsset";
+                _createdAt: string;
+                _updatedAt: string;
+                _rev: string;
+                originalFilename?: string;
+                label?: string;
+                title?: string;
+                description?: string;
+                altText?: string;
+                sha1hash?: string;
+                extension?: string;
+                mimeType?: string;
+                size?: number;
+                assetId?: string;
+                uploadId?: string;
+                path?: string;
+                url?: string;
+                metadata?: SanityImageMetadata;
+                source?: SanityAssetSourceData;
+              } | null;
+            } | null;
+          } | null;
+          movieBanner: {
+            _type: "mediaType";
+            media: {
+              _type: "image";
+              alt: string | null;
+              crop: SanityImageCrop | null;
+              hotspot: SanityImageHotspot | null;
+              asset: {
+                _id: string;
+                _type: "sanity.imageAsset";
+                _createdAt: string;
+                _updatedAt: string;
+                _rev: string;
+                originalFilename?: string;
+                label?: string;
+                title?: string;
+                description?: string;
+                altText?: string;
+                sha1hash?: string;
+                extension?: string;
+                mimeType?: string;
+                size?: number;
+                assetId?: string;
+                uploadId?: string;
+                path?: string;
+                url?: string;
+                metadata?: SanityImageMetadata;
+                source?: SanityAssetSourceData;
+              } | null;
+            } | null;
+          } | null;
+        }> | null;
+      }
+    | {
+        _key: string;
+        _type: "heroCarousel";
+        mediaCard: Array<{
+          _key: string;
+          id: null;
+          cardImage: {
+            _type: "mediaType";
+            media: {
+              _type: "image";
+              alt: string | null;
+              crop: SanityImageCrop | null;
+              hotspot: SanityImageHotspot | null;
+              asset: {
+                _id: string;
+                _type: "sanity.imageAsset";
+                _createdAt: string;
+                _updatedAt: string;
+                _rev: string;
+                originalFilename?: string;
+                label?: string;
+                title?: string;
+                description?: string;
+                altText?: string;
+                sha1hash?: string;
+                extension?: string;
+                mimeType?: string;
+                size?: number;
+                assetId?: string;
+                uploadId?: string;
+                path?: string;
+                url?: string;
+                metadata?: SanityImageMetadata;
+                source?: SanityAssetSourceData;
+              } | null;
+            } | null;
+          } | null;
+          title: string | null;
+          infoItems: Array<{
+            id: null;
+            infoItemTitle: string | null;
+          }> | null;
+          cardLink: {
+            linkType: "externalLink" | "internalLink" | null;
+            externalLink: string | null;
+            internalLink: {
+              _id: string;
+              pageTitle: string | null;
+              slug: Slug | null;
+            } | null;
+          } | null;
+        }> | null;
+      }
+    | {
+        _key: string;
+        _type: "imageWithText";
+        mediaItem: {
+          _type: "mediaType";
+          media: {
+            _type: "image";
+            alt: string | null;
+            crop: SanityImageCrop | null;
+            hotspot: SanityImageHotspot | null;
+            asset: {
+              _id: string;
+              _type: "sanity.imageAsset";
+              _createdAt: string;
+              _updatedAt: string;
+              _rev: string;
+              originalFilename?: string;
+              label?: string;
+              title?: string;
+              description?: string;
+              altText?: string;
+              sha1hash?: string;
+              extension?: string;
+              mimeType?: string;
+              size?: number;
+              assetId?: string;
+              uploadId?: string;
+              path?: string;
+              url?: string;
+              metadata?: SanityImageMetadata;
+              source?: SanityAssetSourceData;
+            } | null;
+          } | null;
         } | null;
-      } | null;
-    }> | null;
-  } | {
-    _key: string;
-    _type: "imageWithText";
-    mediaItem: {
-      _type: "mediaType";
-      media: {
-        _type: "image";
-        alt: string | null;
-        crop: SanityImageCrop | null;
-        hotspot: SanityImageHotspot | null;
-        asset: {
+        mediaTitle: string | null;
+        textSection: Array<{
+          id: null;
+          title: string | null;
+          richText: RichText | null;
+        }> | null;
+      }
+    | {
+        _key: string;
+        _type: "logoCarousel";
+        logoItems: Array<{
+          id: null;
+          mediaItem: {
+            _type: "mediaType";
+            media: {
+              _type: "image";
+              alt: string | null;
+              crop: SanityImageCrop | null;
+              hotspot: SanityImageHotspot | null;
+              asset: {
+                _id: string;
+                _type: "sanity.imageAsset";
+                _createdAt: string;
+                _updatedAt: string;
+                _rev: string;
+                originalFilename?: string;
+                label?: string;
+                title?: string;
+                description?: string;
+                altText?: string;
+                sha1hash?: string;
+                extension?: string;
+                mimeType?: string;
+                size?: number;
+                assetId?: string;
+                uploadId?: string;
+                path?: string;
+                url?: string;
+                metadata?: SanityImageMetadata;
+                source?: SanityAssetSourceData;
+              } | null;
+            } | null;
+          } | null;
+        }> | null;
+      }
+    | {
+        _key: string;
+        _type: "mediaCarousel";
+        carouselItems: Array<{
+          _key: string;
+          title: string | null;
+          mediaItem: {
+            _type: "mediaType";
+            media: {
+              _type: "image";
+              alt: string | null;
+              crop: SanityImageCrop | null;
+              hotspot: SanityImageHotspot | null;
+              asset: {
+                _id: string;
+                _type: "sanity.imageAsset";
+                _createdAt: string;
+                _updatedAt: string;
+                _rev: string;
+                originalFilename?: string;
+                label?: string;
+                title?: string;
+                description?: string;
+                altText?: string;
+                sha1hash?: string;
+                extension?: string;
+                mimeType?: string;
+                size?: number;
+                assetId?: string;
+                uploadId?: string;
+                path?: string;
+                url?: string;
+                metadata?: SanityImageMetadata;
+                source?: SanityAssetSourceData;
+              } | null;
+            } | null;
+          } | null;
+        }> | null;
+      }
+    | {
+        _key: string;
+        _type: "movieClubList";
+        movies: Array<{
           _id: string;
-          _type: "sanity.imageAsset";
+          title: string | null;
+          movieBanner: {
+            _type: "mediaType";
+            media: {
+              _type: "image";
+              alt: string | null;
+              crop: SanityImageCrop | null;
+              hotspot: SanityImageHotspot | null;
+              asset: {
+                _id: string;
+                _type: "sanity.imageAsset";
+                _createdAt: string;
+                _updatedAt: string;
+                _rev: string;
+                originalFilename?: string;
+                label?: string;
+                title?: string;
+                description?: string;
+                altText?: string;
+                sha1hash?: string;
+                extension?: string;
+                mimeType?: string;
+                size?: number;
+                assetId?: string;
+                uploadId?: string;
+                path?: string;
+                url?: string;
+                metadata?: SanityImageMetadata;
+                source?: SanityAssetSourceData;
+              } | null;
+            } | null;
+          } | null;
+        }> | null;
+      }
+    | {
+        _key: string;
+        _type: "pageTitle";
+        titleType: "image" | "text" | null;
+        title: string | null;
+        pageTitleImage: {
+          _type: "mediaType";
+          media: {
+            _type: "image";
+            alt: string | null;
+            crop: SanityImageCrop | null;
+            hotspot: SanityImageHotspot | null;
+            asset: {
+              _id: string;
+              _type: "sanity.imageAsset";
+              _createdAt: string;
+              _updatedAt: string;
+              _rev: string;
+              originalFilename?: string;
+              label?: string;
+              title?: string;
+              description?: string;
+              altText?: string;
+              sha1hash?: string;
+              extension?: string;
+              mimeType?: string;
+              size?: number;
+              assetId?: string;
+              uploadId?: string;
+              path?: string;
+              url?: string;
+              metadata?: SanityImageMetadata;
+              source?: SanityAssetSourceData;
+            } | null;
+          } | null;
+        } | null;
+        visibility: {
+          hideOnMobile: boolean | null;
+          hideOnDesktop: boolean | null;
+        } | null;
+      }
+    | {
+        _key: string;
+        _type: "projectsList";
+        showFeaturedProjectCard: boolean | null;
+        featuredProjectCardOverride: {
+          _id: string;
+          _type: "projects";
           _createdAt: string;
           _updatedAt: string;
           _rev: string;
-          originalFilename?: string;
-          label?: string;
-          title?: string;
-          description?: string;
-          altText?: string;
-          sha1hash?: string;
-          extension?: string;
-          mimeType?: string;
-          size?: number;
-          assetId?: string;
-          uploadId?: string;
-          path?: string;
-          url?: string;
-          metadata?: SanityImageMetadata;
-          source?: SanityAssetSourceData;
-        } | null;
-      } | null;
-    } | null;
-    mediaTitle: string | null;
-    textSection: Array<{
-      id: null;
-      title: string | null;
-      richText: RichText | null;
-    }> | null;
-  } | {
-    _key: string;
-    _type: "logoCarousel";
-    logoItems: Array<{
-      id: null;
-      mediaItem: {
-        _type: "mediaType";
-        media: {
-          _type: "image";
-          alt: string | null;
-          crop: SanityImageCrop | null;
-          hotspot: SanityImageHotspot | null;
-          asset: {
-            _id: string;
-            _type: "sanity.imageAsset";
-            _createdAt: string;
-            _updatedAt: string;
-            _rev: string;
-            originalFilename?: string;
-            label?: string;
-            title?: string;
-            description?: string;
-            altText?: string;
-            sha1hash?: string;
-            extension?: string;
-            mimeType?: string;
-            size?: number;
-            assetId?: string;
-            uploadId?: string;
-            path?: string;
-            url?: string;
-            metadata?: SanityImageMetadata;
-            source?: SanityAssetSourceData;
+          title: string | null;
+          description: RichText | null;
+          projectImage: {
+            _type: "mediaType";
+            media: {
+              _type: "image";
+              alt: string | null;
+              crop: SanityImageCrop | null;
+              hotspot: SanityImageHotspot | null;
+              asset: {
+                _id: string;
+                _type: "sanity.imageAsset";
+                _createdAt: string;
+                _updatedAt: string;
+                _rev: string;
+                originalFilename?: string;
+                label?: string;
+                title?: string;
+                description?: string;
+                altText?: string;
+                sha1hash?: string;
+                extension?: string;
+                mimeType?: string;
+                size?: number;
+                assetId?: string;
+                uploadId?: string;
+                path?: string;
+                url?: string;
+                metadata?: SanityImageMetadata;
+                source?: SanityAssetSourceData;
+              } | null;
+            } | null;
+          } | null;
+          link: {
+            linkType: "externalLink" | "internalLink" | null;
+            externalLink: string | null;
+            internalLink: {
+              _id: string;
+              pageTitle: string | null;
+              slug: Slug | null;
+            } | null;
           } | null;
         } | null;
-      } | null;
-    }> | null;
-  } | {
-    _key: string;
-    _type: "mediaCarousel";
-    carouselItems: Array<{
-      _key: string;
-      title: string | null;
-      mediaItem: {
-        _type: "mediaType";
-        media: {
-          _type: "image";
-          alt: string | null;
-          crop: SanityImageCrop | null;
-          hotspot: SanityImageHotspot | null;
-          asset: {
-            _id: string;
-            _type: "sanity.imageAsset";
-            _createdAt: string;
-            _updatedAt: string;
-            _rev: string;
-            originalFilename?: string;
-            label?: string;
-            title?: string;
-            description?: string;
-            altText?: string;
-            sha1hash?: string;
-            extension?: string;
-            mimeType?: string;
-            size?: number;
-            assetId?: string;
-            uploadId?: string;
-            path?: string;
-            url?: string;
-            metadata?: SanityImageMetadata;
-            source?: SanityAssetSourceData;
-          } | null;
-        } | null;
-      } | null;
-    }> | null;
-  } | {
-    _key: string;
-    _type: "movieClubList";
-    movies: Array<{
-      _id: string;
-      title: string | null;
-      movieBanner: {
-        _type: "mediaType";
-        media: {
-          _type: "image";
-          alt: string | null;
-          crop: SanityImageCrop | null;
-          hotspot: SanityImageHotspot | null;
-          asset: {
-            _id: string;
-            _type: "sanity.imageAsset";
-            _createdAt: string;
-            _updatedAt: string;
-            _rev: string;
-            originalFilename?: string;
-            label?: string;
-            title?: string;
-            description?: string;
-            altText?: string;
-            sha1hash?: string;
-            extension?: string;
-            mimeType?: string;
-            size?: number;
-            assetId?: string;
-            uploadId?: string;
-            path?: string;
-            url?: string;
-            metadata?: SanityImageMetadata;
-            source?: SanityAssetSourceData;
-          } | null;
-        } | null;
-      } | null;
-    }> | null;
-  } | {
-    _key: string;
-    _type: "pageTitle";
-    titleType: "image" | "text" | null;
-    title: string | null;
-    pageTitleImage: {
-      _type: "mediaType";
-      media: {
-        _type: "image";
-        alt: string | null;
-        crop: SanityImageCrop | null;
-        hotspot: SanityImageHotspot | null;
-        asset: {
+      }
+    | {
+        _key: string;
+        _type: "screensList";
+        screens: Array<{
           _id: string;
-          _type: "sanity.imageAsset";
-          _createdAt: string;
-          _updatedAt: string;
-          _rev: string;
-          originalFilename?: string;
-          label?: string;
-          title?: string;
-          description?: string;
-          altText?: string;
-          sha1hash?: string;
-          extension?: string;
-          mimeType?: string;
-          size?: number;
-          assetId?: string;
-          uploadId?: string;
-          path?: string;
-          url?: string;
-          metadata?: SanityImageMetadata;
-          source?: SanityAssetSourceData;
-        } | null;
-      } | null;
-    } | null;
-    visibility: {
-      hideOnMobile: boolean | null;
-      hideOnDesktop: boolean | null;
-    } | null;
-  } | {
-    _key: string;
-    _type: "projectsList";
-    showFeaturedProjectCard: boolean | null;
-    featuredProjectCardOverride: {
-      _id: string;
-      _type: "projects";
-      _createdAt: string;
-      _updatedAt: string;
-      _rev: string;
-      title: string | null;
-      description: RichText | null;
-      projectImage: {
-        _type: "mediaType";
-        media: {
-          _type: "image";
-          alt: string | null;
-          crop: SanityImageCrop | null;
-          hotspot: SanityImageHotspot | null;
-          asset: {
-            _id: string;
-            _type: "sanity.imageAsset";
-            _createdAt: string;
-            _updatedAt: string;
-            _rev: string;
-            originalFilename?: string;
-            label?: string;
-            title?: string;
-            description?: string;
-            altText?: string;
-            sha1hash?: string;
-            extension?: string;
-            mimeType?: string;
-            size?: number;
-            assetId?: string;
-            uploadId?: string;
-            path?: string;
-            url?: string;
-            metadata?: SanityImageMetadata;
-            source?: SanityAssetSourceData;
+          title: string | null;
+          screenImage: {
+            _type: "mediaType";
+            media: {
+              _type: "image";
+              alt: string | null;
+              crop: SanityImageCrop | null;
+              hotspot: SanityImageHotspot | null;
+              asset: {
+                _id: string;
+                _type: "sanity.imageAsset";
+                _createdAt: string;
+                _updatedAt: string;
+                _rev: string;
+                originalFilename?: string;
+                label?: string;
+                title?: string;
+                description?: string;
+                altText?: string;
+                sha1hash?: string;
+                extension?: string;
+                mimeType?: string;
+                size?: number;
+                assetId?: string;
+                uploadId?: string;
+                path?: string;
+                url?: string;
+                metadata?: SanityImageMetadata;
+                source?: SanityAssetSourceData;
+              } | null;
+            } | null;
           } | null;
-        } | null;
-      } | null;
-      link: {
-        linkType: "externalLink" | "internalLink" | null;
-        externalLink: string | null;
-        internalLink: {
-          _id: string;
-          pageTitle: string | null;
-          slug: Slug | null;
-        } | null;
-      } | null;
-    } | null;
-  } | {
-    _type: "moviesHeroCarousel";
-    mediaItems: null;
-  }> | null;
+          link: {
+            linkType: "externalLink" | "internalLink" | null;
+            externalLink: string | null;
+            internalLink: {
+              _id: string;
+              pageTitle: string | null;
+              slug: Slug | null;
+            } | null;
+          } | null;
+        }> | null;
+      }
+    | {
+        _type: "moviesHeroCarousel";
+        mediaItems: null;
+      }
+  > | null;
   seo: {
     metaTitle: string | null;
     metaDescription: string | null;
@@ -1175,410 +1366,470 @@ export type FetchHomeResult = {
     } | null;
   } | null;
 } | null;
+
+// Source: src/sanity/lib/queries.ts
 // Variable: fetchPage
-// Query: *[_type == "page" && slug.current == $slug][0]{    _id,    _type,    pageTitle,    slug,    blockList[]{      // Page Title Block      _type == "pageTitle" => {        _key,        _type,        titleType,        title,        pageTitleImage{          _type,          media{            _type,            alt,            crop,            hotspot,            asset->{ ... }          }        },        visibility {          hideOnMobile,          hideOnDesktop        }      },      // Hero Block      _type == "heroCarousel" => {        _key,        _type,        mediaCard[]{          _key,          id,          cardImage{            _type,            media{              _type,              alt,              crop,              hotspot,              asset->{ ... }            }          },          title,          infoItems[]{            id,            infoItemTitle          },          cardLink{            linkType,            externalLink,            internalLink->{              _id,              pageTitle,              slug            }          }        }      },    // Media Carousel Block    _type == "mediaCarousel" => {      _key,      _type,      carouselItems[]{        _key,        title,        mediaItem{          _type,          media{            _type,            alt,            crop,            hotspot,            asset->{ ... }          }        },      }    },      // Movie Club List Block      _type == "movieClubList" => {          _key,          _type,          movies[]->{            _id,            title,            movieBanner{            _type,            media{              _type,              alt,              crop,              hotspot,              asset->{ ... }            }          }        }      },      // Movie Hero Block      _type == "moviesHeroCarousel" => {        _type,        mediaItems{          _type,          media{            _type,            alt,            crop,            hotspot,              asset->{ ... }          }        }      },      // Image With Text Block      _type == "imageWithText" => {        _key,        _type,        mediaItem{          _type,          media{            _type,            alt,            crop,            hotspot,            asset->{ ... }          }        },        mediaTitle,        textSection[]{          id,          title,          richText        }      },      // Logo Carousel Block      _type == "logoCarousel" => {        _key,        _type,        logoItems[]{          id,          mediaItem{            _type,            media{              _type,              alt,              crop,              hotspot,              asset->{ ... }            }          }        }      },      // Distribution List Block      _type == "distributionList" => {        _key,        _type,        movies[]->{        _id,        title,        slug{          _type,          current        },        releaseDate,        description,        duration,        languages[]->{          _id,          language        },        directors[]->{          _id,          director        },        writers[]->{          _id,          writer        },        actors[]->{          _id,          actor        },        ticket,        button,        trailer,        moviePoster{          _type,          media{            _type,            alt,            crop,            hotspot,            asset->{ ... }          }        },        movieBanner{          _type,          media{            _type,            alt,            crop,            hotspot,            asset->{ ... }          }        }      }      },      // Projects List Block      _type == "projectsList" => {        _key,        _type,        showFeaturedProjectCard,        featuredProjectCardOverride->{          _id,          _type,          _createdAt,          _updatedAt,          _rev,          title,          description,          projectImage {            _type,            media {              _type,              alt,              crop,              hotspot,              asset->{ ... }            }          },          link{            linkType,            externalLink,            internalLink->{              _id,              pageTitle,              slug            }          }        }      }    },    seo {      metaTitle,      metaDescription,      metaImage {        _type,        media {          _type,          alt,          crop,          hotspot,          asset->{ ... }        }      }    }  }
+// Query: *[_type == "page" && slug.current == $slug][0]{    _id,    _type,    pageTitle,    slug,    blockList[]{      // Page Title Block      _type == "pageTitle" => {        _key,        _type,        titleType,        title,        pageTitleImage{          _type,          media{            _type,            alt,            crop,            hotspot,            asset->{ ... }          }        },        visibility {          hideOnMobile,          hideOnDesktop        }      },      // Hero Block      _type == "heroCarousel" => {        _key,        _type,        mediaCard[]{          _key,          id,          cardImage{            _type,            media{              _type,              alt,              crop,              hotspot,              asset->{ ... }            }          },          title,          infoItems[]{            id,            infoItemTitle          },          cardLink{            linkType,            externalLink,            internalLink->{              _id,              pageTitle,              slug            }          }        }      },    // Media Carousel Block    _type == "mediaCarousel" => {      _key,      _type,      carouselItems[]{        _key,        title,        mediaItem{          _type,          media{            _type,            alt,            crop,            hotspot,            asset->{ ... }          }        },      }    },      // Movie Club List Block      _type == "movieClubList" => {          _key,          _type,          movies[]->{            _id,            title,            movieBanner{            _type,            media{              _type,              alt,              crop,              hotspot,              asset->{ ... }            }          }        }      },      // Screens List Block      _type == "screensList" => {        _key,        _type,        screens[]->{          _id,          title,          screenImage{            _type,            media{              _type,              alt,              crop,              hotspot,              asset->{ ... }            }          },          link{            linkType,            externalLink,            internalLink->{              _id,              pageTitle,              slug            }          }        }      },      // Movie Hero Block      _type == "moviesHeroCarousel" => {        _type,        mediaItems{          _type,          media{            _type,            alt,            crop,            hotspot,              asset->{ ... }          }        }      },      // Image With Text Block      _type == "imageWithText" => {        _key,        _type,        mediaItem{          _type,          media{            _type,            alt,            crop,            hotspot,            asset->{ ... }          }        },        mediaTitle,        textSection[]{          id,          title,          richText        }      },      // Logo Carousel Block      _type == "logoCarousel" => {        _key,        _type,        logoItems[]{          id,          mediaItem{            _type,            media{              _type,              alt,              crop,              hotspot,              asset->{ ... }            }          }        }      },      // Distribution List Block      _type == "distributionList" => {        _key,        _type,        movies[]->{        _id,        title,        slug{          _type,          current        },        releaseDate,        description,        duration,        languages[]->{          _id,          language        },        directors[]->{          _id,          director        },        writers[]->{          _id,          writer        },        actors[]->{          _id,          actor        },        ticket,        button,        trailer,        moviePoster{          _type,          media{            _type,            alt,            crop,            hotspot,            asset->{ ... }          }        },        movieBanner{          _type,          media{            _type,            alt,            crop,            hotspot,            asset->{ ... }          }        }      }      },      // Projects List Block      _type == "projectsList" => {        _key,        _type,        showFeaturedProjectCard,        featuredProjectCardOverride->{          _id,          _type,          _createdAt,          _updatedAt,          _rev,          title,          description,          projectImage {            _type,            media {              _type,              alt,              crop,              hotspot,              asset->{ ... }            }          },          link{            linkType,            externalLink,            internalLink->{              _id,              pageTitle,              slug            }          }        }      }    },    seo {      metaTitle,      metaDescription,      metaImage {        _type,        media {          _type,          alt,          crop,          hotspot,          asset->{ ... }        }      }    }  }
 export type FetchPageResult = {
   _id: string;
   _type: "page";
   pageTitle: string | null;
   slug: Slug | null;
-  blockList: Array<{
-    _key: string;
-    _type: "distributionList";
-    movies: Array<{
-      _id: string;
-      title: string | null;
-      slug: {
-        _type: "slug";
-        current: string | null;
-      } | null;
-      releaseDate: string | null;
-      description: RichText | null;
-      duration: string | null;
-      languages: Array<{
-        _id: string;
-        language: string | null;
-      }> | null;
-      directors: Array<{
-        _id: string;
-        director: string | null;
-      }> | null;
-      writers: Array<{
-        _id: string;
-        writer: string | null;
-      }> | null;
-      actors: Array<{
-        _id: string;
-        actor: string | null;
-      }> | null;
-      ticket: TicketType | null;
-      button: ButtonType | null;
-      trailer: TrailerType | null;
-      moviePoster: {
-        _type: "mediaType";
-        media: {
-          _type: "image";
-          alt: string | null;
-          crop: SanityImageCrop | null;
-          hotspot: SanityImageHotspot | null;
-          asset: {
-            _id: string;
-            _type: "sanity.imageAsset";
-            _createdAt: string;
-            _updatedAt: string;
-            _rev: string;
-            originalFilename?: string;
-            label?: string;
-            title?: string;
-            description?: string;
-            altText?: string;
-            sha1hash?: string;
-            extension?: string;
-            mimeType?: string;
-            size?: number;
-            assetId?: string;
-            uploadId?: string;
-            path?: string;
-            url?: string;
-            metadata?: SanityImageMetadata;
-            source?: SanityAssetSourceData;
-          } | null;
-        } | null;
-      } | null;
-      movieBanner: {
-        _type: "mediaType";
-        media: {
-          _type: "image";
-          alt: string | null;
-          crop: SanityImageCrop | null;
-          hotspot: SanityImageHotspot | null;
-          asset: {
-            _id: string;
-            _type: "sanity.imageAsset";
-            _createdAt: string;
-            _updatedAt: string;
-            _rev: string;
-            originalFilename?: string;
-            label?: string;
-            title?: string;
-            description?: string;
-            altText?: string;
-            sha1hash?: string;
-            extension?: string;
-            mimeType?: string;
-            size?: number;
-            assetId?: string;
-            uploadId?: string;
-            path?: string;
-            url?: string;
-            metadata?: SanityImageMetadata;
-            source?: SanityAssetSourceData;
-          } | null;
-        } | null;
-      } | null;
-    }> | null;
-  } | {
-    _key: string;
-    _type: "heroCarousel";
-    mediaCard: Array<{
-      _key: string;
-      id: null;
-      cardImage: {
-        _type: "mediaType";
-        media: {
-          _type: "image";
-          alt: string | null;
-          crop: SanityImageCrop | null;
-          hotspot: SanityImageHotspot | null;
-          asset: {
-            _id: string;
-            _type: "sanity.imageAsset";
-            _createdAt: string;
-            _updatedAt: string;
-            _rev: string;
-            originalFilename?: string;
-            label?: string;
-            title?: string;
-            description?: string;
-            altText?: string;
-            sha1hash?: string;
-            extension?: string;
-            mimeType?: string;
-            size?: number;
-            assetId?: string;
-            uploadId?: string;
-            path?: string;
-            url?: string;
-            metadata?: SanityImageMetadata;
-            source?: SanityAssetSourceData;
-          } | null;
-        } | null;
-      } | null;
-      title: string | null;
-      infoItems: Array<{
-        id: null;
-        infoItemTitle: string | null;
-      }> | null;
-      cardLink: {
-        linkType: "externalLink" | "internalLink" | null;
-        externalLink: string | null;
-        internalLink: {
+  blockList: Array<
+    | {
+        _key: string;
+        _type: "distributionList";
+        movies: Array<{
           _id: string;
-          pageTitle: string | null;
-          slug: Slug | null;
+          title: string | null;
+          slug: {
+            _type: "slug";
+            current: string | null;
+          } | null;
+          releaseDate: string | null;
+          description: RichText | null;
+          duration: string | null;
+          languages: Array<{
+            _id: string;
+            language: string | null;
+          }> | null;
+          directors: Array<{
+            _id: string;
+            director: string | null;
+          }> | null;
+          writers: Array<{
+            _id: string;
+            writer: string | null;
+          }> | null;
+          actors: Array<{
+            _id: string;
+            actor: string | null;
+          }> | null;
+          ticket: TicketType | null;
+          button: ButtonType | null;
+          trailer: TrailerType | null;
+          moviePoster: {
+            _type: "mediaType";
+            media: {
+              _type: "image";
+              alt: string | null;
+              crop: SanityImageCrop | null;
+              hotspot: SanityImageHotspot | null;
+              asset: {
+                _id: string;
+                _type: "sanity.imageAsset";
+                _createdAt: string;
+                _updatedAt: string;
+                _rev: string;
+                originalFilename?: string;
+                label?: string;
+                title?: string;
+                description?: string;
+                altText?: string;
+                sha1hash?: string;
+                extension?: string;
+                mimeType?: string;
+                size?: number;
+                assetId?: string;
+                uploadId?: string;
+                path?: string;
+                url?: string;
+                metadata?: SanityImageMetadata;
+                source?: SanityAssetSourceData;
+              } | null;
+            } | null;
+          } | null;
+          movieBanner: {
+            _type: "mediaType";
+            media: {
+              _type: "image";
+              alt: string | null;
+              crop: SanityImageCrop | null;
+              hotspot: SanityImageHotspot | null;
+              asset: {
+                _id: string;
+                _type: "sanity.imageAsset";
+                _createdAt: string;
+                _updatedAt: string;
+                _rev: string;
+                originalFilename?: string;
+                label?: string;
+                title?: string;
+                description?: string;
+                altText?: string;
+                sha1hash?: string;
+                extension?: string;
+                mimeType?: string;
+                size?: number;
+                assetId?: string;
+                uploadId?: string;
+                path?: string;
+                url?: string;
+                metadata?: SanityImageMetadata;
+                source?: SanityAssetSourceData;
+              } | null;
+            } | null;
+          } | null;
+        }> | null;
+      }
+    | {
+        _key: string;
+        _type: "heroCarousel";
+        mediaCard: Array<{
+          _key: string;
+          id: null;
+          cardImage: {
+            _type: "mediaType";
+            media: {
+              _type: "image";
+              alt: string | null;
+              crop: SanityImageCrop | null;
+              hotspot: SanityImageHotspot | null;
+              asset: {
+                _id: string;
+                _type: "sanity.imageAsset";
+                _createdAt: string;
+                _updatedAt: string;
+                _rev: string;
+                originalFilename?: string;
+                label?: string;
+                title?: string;
+                description?: string;
+                altText?: string;
+                sha1hash?: string;
+                extension?: string;
+                mimeType?: string;
+                size?: number;
+                assetId?: string;
+                uploadId?: string;
+                path?: string;
+                url?: string;
+                metadata?: SanityImageMetadata;
+                source?: SanityAssetSourceData;
+              } | null;
+            } | null;
+          } | null;
+          title: string | null;
+          infoItems: Array<{
+            id: null;
+            infoItemTitle: string | null;
+          }> | null;
+          cardLink: {
+            linkType: "externalLink" | "internalLink" | null;
+            externalLink: string | null;
+            internalLink: {
+              _id: string;
+              pageTitle: string | null;
+              slug: Slug | null;
+            } | null;
+          } | null;
+        }> | null;
+      }
+    | {
+        _key: string;
+        _type: "imageWithText";
+        mediaItem: {
+          _type: "mediaType";
+          media: {
+            _type: "image";
+            alt: string | null;
+            crop: SanityImageCrop | null;
+            hotspot: SanityImageHotspot | null;
+            asset: {
+              _id: string;
+              _type: "sanity.imageAsset";
+              _createdAt: string;
+              _updatedAt: string;
+              _rev: string;
+              originalFilename?: string;
+              label?: string;
+              title?: string;
+              description?: string;
+              altText?: string;
+              sha1hash?: string;
+              extension?: string;
+              mimeType?: string;
+              size?: number;
+              assetId?: string;
+              uploadId?: string;
+              path?: string;
+              url?: string;
+              metadata?: SanityImageMetadata;
+              source?: SanityAssetSourceData;
+            } | null;
+          } | null;
         } | null;
-      } | null;
-    }> | null;
-  } | {
-    _key: string;
-    _type: "imageWithText";
-    mediaItem: {
-      _type: "mediaType";
-      media: {
-        _type: "image";
-        alt: string | null;
-        crop: SanityImageCrop | null;
-        hotspot: SanityImageHotspot | null;
-        asset: {
+        mediaTitle: string | null;
+        textSection: Array<{
+          id: null;
+          title: string | null;
+          richText: RichText | null;
+        }> | null;
+      }
+    | {
+        _key: string;
+        _type: "logoCarousel";
+        logoItems: Array<{
+          id: null;
+          mediaItem: {
+            _type: "mediaType";
+            media: {
+              _type: "image";
+              alt: string | null;
+              crop: SanityImageCrop | null;
+              hotspot: SanityImageHotspot | null;
+              asset: {
+                _id: string;
+                _type: "sanity.imageAsset";
+                _createdAt: string;
+                _updatedAt: string;
+                _rev: string;
+                originalFilename?: string;
+                label?: string;
+                title?: string;
+                description?: string;
+                altText?: string;
+                sha1hash?: string;
+                extension?: string;
+                mimeType?: string;
+                size?: number;
+                assetId?: string;
+                uploadId?: string;
+                path?: string;
+                url?: string;
+                metadata?: SanityImageMetadata;
+                source?: SanityAssetSourceData;
+              } | null;
+            } | null;
+          } | null;
+        }> | null;
+      }
+    | {
+        _key: string;
+        _type: "mediaCarousel";
+        carouselItems: Array<{
+          _key: string;
+          title: string | null;
+          mediaItem: {
+            _type: "mediaType";
+            media: {
+              _type: "image";
+              alt: string | null;
+              crop: SanityImageCrop | null;
+              hotspot: SanityImageHotspot | null;
+              asset: {
+                _id: string;
+                _type: "sanity.imageAsset";
+                _createdAt: string;
+                _updatedAt: string;
+                _rev: string;
+                originalFilename?: string;
+                label?: string;
+                title?: string;
+                description?: string;
+                altText?: string;
+                sha1hash?: string;
+                extension?: string;
+                mimeType?: string;
+                size?: number;
+                assetId?: string;
+                uploadId?: string;
+                path?: string;
+                url?: string;
+                metadata?: SanityImageMetadata;
+                source?: SanityAssetSourceData;
+              } | null;
+            } | null;
+          } | null;
+        }> | null;
+      }
+    | {
+        _key: string;
+        _type: "movieClubList";
+        movies: Array<{
           _id: string;
-          _type: "sanity.imageAsset";
+          title: string | null;
+          movieBanner: {
+            _type: "mediaType";
+            media: {
+              _type: "image";
+              alt: string | null;
+              crop: SanityImageCrop | null;
+              hotspot: SanityImageHotspot | null;
+              asset: {
+                _id: string;
+                _type: "sanity.imageAsset";
+                _createdAt: string;
+                _updatedAt: string;
+                _rev: string;
+                originalFilename?: string;
+                label?: string;
+                title?: string;
+                description?: string;
+                altText?: string;
+                sha1hash?: string;
+                extension?: string;
+                mimeType?: string;
+                size?: number;
+                assetId?: string;
+                uploadId?: string;
+                path?: string;
+                url?: string;
+                metadata?: SanityImageMetadata;
+                source?: SanityAssetSourceData;
+              } | null;
+            } | null;
+          } | null;
+        }> | null;
+      }
+    | {
+        _key: string;
+        _type: "pageTitle";
+        titleType: "image" | "text" | null;
+        title: string | null;
+        pageTitleImage: {
+          _type: "mediaType";
+          media: {
+            _type: "image";
+            alt: string | null;
+            crop: SanityImageCrop | null;
+            hotspot: SanityImageHotspot | null;
+            asset: {
+              _id: string;
+              _type: "sanity.imageAsset";
+              _createdAt: string;
+              _updatedAt: string;
+              _rev: string;
+              originalFilename?: string;
+              label?: string;
+              title?: string;
+              description?: string;
+              altText?: string;
+              sha1hash?: string;
+              extension?: string;
+              mimeType?: string;
+              size?: number;
+              assetId?: string;
+              uploadId?: string;
+              path?: string;
+              url?: string;
+              metadata?: SanityImageMetadata;
+              source?: SanityAssetSourceData;
+            } | null;
+          } | null;
+        } | null;
+        visibility: {
+          hideOnMobile: boolean | null;
+          hideOnDesktop: boolean | null;
+        } | null;
+      }
+    | {
+        _key: string;
+        _type: "projectsList";
+        showFeaturedProjectCard: boolean | null;
+        featuredProjectCardOverride: {
+          _id: string;
+          _type: "projects";
           _createdAt: string;
           _updatedAt: string;
           _rev: string;
-          originalFilename?: string;
-          label?: string;
-          title?: string;
-          description?: string;
-          altText?: string;
-          sha1hash?: string;
-          extension?: string;
-          mimeType?: string;
-          size?: number;
-          assetId?: string;
-          uploadId?: string;
-          path?: string;
-          url?: string;
-          metadata?: SanityImageMetadata;
-          source?: SanityAssetSourceData;
-        } | null;
-      } | null;
-    } | null;
-    mediaTitle: string | null;
-    textSection: Array<{
-      id: null;
-      title: string | null;
-      richText: RichText | null;
-    }> | null;
-  } | {
-    _key: string;
-    _type: "logoCarousel";
-    logoItems: Array<{
-      id: null;
-      mediaItem: {
-        _type: "mediaType";
-        media: {
-          _type: "image";
-          alt: string | null;
-          crop: SanityImageCrop | null;
-          hotspot: SanityImageHotspot | null;
-          asset: {
-            _id: string;
-            _type: "sanity.imageAsset";
-            _createdAt: string;
-            _updatedAt: string;
-            _rev: string;
-            originalFilename?: string;
-            label?: string;
-            title?: string;
-            description?: string;
-            altText?: string;
-            sha1hash?: string;
-            extension?: string;
-            mimeType?: string;
-            size?: number;
-            assetId?: string;
-            uploadId?: string;
-            path?: string;
-            url?: string;
-            metadata?: SanityImageMetadata;
-            source?: SanityAssetSourceData;
+          title: string | null;
+          description: RichText | null;
+          projectImage: {
+            _type: "mediaType";
+            media: {
+              _type: "image";
+              alt: string | null;
+              crop: SanityImageCrop | null;
+              hotspot: SanityImageHotspot | null;
+              asset: {
+                _id: string;
+                _type: "sanity.imageAsset";
+                _createdAt: string;
+                _updatedAt: string;
+                _rev: string;
+                originalFilename?: string;
+                label?: string;
+                title?: string;
+                description?: string;
+                altText?: string;
+                sha1hash?: string;
+                extension?: string;
+                mimeType?: string;
+                size?: number;
+                assetId?: string;
+                uploadId?: string;
+                path?: string;
+                url?: string;
+                metadata?: SanityImageMetadata;
+                source?: SanityAssetSourceData;
+              } | null;
+            } | null;
+          } | null;
+          link: {
+            linkType: "externalLink" | "internalLink" | null;
+            externalLink: string | null;
+            internalLink: {
+              _id: string;
+              pageTitle: string | null;
+              slug: Slug | null;
+            } | null;
           } | null;
         } | null;
-      } | null;
-    }> | null;
-  } | {
-    _key: string;
-    _type: "mediaCarousel";
-    carouselItems: Array<{
-      _key: string;
-      title: string | null;
-      mediaItem: {
-        _type: "mediaType";
-        media: {
-          _type: "image";
-          alt: string | null;
-          crop: SanityImageCrop | null;
-          hotspot: SanityImageHotspot | null;
-          asset: {
-            _id: string;
-            _type: "sanity.imageAsset";
-            _createdAt: string;
-            _updatedAt: string;
-            _rev: string;
-            originalFilename?: string;
-            label?: string;
-            title?: string;
-            description?: string;
-            altText?: string;
-            sha1hash?: string;
-            extension?: string;
-            mimeType?: string;
-            size?: number;
-            assetId?: string;
-            uploadId?: string;
-            path?: string;
-            url?: string;
-            metadata?: SanityImageMetadata;
-            source?: SanityAssetSourceData;
-          } | null;
-        } | null;
-      } | null;
-    }> | null;
-  } | {
-    _key: string;
-    _type: "movieClubList";
-    movies: Array<{
-      _id: string;
-      title: string | null;
-      movieBanner: {
-        _type: "mediaType";
-        media: {
-          _type: "image";
-          alt: string | null;
-          crop: SanityImageCrop | null;
-          hotspot: SanityImageHotspot | null;
-          asset: {
-            _id: string;
-            _type: "sanity.imageAsset";
-            _createdAt: string;
-            _updatedAt: string;
-            _rev: string;
-            originalFilename?: string;
-            label?: string;
-            title?: string;
-            description?: string;
-            altText?: string;
-            sha1hash?: string;
-            extension?: string;
-            mimeType?: string;
-            size?: number;
-            assetId?: string;
-            uploadId?: string;
-            path?: string;
-            url?: string;
-            metadata?: SanityImageMetadata;
-            source?: SanityAssetSourceData;
-          } | null;
-        } | null;
-      } | null;
-    }> | null;
-  } | {
-    _key: string;
-    _type: "pageTitle";
-    titleType: "image" | "text" | null;
-    title: string | null;
-    pageTitleImage: {
-      _type: "mediaType";
-      media: {
-        _type: "image";
-        alt: string | null;
-        crop: SanityImageCrop | null;
-        hotspot: SanityImageHotspot | null;
-        asset: {
+      }
+    | {
+        _key: string;
+        _type: "screensList";
+        screens: Array<{
           _id: string;
-          _type: "sanity.imageAsset";
-          _createdAt: string;
-          _updatedAt: string;
-          _rev: string;
-          originalFilename?: string;
-          label?: string;
-          title?: string;
-          description?: string;
-          altText?: string;
-          sha1hash?: string;
-          extension?: string;
-          mimeType?: string;
-          size?: number;
-          assetId?: string;
-          uploadId?: string;
-          path?: string;
-          url?: string;
-          metadata?: SanityImageMetadata;
-          source?: SanityAssetSourceData;
-        } | null;
-      } | null;
-    } | null;
-    visibility: {
-      hideOnMobile: boolean | null;
-      hideOnDesktop: boolean | null;
-    } | null;
-  } | {
-    _key: string;
-    _type: "projectsList";
-    showFeaturedProjectCard: boolean | null;
-    featuredProjectCardOverride: {
-      _id: string;
-      _type: "projects";
-      _createdAt: string;
-      _updatedAt: string;
-      _rev: string;
-      title: string | null;
-      description: RichText | null;
-      projectImage: {
-        _type: "mediaType";
-        media: {
-          _type: "image";
-          alt: string | null;
-          crop: SanityImageCrop | null;
-          hotspot: SanityImageHotspot | null;
-          asset: {
-            _id: string;
-            _type: "sanity.imageAsset";
-            _createdAt: string;
-            _updatedAt: string;
-            _rev: string;
-            originalFilename?: string;
-            label?: string;
-            title?: string;
-            description?: string;
-            altText?: string;
-            sha1hash?: string;
-            extension?: string;
-            mimeType?: string;
-            size?: number;
-            assetId?: string;
-            uploadId?: string;
-            path?: string;
-            url?: string;
-            metadata?: SanityImageMetadata;
-            source?: SanityAssetSourceData;
+          title: string | null;
+          screenImage: {
+            _type: "mediaType";
+            media: {
+              _type: "image";
+              alt: string | null;
+              crop: SanityImageCrop | null;
+              hotspot: SanityImageHotspot | null;
+              asset: {
+                _id: string;
+                _type: "sanity.imageAsset";
+                _createdAt: string;
+                _updatedAt: string;
+                _rev: string;
+                originalFilename?: string;
+                label?: string;
+                title?: string;
+                description?: string;
+                altText?: string;
+                sha1hash?: string;
+                extension?: string;
+                mimeType?: string;
+                size?: number;
+                assetId?: string;
+                uploadId?: string;
+                path?: string;
+                url?: string;
+                metadata?: SanityImageMetadata;
+                source?: SanityAssetSourceData;
+              } | null;
+            } | null;
           } | null;
-        } | null;
-      } | null;
-      link: {
-        linkType: "externalLink" | "internalLink" | null;
-        externalLink: string | null;
-        internalLink: {
-          _id: string;
-          pageTitle: string | null;
-          slug: Slug | null;
-        } | null;
-      } | null;
-    } | null;
-  } | {
-    _type: "moviesHeroCarousel";
-    mediaItems: null;
-  }> | null;
+          link: {
+            linkType: "externalLink" | "internalLink" | null;
+            externalLink: string | null;
+            internalLink: {
+              _id: string;
+              pageTitle: string | null;
+              slug: Slug | null;
+            } | null;
+          } | null;
+        }> | null;
+      }
+    | {
+        _type: "moviesHeroCarousel";
+        mediaItems: null;
+      }
+  > | null;
   seo: {
     metaTitle: string | null;
     metaDescription: string | null;
@@ -1615,6 +1866,8 @@ export type FetchPageResult = {
     } | null;
   } | null;
 } | null;
+
+// Source: src/sanity/lib/queries.ts
 // Variable: fetchDistributionMovie
 // Query: *[_type == "distributions" && slug.current == $slug][0]{    title,    slug,    releaseDate,    description,    duration,    languages[]->{      _id,      language    },    directors[]->{      _id,      director    },    writers[]->{      _id,      writer    },    actors[]->{      _id,      actor    },    ticket,    button,    trailer,    moviePoster{      _type,      media{        _type,        alt,        crop,        hotspot,        asset->{ ... }      }    },    movieBanner{      _type,      media{        _type,        alt,        crop,        hotspot,        asset->{ ... }      }    }  }
 export type FetchDistributionMovieResult = {
@@ -1705,16 +1958,22 @@ export type FetchDistributionMovieResult = {
     } | null;
   } | null;
 } | null;
+
+// Source: src/sanity/lib/queries.ts
 // Variable: fetchAllDistributionMovieSlugs
 // Query: *[_type == "distributions" && defined(slug.current)]{   "slug": slug.current  }
 export type FetchAllDistributionMovieSlugsResult = Array<{
   slug: string | null;
 }>;
+
+// Source: src/sanity/lib/queries.ts
 // Variable: fetchDistributionParentSlug
 // Query: *[_type == "page" && count(blockList[_type == "distributionList"]) > 0][0]{    "slug": slug.current  }
 export type FetchDistributionParentSlugResult = {
   slug: string | null;
 } | null;
+
+// Source: src/sanity/lib/queries.ts
 // Variable: fetchAllProjects
 // Query: *[_type == "projects"] | order(_createdAt desc) {    _id,    _type,    _createdAt,    _updatedAt,    _rev,    title,    description,    projectImage {      _type,      media {        _type,        alt,        crop,        hotspot,        asset->{ ... }      }    },    link{      linkType,      externalLink,      internalLink->{        _id,        pageTitle,        slug      }    }  }
 export type FetchAllProjectsResult = Array<{
@@ -1766,6 +2025,8 @@ export type FetchAllProjectsResult = Array<{
     } | null;
   } | null;
 }>;
+
+// Source: src/sanity/lib/queries.ts
 // Variable: fetchLatestProject
 // Query: *[_type == "projects"] | order(_createdAt desc)[0] {    _id,    _type,    _createdAt,    _updatedAt,    _rev,    title,    description,    projectImage {      _type,      media {        _type,        "alt": coalesce(alt, null),        crop,        hotspot,        asset->{ ... }      }    }  }
 export type FetchLatestProjectResult = {
@@ -1813,16 +2074,16 @@ export type FetchLatestProjectResult = {
 import "@sanity/client";
 declare module "@sanity/client" {
   interface SanityQueries {
-    "\n  *[_type == \"page\" && defined(slug.current)]{\n    \"slug\": slug.current\n  }\n": FetchAllPageSlugsResult;
-    "\n    *[_type == \"settings\"][0]{\n      _id,\n      _type,\n      seo {\n        metaTitle,\n        metaDescription,\n        metaImage {\n          _type,\n          media {\n            _type,\n            alt,\n            crop,\n            hotspot,\n            asset->{ ... }\n          }\n        }\n      },\n      distributionMovieDetailTitles {\n        descriptionLabel,\n        directorsLabel,\n        writersLabel,\n        actorsLabel,\n        languagesLabel,\n        releaseDateLabel,\n        durationLabel\n      }\n    }\n    ": SettingsQueryResult;
-    "\n *[_type == \"header\"][0]{\n  mobileLogo{\n    _type,\n    media{\n      _type,\n      alt,\n      crop,\n      hotspot,\n      asset->{ ... }\n    }\n  },\n  desktopLogo{\n    _type,\n    media{\n      _type,\n      alt,\n      crop,\n      hotspot,\n      asset->{ ... }\n    }\n  },\n  linkReference[]{\n    _key,\n    label,\n    link{\n      linkType,\n      externalLink,\n      internalLink->{\n        _id,\n        pageTitle,\n        slug\n      }\n    }\n  },\n  homeMenuItemLabel,\n  socialMediaLinks[]{\n    _key,\n    linkType,\n    externalLink,\n    internalLink->{\n      _id,\n      pageTitle,\n      slug\n    }\n  }\n}\n": FetchHeaderResult;
-    "\n  *[_type == \"footer\"][0]{\n    _id,\n    _type,\n    title,\n    email,\n    text[],\n    socialMediaLinks[]{\n      _key,\n      linkType,\n      externalLink,\n      internalLink->{\n        _id,\n        pageTitle,\n        slug\n      }\n    },\n    rights\n  }\n": FetchFooterResult;
-    "\n*[_type == \"page\" && slug.current == '/'][0]{\n  _id,\n    _type,\n    pageTitle,\n    slug,\n    blockList[]{\n      // Page Title Block\n      _type == \"pageTitle\" => {\n        _key,\n        _type,\n        titleType,\n        title,\n        pageTitleImage{\n          _type,\n          media{\n            _type,\n            alt,\n            crop,\n            hotspot,\n            asset->{ ... }\n          }\n        },\n        visibility {\n          hideOnMobile,\n          hideOnDesktop\n        }\n      },\n      // Hero Block\n      _type == \"heroCarousel\" => {\n        _key,\n        _type,\n        mediaCard[]{\n          _key,\n          id,\n          cardImage{\n            _type,\n            media{\n              _type,\n              alt,\n              crop,\n              hotspot,\n              asset->{ ... }\n            }\n          },\n          title,\n          infoItems[]{\n            id,\n            infoItemTitle\n          },\n          cardLink{\n            linkType,\n            externalLink,\n            internalLink->{\n              _id,\n              pageTitle,\n              slug\n            }\n          }\n        },\n      },\n    // Media Carousel Block\n    _type == \"mediaCarousel\" => {\n      _key,\n      _type,\n      carouselItems[]{\n        _key,\n        title,\n        mediaItem{\n          _type,\n          media{\n            _type,\n            alt,\n            crop,\n            hotspot,\n            asset->{ ... }\n          }\n        },\n      }\n    },\n      // Movie Club List Block\n      _type == \"movieClubList\" => {\n          _key,\n          _type,\n          movies[]->{\n            _id,\n            title,\n            movieBanner{\n            _type,\n            media{\n              _type,\n              alt,\n              crop,\n              hotspot,\n              asset->{ ... }\n            }\n          }\n        }\n      },\n      // Movie Hero Block\n      _type == \"moviesHeroCarousel\" => {\n        _type,\n        mediaItems{\n          _type,\n          media{\n            _type,\n            alt,\n            crop,\n            hotspot,  \n            asset->{ ... }\n          }\n        }\n      },\n      // Image With Text Block\n      _type == \"imageWithText\" => {\n        _key,\n        _type,\n        mediaItem{\n          _type,\n          media{\n            _type,\n            alt,\n            crop,\n            hotspot,\n            asset->{ ... }\n          }\n        },\n        mediaTitle,\n        textSection[]{\n          id,\n          title,\n          richText\n        }\n      },\n      // Logo Carousel Block\n      _type == \"logoCarousel\" => {\n        _key,\n        _type,\n        logoItems[]{\n          id,\n          mediaItem{\n            _type,\n            media{\n              _type,\n              alt,\n              crop,\n              hotspot,\n              asset->{ ... }\n            }\n          }\n        }\n      },\n            // Distribution List Block\n            _type == \"distributionList\" => {\n        _key,\n        _type,\n        movies[]->{\n        _id,\n        title,\n        slug{\n          _type,\n          current\n        },\n        releaseDate,\n        description,\n        duration,\n        languages[]->{\n          _id,\n          language\n        },\n        directors[]->{\n          _id,\n          director\n        },\n        writers[]->{\n          _id,\n          writer\n        },\n        actors[]->{\n          _id,\n          actor\n        },\n        ticket,\n        button,\n        trailer,\n        moviePoster{\n          _type,\n          media{\n            _type,\n            alt,\n            crop,\n            hotspot,\n            asset->{ ... }\n          }\n        },\n        movieBanner{\n          _type,\n          media{\n            _type,\n            alt,\n            crop,\n            hotspot,\n            asset->{ ... }\n          }\n        }\n      }\n      },\n      // Projects List Block\n      _type == \"projectsList\" => {\n        _key,\n        _type,\n        showFeaturedProjectCard,\n        featuredProjectCardOverride->{\n          _id,\n          _type,\n          _createdAt,\n          _updatedAt,\n          _rev,\n          title,\n          description,\n          projectImage {\n            _type,\n            media {\n              _type,\n              alt,\n              crop,\n              hotspot,\n              asset->{ ... }\n            }\n          },\n          link{\n            linkType,\n            externalLink,\n            internalLink->{\n              _id,\n              pageTitle,\n              slug\n            }\n          }\n        }\n      }\n    },\n    seo {\n      metaTitle,\n      metaDescription,\n      metaImage {\n        _type,\n        media {\n          _type,\n          alt,\n          crop,\n          hotspot,\n          asset->{ ... }\n        }\n      }\n    }\n  }\n": FetchHomeResult;
-    "\n  *[_type == \"page\" && slug.current == $slug][0]{\n    _id,\n    _type,\n    pageTitle,\n    slug,\n    blockList[]{\n      // Page Title Block\n      _type == \"pageTitle\" => {\n        _key,\n        _type,\n        titleType,\n        title,\n        pageTitleImage{\n          _type,\n          media{\n            _type,\n            alt,\n            crop,\n            hotspot,\n            asset->{ ... }\n          }\n        },\n        visibility {\n          hideOnMobile,\n          hideOnDesktop\n        }\n      },\n      // Hero Block\n      _type == \"heroCarousel\" => {\n        _key,\n        _type,\n        mediaCard[]{\n          _key,\n          id,\n          cardImage{\n            _type,\n            media{\n              _type,\n              alt,\n              crop,\n              hotspot,\n              asset->{ ... }\n            }\n          },\n          title,\n          infoItems[]{\n            id,\n            infoItemTitle\n          },\n          cardLink{\n            linkType,\n            externalLink,\n            internalLink->{\n              _id,\n              pageTitle,\n              slug\n            }\n          }\n        }\n      },\n    // Media Carousel Block\n    _type == \"mediaCarousel\" => {\n      _key,\n      _type,\n      carouselItems[]{\n        _key,\n        title,\n        mediaItem{\n          _type,\n          media{\n            _type,\n            alt,\n            crop,\n            hotspot,\n            asset->{ ... }\n          }\n        },\n      }\n    },\n      // Movie Club List Block\n      _type == \"movieClubList\" => {\n          _key,\n          _type,\n          movies[]->{\n            _id,\n            title,\n            movieBanner{\n            _type,\n            media{\n              _type,\n              alt,\n              crop,\n              hotspot,\n              asset->{ ... }\n            }\n          }\n        }\n      },\n      // Movie Hero Block\n      _type == \"moviesHeroCarousel\" => {\n        _type,\n        mediaItems{\n          _type,\n          media{\n            _type,\n            alt,\n            crop,\n            hotspot,  \n            asset->{ ... }\n          }\n        }\n      },\n      // Image With Text Block\n      _type == \"imageWithText\" => {\n        _key,\n        _type,\n        mediaItem{\n          _type,\n          media{\n            _type,\n            alt,\n            crop,\n            hotspot,\n            asset->{ ... }\n          }\n        },\n        mediaTitle,\n        textSection[]{\n          id,\n          title,\n          richText\n        }\n      },\n      // Logo Carousel Block\n      _type == \"logoCarousel\" => {\n        _key,\n        _type,\n        logoItems[]{\n          id,\n          mediaItem{\n            _type,\n            media{\n              _type,\n              alt,\n              crop,\n              hotspot,\n              asset->{ ... }\n            }\n          }\n        }\n      },\n      // Distribution List Block\n      _type == \"distributionList\" => {\n        _key,\n        _type,\n        movies[]->{\n        _id,\n        title,\n        slug{\n          _type,\n          current\n        },\n        releaseDate,\n        description,\n        duration,\n        languages[]->{\n          _id,\n          language\n        },\n        directors[]->{\n          _id,\n          director\n        },\n        writers[]->{\n          _id,\n          writer\n        },\n        actors[]->{\n          _id,\n          actor\n        },\n        ticket,\n        button,\n        trailer,\n        moviePoster{\n          _type,\n          media{\n            _type,\n            alt,\n            crop,\n            hotspot,\n            asset->{ ... }\n          }\n        },\n        movieBanner{\n          _type,\n          media{\n            _type,\n            alt,\n            crop,\n            hotspot,\n            asset->{ ... }\n          }\n        }\n      }\n      },\n      // Projects List Block\n      _type == \"projectsList\" => {\n        _key,\n        _type,\n        showFeaturedProjectCard,\n        featuredProjectCardOverride->{\n          _id,\n          _type,\n          _createdAt,\n          _updatedAt,\n          _rev,\n          title,\n          description,\n          projectImage {\n            _type,\n            media {\n              _type,\n              alt,\n              crop,\n              hotspot,\n              asset->{ ... }\n            }\n          },\n          link{\n            linkType,\n            externalLink,\n            internalLink->{\n              _id,\n              pageTitle,\n              slug\n            }\n          }\n        }\n      }\n    },\n    seo {\n      metaTitle,\n      metaDescription,\n      metaImage {\n        _type,\n        media {\n          _type,\n          alt,\n          crop,\n          hotspot,\n          asset->{ ... }\n        }\n      }\n    }\n  }\n  ": FetchPageResult;
-    "\n*[_type == \"distributions\" && slug.current == $slug][0]{\n    title,\n    slug,\n    releaseDate,\n    description,\n    duration,\n    languages[]->{\n      _id,\n      language\n    },\n    directors[]->{\n      _id,\n      director\n    },\n    writers[]->{\n      _id,\n      writer\n    },\n    actors[]->{\n      _id,\n      actor\n    },\n    ticket,\n    button,\n    trailer,\n    moviePoster{\n      _type,\n      media{\n        _type,\n        alt,\n        crop,\n        hotspot,\n        asset->{ ... }\n      }\n    },\n    movieBanner{\n      _type,\n      media{\n        _type,\n        alt,\n        crop,\n        hotspot,\n        asset->{ ... }\n      }\n    }\n  }\n": FetchDistributionMovieResult;
-    "\n  *[_type == \"distributions\" && defined(slug.current)]{\n   \"slug\": slug.current\n  }\n": FetchAllDistributionMovieSlugsResult;
-    "\n  *[_type == \"page\" && count(blockList[_type == \"distributionList\"]) > 0][0]{\n    \"slug\": slug.current\n  }\n": FetchDistributionParentSlugResult;
-    "\n  *[_type == \"projects\"] | order(_createdAt desc) {\n    _id,\n    _type,\n    _createdAt,\n    _updatedAt,\n    _rev,\n    title,\n    description,\n    projectImage {\n      _type,\n      media {\n        _type,\n        alt,\n        crop,\n        hotspot,\n        asset->{ ... }\n      }\n    },\n    link{\n      linkType,\n      externalLink,\n      internalLink->{\n        _id,\n        pageTitle,\n        slug\n      }\n    }\n  }\n": FetchAllProjectsResult;
-    "\n  *[_type == \"projects\"] | order(_createdAt desc)[0] {\n    _id,\n    _type,\n    _createdAt,\n    _updatedAt,\n    _rev,\n    title,\n    description,\n    projectImage {\n      _type,\n      media {\n        _type,\n        \"alt\": coalesce(alt, null),\n        crop,\n        hotspot,\n        asset->{ ... }\n      }\n    }\n  }\n": FetchLatestProjectResult;
+    '\n  *[_type == "page" && defined(slug.current)]{\n    "slug": slug.current\n  }\n': FetchAllPageSlugsResult;
+    '\n    *[_type == "settings"][0]{\n      _id,\n      _type,\n      seo {\n        metaTitle,\n        metaDescription,\n        metaImage {\n          _type,\n          media {\n            _type,\n            alt,\n            crop,\n            hotspot,\n            asset->{ ... }\n          }\n        }\n      },\n      distributionMovieDetailTitles {\n        descriptionLabel,\n        directorsLabel,\n        writersLabel,\n        actorsLabel,\n        languagesLabel,\n        releaseDateLabel,\n        durationLabel\n      }\n    }\n    ': SettingsQueryResult;
+    '\n *[_type == "header"][0]{\n  mobileLogo{\n    _type,\n    media{\n      _type,\n      alt,\n      crop,\n      hotspot,\n      asset->{ ... }\n    }\n  },\n  desktopLogo{\n    _type,\n    media{\n      _type,\n      alt,\n      crop,\n      hotspot,\n      asset->{ ... }\n    }\n  },\n  linkReference[]{\n    _key,\n    label,\n    link{\n      linkType,\n      externalLink,\n      internalLink->{\n        _id,\n        pageTitle,\n        slug\n      }\n    }\n  },\n  homeMenuItemLabel,\n  socialMediaLinks[]{\n    _key,\n    linkType,\n    externalLink,\n    internalLink->{\n      _id,\n      pageTitle,\n      slug\n    }\n  }\n}\n': FetchHeaderResult;
+    '\n  *[_type == "footer"][0]{\n    _id,\n    _type,\n    title,\n    email,\n    text[],\n    socialMediaLinks[]{\n      _key,\n      linkType,\n      externalLink,\n      internalLink->{\n        _id,\n        pageTitle,\n        slug\n      }\n    },\n    rights\n  }\n': FetchFooterResult;
+    '\n*[_type == "page" && slug.current == \'/\'][0]{\n  _id,\n    _type,\n    pageTitle,\n    slug,\n    blockList[]{\n      // Page Title Block\n      _type == "pageTitle" => {\n        _key,\n        _type,\n        titleType,\n        title,\n        pageTitleImage{\n          _type,\n          media{\n            _type,\n            alt,\n            crop,\n            hotspot,\n            asset->{ ... }\n          }\n        },\n        visibility {\n          hideOnMobile,\n          hideOnDesktop\n        }\n      },\n      // Hero Block\n      _type == "heroCarousel" => {\n        _key,\n        _type,\n        mediaCard[]{\n          _key,\n          id,\n          cardImage{\n            _type,\n            media{\n              _type,\n              alt,\n              crop,\n              hotspot,\n              asset->{ ... }\n            }\n          },\n          title,\n          infoItems[]{\n            id,\n            infoItemTitle\n          },\n          cardLink{\n            linkType,\n            externalLink,\n            internalLink->{\n              _id,\n              pageTitle,\n              slug\n            }\n          }\n        },\n      },\n    // Media Carousel Block\n    _type == "mediaCarousel" => {\n      _key,\n      _type,\n      carouselItems[]{\n        _key,\n        title,\n        mediaItem{\n          _type,\n          media{\n            _type,\n            alt,\n            crop,\n            hotspot,\n            asset->{ ... }\n          }\n        },\n      }\n    },\n      // Movie Club List Block\n      _type == "movieClubList" => {\n          _key,\n          _type,\n          movies[]->{\n            _id,\n            title,\n            movieBanner{\n            _type,\n            media{\n              _type,\n              alt,\n              crop,\n              hotspot,\n              asset->{ ... }\n            }\n          }\n        }\n      },\n      // Screens List Block\n      _type == "screensList" => {\n        _key,\n        _type,\n        screens[]->{\n          _id,\n          title,\n          screenImage{\n            _type,\n            media{\n              _type,\n              alt,\n              crop,\n              hotspot,\n              asset->{ ... }\n            }\n          },\n          link{\n            linkType,\n            externalLink,\n            internalLink->{\n              _id,\n              pageTitle,\n              slug\n            }\n          }\n        }\n      },\n      // Movie Hero Block\n      _type == "moviesHeroCarousel" => {\n        _type,\n        mediaItems{\n          _type,\n          media{\n            _type,\n            alt,\n            crop,\n            hotspot,  \n            asset->{ ... }\n          }\n        }\n      },\n      // Image With Text Block\n      _type == "imageWithText" => {\n        _key,\n        _type,\n        mediaItem{\n          _type,\n          media{\n            _type,\n            alt,\n            crop,\n            hotspot,\n            asset->{ ... }\n          }\n        },\n        mediaTitle,\n        textSection[]{\n          id,\n          title,\n          richText\n        }\n      },\n      // Logo Carousel Block\n      _type == "logoCarousel" => {\n        _key,\n        _type,\n        logoItems[]{\n          id,\n          mediaItem{\n            _type,\n            media{\n              _type,\n              alt,\n              crop,\n              hotspot,\n              asset->{ ... }\n            }\n          }\n        }\n      },\n            // Distribution List Block\n            _type == "distributionList" => {\n        _key,\n        _type,\n        movies[]->{\n        _id,\n        title,\n        slug{\n          _type,\n          current\n        },\n        releaseDate,\n        description,\n        duration,\n        languages[]->{\n          _id,\n          language\n        },\n        directors[]->{\n          _id,\n          director\n        },\n        writers[]->{\n          _id,\n          writer\n        },\n        actors[]->{\n          _id,\n          actor\n        },\n        ticket,\n        button,\n        trailer,\n        moviePoster{\n          _type,\n          media{\n            _type,\n            alt,\n            crop,\n            hotspot,\n            asset->{ ... }\n          }\n        },\n        movieBanner{\n          _type,\n          media{\n            _type,\n            alt,\n            crop,\n            hotspot,\n            asset->{ ... }\n          }\n        }\n      }\n      },\n      // Projects List Block\n      _type == "projectsList" => {\n        _key,\n        _type,\n        showFeaturedProjectCard,\n        featuredProjectCardOverride->{\n          _id,\n          _type,\n          _createdAt,\n          _updatedAt,\n          _rev,\n          title,\n          description,\n          projectImage {\n            _type,\n            media {\n              _type,\n              alt,\n              crop,\n              hotspot,\n              asset->{ ... }\n            }\n          },\n          link{\n            linkType,\n            externalLink,\n            internalLink->{\n              _id,\n              pageTitle,\n              slug\n            }\n          }\n        }\n      }\n    },\n    seo {\n      metaTitle,\n      metaDescription,\n      metaImage {\n        _type,\n        media {\n          _type,\n          alt,\n          crop,\n          hotspot,\n          asset->{ ... }\n        }\n      }\n    }\n  }\n': FetchHomeResult;
+    '\n  *[_type == "page" && slug.current == $slug][0]{\n    _id,\n    _type,\n    pageTitle,\n    slug,\n    blockList[]{\n      // Page Title Block\n      _type == "pageTitle" => {\n        _key,\n        _type,\n        titleType,\n        title,\n        pageTitleImage{\n          _type,\n          media{\n            _type,\n            alt,\n            crop,\n            hotspot,\n            asset->{ ... }\n          }\n        },\n        visibility {\n          hideOnMobile,\n          hideOnDesktop\n        }\n      },\n      // Hero Block\n      _type == "heroCarousel" => {\n        _key,\n        _type,\n        mediaCard[]{\n          _key,\n          id,\n          cardImage{\n            _type,\n            media{\n              _type,\n              alt,\n              crop,\n              hotspot,\n              asset->{ ... }\n            }\n          },\n          title,\n          infoItems[]{\n            id,\n            infoItemTitle\n          },\n          cardLink{\n            linkType,\n            externalLink,\n            internalLink->{\n              _id,\n              pageTitle,\n              slug\n            }\n          }\n        }\n      },\n    // Media Carousel Block\n    _type == "mediaCarousel" => {\n      _key,\n      _type,\n      carouselItems[]{\n        _key,\n        title,\n        mediaItem{\n          _type,\n          media{\n            _type,\n            alt,\n            crop,\n            hotspot,\n            asset->{ ... }\n          }\n        },\n      }\n    },\n      // Movie Club List Block\n      _type == "movieClubList" => {\n          _key,\n          _type,\n          movies[]->{\n            _id,\n            title,\n            movieBanner{\n            _type,\n            media{\n              _type,\n              alt,\n              crop,\n              hotspot,\n              asset->{ ... }\n            }\n          }\n        }\n      },\n      // Screens List Block\n      _type == "screensList" => {\n        _key,\n        _type,\n        screens[]->{\n          _id,\n          title,\n          screenImage{\n            _type,\n            media{\n              _type,\n              alt,\n              crop,\n              hotspot,\n              asset->{ ... }\n            }\n          },\n          link{\n            linkType,\n            externalLink,\n            internalLink->{\n              _id,\n              pageTitle,\n              slug\n            }\n          }\n        }\n      },\n      // Movie Hero Block\n      _type == "moviesHeroCarousel" => {\n        _type,\n        mediaItems{\n          _type,\n          media{\n            _type,\n            alt,\n            crop,\n            hotspot,  \n            asset->{ ... }\n          }\n        }\n      },\n      // Image With Text Block\n      _type == "imageWithText" => {\n        _key,\n        _type,\n        mediaItem{\n          _type,\n          media{\n            _type,\n            alt,\n            crop,\n            hotspot,\n            asset->{ ... }\n          }\n        },\n        mediaTitle,\n        textSection[]{\n          id,\n          title,\n          richText\n        }\n      },\n      // Logo Carousel Block\n      _type == "logoCarousel" => {\n        _key,\n        _type,\n        logoItems[]{\n          id,\n          mediaItem{\n            _type,\n            media{\n              _type,\n              alt,\n              crop,\n              hotspot,\n              asset->{ ... }\n            }\n          }\n        }\n      },\n      // Distribution List Block\n      _type == "distributionList" => {\n        _key,\n        _type,\n        movies[]->{\n        _id,\n        title,\n        slug{\n          _type,\n          current\n        },\n        releaseDate,\n        description,\n        duration,\n        languages[]->{\n          _id,\n          language\n        },\n        directors[]->{\n          _id,\n          director\n        },\n        writers[]->{\n          _id,\n          writer\n        },\n        actors[]->{\n          _id,\n          actor\n        },\n        ticket,\n        button,\n        trailer,\n        moviePoster{\n          _type,\n          media{\n            _type,\n            alt,\n            crop,\n            hotspot,\n            asset->{ ... }\n          }\n        },\n        movieBanner{\n          _type,\n          media{\n            _type,\n            alt,\n            crop,\n            hotspot,\n            asset->{ ... }\n          }\n        }\n      }\n      },\n      // Projects List Block\n      _type == "projectsList" => {\n        _key,\n        _type,\n        showFeaturedProjectCard,\n        featuredProjectCardOverride->{\n          _id,\n          _type,\n          _createdAt,\n          _updatedAt,\n          _rev,\n          title,\n          description,\n          projectImage {\n            _type,\n            media {\n              _type,\n              alt,\n              crop,\n              hotspot,\n              asset->{ ... }\n            }\n          },\n          link{\n            linkType,\n            externalLink,\n            internalLink->{\n              _id,\n              pageTitle,\n              slug\n            }\n          }\n        }\n      }\n    },\n    seo {\n      metaTitle,\n      metaDescription,\n      metaImage {\n        _type,\n        media {\n          _type,\n          alt,\n          crop,\n          hotspot,\n          asset->{ ... }\n        }\n      }\n    }\n  }\n  ': FetchPageResult;
+    '\n*[_type == "distributions" && slug.current == $slug][0]{\n    title,\n    slug,\n    releaseDate,\n    description,\n    duration,\n    languages[]->{\n      _id,\n      language\n    },\n    directors[]->{\n      _id,\n      director\n    },\n    writers[]->{\n      _id,\n      writer\n    },\n    actors[]->{\n      _id,\n      actor\n    },\n    ticket,\n    button,\n    trailer,\n    moviePoster{\n      _type,\n      media{\n        _type,\n        alt,\n        crop,\n        hotspot,\n        asset->{ ... }\n      }\n    },\n    movieBanner{\n      _type,\n      media{\n        _type,\n        alt,\n        crop,\n        hotspot,\n        asset->{ ... }\n      }\n    }\n  }\n': FetchDistributionMovieResult;
+    '\n  *[_type == "distributions" && defined(slug.current)]{\n   "slug": slug.current\n  }\n': FetchAllDistributionMovieSlugsResult;
+    '\n  *[_type == "page" && count(blockList[_type == "distributionList"]) > 0][0]{\n    "slug": slug.current\n  }\n': FetchDistributionParentSlugResult;
+    '\n  *[_type == "projects"] | order(_createdAt desc) {\n    _id,\n    _type,\n    _createdAt,\n    _updatedAt,\n    _rev,\n    title,\n    description,\n    projectImage {\n      _type,\n      media {\n        _type,\n        alt,\n        crop,\n        hotspot,\n        asset->{ ... }\n      }\n    },\n    link{\n      linkType,\n      externalLink,\n      internalLink->{\n        _id,\n        pageTitle,\n        slug\n      }\n    }\n  }\n': FetchAllProjectsResult;
+    '\n  *[_type == "projects"] | order(_createdAt desc)[0] {\n    _id,\n    _type,\n    _createdAt,\n    _updatedAt,\n    _rev,\n    title,\n    description,\n    projectImage {\n      _type,\n      media {\n        _type,\n        "alt": coalesce(alt, null),\n        crop,\n        hotspot,\n        asset->{ ... }\n      }\n    }\n  }\n': FetchLatestProjectResult;
   }
 }
