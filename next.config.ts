@@ -36,22 +36,6 @@ const nextConfig: NextConfig = {
     webVitalsAttribution: ['CLS', 'LCP', 'FCP', 'FID', 'TTFB', 'INP'],
     viewTransition: true,
   },
-  // Canonical host redirects — funnel www and the vercel.app production alias
-  // to the apex domain so Google indexes everything under one host.
-  redirects: async () => [
-    {
-      source: '/:path*',
-      has: [{ type: 'host', value: 'www.phmedia.se' }],
-      destination: 'https://phmedia.se/:path*',
-      permanent: true,
-    },
-    {
-      source: '/:path*',
-      has: [{ type: 'host', value: 'ph-film-media.vercel.app' }],
-      destination: 'https://phmedia.se/:path*',
-      permanent: true,
-    },
-  ],
   // Cache headers
   headers: async () => [
     {
