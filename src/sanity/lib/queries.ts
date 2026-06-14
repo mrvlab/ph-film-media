@@ -2,7 +2,8 @@ import { defineQuery } from 'next-sanity';
 
 export const fetchAllPageSlugs = defineQuery(`
   *[_type == "page" && defined(slug.current)]{
-    "slug": slug.current
+    "slug": slug.current,
+    _updatedAt
   }
 `);
 
@@ -730,7 +731,8 @@ export const fetchDistributionMovie = defineQuery(`
 
 export const fetchAllDistributionMovieSlugs = defineQuery(`
   *[_type == "distributions" && defined(slug.current)]{
-   "slug": slug.current
+   "slug": slug.current,
+   _updatedAt
   }
 `);
 

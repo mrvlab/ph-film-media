@@ -65,6 +65,24 @@ export function getOrganizationJsonLd({
   };
 }
 
+// Helper for SiteNavigationElement JSON-LD (tells Google the main site sections)
+export function getSiteNavigationJsonLd({
+  items,
+}: {
+  items: Array<{ name: string; url: string }>;
+}) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    itemListElement: items.map((item, index) => ({
+      '@type': 'SiteNavigationElement',
+      position: index + 1,
+      name: item.name,
+      url: item.url,
+    })),
+  };
+}
+
 // Helper for Breadcrumb JSON-LD
 export function getBreadcrumbJsonLd({
   items,
