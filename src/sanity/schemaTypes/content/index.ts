@@ -6,3 +6,4 @@ export { writers } from './writers';
 export { movieClub } from './movieClub';
 export { projects } from './projects';
 export { screen } from './screen';
+export { ticket } from './ticket';
