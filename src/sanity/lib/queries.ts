@@ -234,6 +234,43 @@ export const fetchHome = defineQuery(`
           }
         }
       },
+      // Tickets List Block
+      _type == "ticketsList" => {
+        _key,
+        _type,
+        heading,
+        tickets[]->{
+          _id,
+          title,
+          slug,
+          date,
+          price,
+          currency,
+          totalSeats,
+          seatsSold,
+          venue,
+          poster{
+            _type,
+            media{
+              _type,
+              alt,
+              crop,
+              hotspot,
+              asset->{ ... }
+            }
+          },
+          banner{
+            _type,
+            media{
+              _type,
+              alt,
+              crop,
+              hotspot,
+              asset->{ ... }
+            }
+          }
+        }
+      },
       // Movie Hero Block
       _type == "moviesHeroCarousel" => {
         _type,
@@ -517,6 +554,43 @@ export const fetchPage = defineQuery(`
               _id,
               pageTitle,
               slug
+            }
+          }
+        }
+      },
+      // Tickets List Block
+      _type == "ticketsList" => {
+        _key,
+        _type,
+        heading,
+        tickets[]->{
+          _id,
+          title,
+          slug,
+          date,
+          price,
+          currency,
+          totalSeats,
+          seatsSold,
+          venue,
+          poster{
+            _type,
+            media{
+              _type,
+              alt,
+              crop,
+              hotspot,
+              asset->{ ... }
+            }
+          },
+          banner{
+            _type,
+            media{
+              _type,
+              alt,
+              crop,
+              hotspot,
+              asset->{ ... }
             }
           }
         }
