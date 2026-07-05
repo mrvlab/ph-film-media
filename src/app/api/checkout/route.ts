@@ -117,6 +117,9 @@ export async function POST(request: Request) {
         },
       ],
       metadata: { ticketId: ticket._id },
+      // Also stamp ticketId on the PaymentIntent so we can search PIs by
+      // metadata later (search only indexes PI/Charge metadata, not Session).
+      payment_intent_data: { metadata: { ticketId: ticket._id } },
       success_url: `${origin}/tickets/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}${cancelPath}`,
     });
