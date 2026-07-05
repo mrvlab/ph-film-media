@@ -7,3 +7,4 @@ export { movieClub } from './movieClub';
 export { projects } from './projects';
 export { screen } from './screen';
 export { ticket } from './ticket';
+export { stripeEvent } from './stripeEvent';
