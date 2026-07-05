@@ -71,6 +71,8 @@ export const ticket = defineType({
       group: 'details',
       initialValue: 0,
       readOnly: true,
+      description:
+        'Read-only. Recomputed automatically from Stripe on every purchase and refund, and nightly by the reconcile cron. To force a resync, POST /api/tickets/reconcile.',
     }),
     // ----- Media -----
     defineField({
