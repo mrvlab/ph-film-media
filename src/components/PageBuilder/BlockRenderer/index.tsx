@@ -8,7 +8,7 @@ import PageTitle from '@/components/Blocks/PageTitle';
 import MoviesHeroCarousel from '@/components/Blocks/MoviesHeroCarousel';
 import DistributionList from '@/components/Blocks/DistributionList';
 import ProjectsList from '@/components/Blocks/ProjectsList';
-import ScreensList from '@/components/Blocks/ScreensList';
+import TicketList from '@/components/Blocks/TicketList';
 import TicketsList from '@/components/Blocks/TicketsList';
 import type {
   FetchHomeResult,
@@ -47,7 +47,7 @@ const BLOCK_COMPONENTS = {
   logoCarousel: LogoCarousel,
   distributionList: DistributionList,
   projectsList: ProjectsList,
-  screensList: ScreensList,
+  ticketList: TicketList,
   ticketsList: TicketsList,
 } as const;
 

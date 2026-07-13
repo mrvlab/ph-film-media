@@ -206,8 +206,8 @@ export const fetchHome = defineQuery(`
           }
         }
       },
-      // Screens List Block
-      _type == "screensList" => {
+      // Ticket List Block
+      _type == "ticketList" => {
         _key,
         _type,
         screens[]->{
@@ -530,8 +530,8 @@ export const fetchPage = defineQuery(`
           }
         }
       },
-      // Screens List Block
-      _type == "screensList" => {
+      // Ticket List Block
+      _type == "ticketList" => {
         _key,
         _type,
         screens[]->{

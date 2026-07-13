@@ -1044,6 +1044,64 @@
     }
   },
   {
+    "name": "stripeEvent",
+    "type": "document",
+    "attributes": {
+      "_id": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        }
+      },
+      "_type": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string",
+          "value": "stripeEvent"
+        }
+      },
+      "_createdAt": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        }
+      },
+      "_updatedAt": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        }
+      },
+      "_rev": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        }
+      },
+      "type": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        },
+        "optional": true
+      },
+      "ticketId": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        },
+        "optional": true
+      },
+      "receivedAt": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        },
+        "optional": true
+      }
+    }
+  },
+  {
     "name": "ticket",
     "type": "document",
     "attributes": {
@@ -1899,7 +1957,7 @@
     }
   },
   {
-    "name": "screensList",
+    "name": "ticketList",
     "type": "type",
     "value": {
       "type": "object",
@@ -1908,7 +1966,7 @@
           "type": "objectAttribute",
           "value": {
             "type": "string",
-            "value": "screensList"
+            "value": "ticketList"
           }
         },
         "screens": {
@@ -2796,7 +2854,7 @@
                 },
                 "rest": {
                   "type": "inline",
-                  "name": "screensList"
+                  "name": "ticketList"
                 }
               },
               {

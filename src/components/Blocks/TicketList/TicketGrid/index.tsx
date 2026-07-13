@@ -3,16 +3,16 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { usePathname } from 'next/navigation';
-import ScreenCard from '../ScreenCard';
-import { IScreensListBlocks } from '..';
+import TicketCard from '../TicketCard';
+import { ITicketListBlocks } from '..';
 import { useViewTransitionAnimation } from '@/hooks/useViewTransitionReady';
 import { VIEW_TRANSITION_CONFIG } from '@/config/viewTransitionConfig';
 
-type IScreensGrid = {
-  screens: IScreensListBlocks['screens'];
+type ITicketGrid = {
+  screens: ITicketListBlocks['screens'];
 };
 
-const ScreensGrid = ({ screens }: IScreensGrid) => {
+const TicketGrid = ({ screens }: ITicketGrid) => {
   const pathname = usePathname();
   const { isReady, animationKey } = useViewTransitionAnimation(pathname);
 
@@ -64,7 +64,7 @@ const ScreensGrid = ({ screens }: IScreensGrid) => {
               amount: 0.4,
             }}
           >
-            <ScreenCard screen={screenItem} />
+            <TicketCard screen={screenItem} />
           </motion.div>
         );
       })}
@@ -72,4 +72,4 @@ const ScreensGrid = ({ screens }: IScreensGrid) => {
   );
 };
 
-export default ScreensGrid;
+export default TicketGrid;

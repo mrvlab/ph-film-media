@@ -1,9 +1,9 @@
 import { ListIcon } from '@sanity/icons';
 import { defineArrayMember, defineField, defineType } from 'sanity';
 
-export const screensList = defineType({
-  name: 'screensList',
-  title: 'Screens List',
+export const ticketList = defineType({
+  name: 'ticketList',
+  title: 'Ticket List',
   type: 'object',
   icon: ListIcon,
   fields: [
@@ -22,7 +22,7 @@ export const screensList = defineType({
   preview: {
     prepare() {
       return {
-        title: 'Screens List',
+        title: 'Ticket List',
         media: ListIcon,
       };
     },

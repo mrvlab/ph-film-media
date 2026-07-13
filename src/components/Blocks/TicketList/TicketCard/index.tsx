@@ -7,16 +7,16 @@ import VideoOverlay from '@/components/VideoOverlay/VideoOverlay';
 import { extractVideoInfo } from '@/components/VideoOverlay/videoUtils';
 import type { LinkType } from '../../../../../sanity.types';
 import type { SanityImageObject } from '@/components/Media/SanityImage/SanityImageObject';
-import { IScreensListBlocks } from '..';
+import { ITicketListBlocks } from '..';
 
-type ScreenCardProps = {
-  screen: NonNullable<NonNullable<IScreensListBlocks['screens']>[number]>;
+type TicketCardProps = {
+  screen: NonNullable<NonNullable<ITicketListBlocks['screens']>[number]>;
 };
 
 const cardClassName =
   'flex flex-col gap-6 h-full hover:opacity-80 transition-opacity';
 
-const ScreenCard = ({ screen }: ScreenCardProps) => {
+const TicketCard = ({ screen }: TicketCardProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   if (!screen || !('_id' in screen)) return null;
@@ -82,4 +82,4 @@ const ScreenCard = ({ screen }: ScreenCardProps) => {
   );
 };
 
-export default ScreenCard;
+export default TicketCard;
