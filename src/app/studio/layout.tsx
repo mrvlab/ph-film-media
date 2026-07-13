@@ -4,7 +4,7 @@ export default function SanityStudioLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className='lg:col-span-full lg:row-span-full lg:font-[0.75rem] lg:overflow-auto lg:h-screen'>
+    <div className='lg:col-span-full lg:row-span-full lg:font-[1.2rem] lg:overflow-auto lg:h-screen'>
       {children}
     </div>
   );

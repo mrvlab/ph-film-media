@@ -10,7 +10,7 @@ export default function Custom404() {
         id='not-found-main'
       >
         <div className='flex h-screen flex-col items-center justify-center gap-12 lg:h-full lg:gap-16'>
-          <h2 className='text-[213px] lg:text-[378px] leading-[0.9] text-white/90'>
+          <h2 className='text-[21.3rem] lg:text-[37.8rem] leading-[0.9] text-white/90'>
             404
           </h2>
 

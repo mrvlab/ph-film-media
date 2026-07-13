@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "schema": "npx sanity@latest schema extract",
     "types": "npx sanity@latest typegen generate",
     "typegen": "npx sanity@latest schema extract && npx sanity@latest typegen generate --enforce-required-fields"
@@ -23,7 +23,7 @@
     "embla-carousel-react": "^8.6.0",
     "embla-carousel-wheel-gestures": "^8.0.2",
     "framer-motion": "^12.15.0",
-    "next": "15.2.9",
+    "next": "16.2.10",
     "next-sanity": "^11.6.12",
     "next-view-transitions": "^0.3.4",
     "react": "^19",
@@ -48,7 +48,7 @@
     "@types/react-dom": "^19",
     "@types/react-responsive": "^9.0.0",
     "eslint": "^9",
-    "eslint-config-next": "15.2.9",
+    "eslint-config-next": "16.2.10",
     "sanity": "^4.22.0",
     "tailwindcss": "^4",
     "typescript": "^5"

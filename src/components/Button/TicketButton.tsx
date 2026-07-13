@@ -18,7 +18,7 @@ const TicketButton = ({
         xmlns='http://www.w3.org/2000/svg'
         fill='none'
         viewBox='0 0 118 51'
-        className='absolute inset-0 w-full h-[43px] lg:h-[51px]'
+        className='absolute inset-0 w-full h-[4.3rem] lg:h-[5.1rem]'
         preserveAspectRatio='xMidYMid meet'
       >
         <g clipPath='url(#a)'>

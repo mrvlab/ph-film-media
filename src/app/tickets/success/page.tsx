@@ -19,7 +19,7 @@ export default async function TicketSuccessPage({
       >
         <div className='flex min-h-screen flex-col items-center justify-center gap-6 px-p-mobile py-16 text-center lg:min-h-full lg:gap-8 lg:px-0 lg:py-0'>
           {/* Hero — mirrors the 404's display size */}
-          <h1 className='text-[180px] uppercase leading-[0.9] text-white/95 lg:text-[248px]'>
+          <h1 className='text-[18rem] uppercase leading-[0.9] text-white/95 lg:text-[24.8rem]'>
             Tack
           </h1>
 
