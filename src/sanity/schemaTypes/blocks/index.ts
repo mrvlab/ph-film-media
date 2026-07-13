@@ -8,4 +8,3 @@ export { logoCarousel } from './logoCarousel';
 export { pageTitle } from './pageTitle';
 export { projectsList } from './projectsList';
 export { ticketList } from './ticketList';
-export { ticketsList } from './ticketsList';

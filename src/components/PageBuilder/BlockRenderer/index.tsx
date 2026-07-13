@@ -9,7 +9,6 @@ import MoviesHeroCarousel from '@/components/Blocks/MoviesHeroCarousel';
 import DistributionList from '@/components/Blocks/DistributionList';
 import ProjectsList from '@/components/Blocks/ProjectsList';
 import TicketList from '@/components/Blocks/TicketList';
-import TicketsList from '@/components/Blocks/TicketsList';
 import type {
   FetchHomeResult,
   FetchPageResult,
@@ -48,7 +47,6 @@ const BLOCK_COMPONENTS = {
   distributionList: DistributionList,
   projectsList: ProjectsList,
   ticketList: TicketList,
-  ticketsList: TicketsList,
 } as const;
 
 export default function BlockRenderer({

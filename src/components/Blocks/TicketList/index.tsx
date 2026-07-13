@@ -1,28 +1,50 @@
-'use client';
+import type {
+  FetchHomeResult,
+  FetchPageResult,
+} from '../../../../sanity.types';
+import Ticket from './Ticket';
+import { TicketCarousel } from './TicketCarousel';
 
-import React from 'react';
-import { FetchHomeResult, FetchPageResult } from '../../../../sanity.types';
-import TicketGrid from './TicketGrid';
-
-export type ITicketListBlocks = Extract<
+export type ITicketListBlock = Extract<
   NonNullable<
     NonNullable<FetchPageResult | FetchHomeResult>['blockList']
   >[number],
   { _type: 'ticketList' }
 >;
 
-const TicketList = (block: ITicketListBlocks) => {
+const TicketList = (block: ITicketListBlock) => {
   if (block._type !== 'ticketList') return null;
 
-  const { screens } = block;
-  if (!screens || screens.length === 0) return null;
+  const tickets = block.tickets ?? [];
+  if (tickets.length === 0) return null;
+  const count = tickets.length;
+
+  // Bottom spacing defaults to true when unset (40px mobile / 80px desktop).
+  const bottomSpacingClass =
+    block.bottomSpacing !== false ? 'mb-10 lg:mb-20' : '';
+
+  // The same Ticket card is used throughout; only the wrapper differs:
+  // one ticket → standalone, many → peeking carousel.
+  if (count > 1) {
+    return (
+      <TicketCarousel heading={block.heading} className={bottomSpacingClass}>
+        {tickets.map((ticket, i) => (
+          <Ticket key={('_id' in ticket && ticket._id) || i} ticket={ticket} />
+        ))}
+      </TicketCarousel>
+    );
+  }
 
   return (
     <section
       key={block._key || 'ticketList'}
-      className='grid gap-x-2 gap-y-5 grid-cols-1 md:grid-cols-2 lg:gap-y-10 lg:grid-cols-3 2xl:grid-cols-4 auto-rows-fr'
+      className={`page-x-spacing flex flex-col gap-2.5 h-fit uppercase lg:gap-3 ${bottomSpacingClass}`}
     >
-      <TicketGrid screens={screens} />
+      {block.heading ? (
+        <h2 className='text-h-67 lg:text-h-37 !leading-[1]'>{block.heading}</h2>
+      ) : null}
+
+      <Ticket ticket={tickets[0]} />
     </section>
   );
 };

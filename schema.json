@@ -1882,7 +1882,7 @@
     }
   },
   {
-    "name": "ticketsList",
+    "name": "ticketList",
     "type": "type",
     "value": {
       "type": "object",
@@ -1891,7 +1891,7 @@
           "type": "objectAttribute",
           "value": {
             "type": "string",
-            "value": "ticketsList"
+            "value": "ticketList"
           }
         },
         "heading": {
@@ -1922,72 +1922,11 @@
             }
           },
           "optional": true
-        }
-      }
-    }
-  },
-  {
-    "type": "type",
-    "name": "screen.reference",
-    "value": {
-      "type": "object",
-      "attributes": {
-        "_ref": {
-          "type": "objectAttribute",
-          "value": {
-            "type": "string"
-          }
         },
-        "_type": {
-          "type": "objectAttribute",
-          "value": {
-            "type": "string",
-            "value": "reference"
-          }
-        },
-        "_weak": {
+        "bottomSpacing": {
           "type": "objectAttribute",
           "value": {
             "type": "boolean"
-          },
-          "optional": true
-        }
-      },
-      "dereferencesTo": "screen"
-    }
-  },
-  {
-    "name": "ticketList",
-    "type": "type",
-    "value": {
-      "type": "object",
-      "attributes": {
-        "_type": {
-          "type": "objectAttribute",
-          "value": {
-            "type": "string",
-            "value": "ticketList"
-          }
-        },
-        "screens": {
-          "type": "objectAttribute",
-          "value": {
-            "type": "array",
-            "of": {
-              "type": "object",
-              "attributes": {
-                "_key": {
-                  "type": "objectAttribute",
-                  "value": {
-                    "type": "string"
-                  }
-                }
-              },
-              "rest": {
-                "type": "inline",
-                "name": "screen.reference"
-              }
-            }
           },
           "optional": true
         }
@@ -2855,21 +2794,6 @@
                 "rest": {
                   "type": "inline",
                   "name": "ticketList"
-                }
-              },
-              {
-                "type": "object",
-                "attributes": {
-                  "_key": {
-                    "type": "objectAttribute",
-                    "value": {
-                      "type": "string"
-                    }
-                  }
-                },
-                "rest": {
-                  "type": "inline",
-                  "name": "ticketsList"
                 }
               }
             ]

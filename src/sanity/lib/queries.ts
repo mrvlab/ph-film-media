@@ -210,35 +210,8 @@ export const fetchHome = defineQuery(`
       _type == "ticketList" => {
         _key,
         _type,
-        screens[]->{
-          _id,
-          title,
-          screenImage{
-            _type,
-            media{
-              _type,
-              alt,
-              crop,
-              hotspot,
-              asset->{ ... }
-            }
-          },
-          link{
-            linkType,
-            externalLink,
-            internalLink->{
-              _id,
-              pageTitle,
-              slug
-            }
-          }
-        }
-      },
-      // Tickets List Block
-      _type == "ticketsList" => {
-        _key,
-        _type,
         heading,
+        bottomSpacing,
         tickets[]->{
           _id,
           title,
@@ -534,35 +507,8 @@ export const fetchPage = defineQuery(`
       _type == "ticketList" => {
         _key,
         _type,
-        screens[]->{
-          _id,
-          title,
-          screenImage{
-            _type,
-            media{
-              _type,
-              alt,
-              crop,
-              hotspot,
-              asset->{ ... }
-            }
-          },
-          link{
-            linkType,
-            externalLink,
-            internalLink->{
-              _id,
-              pageTitle,
-              slug
-            }
-          }
-        }
-      },
-      // Tickets List Block
-      _type == "ticketsList" => {
-        _key,
-        _type,
         heading,
+        bottomSpacing,
         tickets[]->{
           _id,
           title,

@@ -1,29 +1,50 @@
-import { ListIcon } from '@sanity/icons';
+import { TagIcon } from '@sanity/icons';
 import { defineArrayMember, defineField, defineType } from 'sanity';
 
 export const ticketList = defineType({
   name: 'ticketList',
   title: 'Ticket List',
   type: 'object',
-  icon: ListIcon,
+  icon: TagIcon,
   fields: [
     defineField({
-      name: 'screens',
-      title: 'Screens',
+      name: 'heading',
+      title: 'Heading (optional)',
+      type: 'string',
+    }),
+    defineField({
+      name: 'tickets',
+      title: 'Tickets',
       type: 'array',
       of: [
         defineArrayMember({
           type: 'reference',
-          to: [{ type: 'screen' }],
+          to: [{ type: 'ticket' }],
         }),
       ],
     }),
+    defineField({
+      name: 'bottomSpacing',
+      title: 'Bottom spacing',
+      type: 'boolean',
+      description: 'Adds spacing below this block.',
+      initialValue: true,
+    }),
   ],
   preview: {
-    prepare() {
+    select: {
+      heading: 'heading',
+      ticket0: 'tickets.0.title',
+      count: 'tickets.length',
+    },
+    prepare({ heading, ticket0, count }) {
+      const subtitle = count
+        ? `${count} ticket${count === 1 ? '' : 's'}`
+        : 'No tickets';
       return {
-        title: 'Ticket List',
-        media: ListIcon,
+        title: heading || ticket0 || 'Ticket List',
+        subtitle,
+        media: TagIcon,
       };
     },
   },
