@@ -3,7 +3,7 @@ import Image from 'next/image';
 import { urlFor } from '@/sanity/lib/image';
 import { BuyTicketButton } from './BuyTicketButton';
 import { BuyTicketCard } from './BuyTicketCard';
-import type { ITicketListBlock } from '.';
+import type { ITicketListBlock, TicketLabels } from '.';
 
 type TicketData = NonNullable<ITicketListBlock['tickets']>[number];
 
@@ -36,14 +36,20 @@ const timeOfDay = new Intl.DateTimeFormat('sv-SE', {
 
 type TicketProps = {
   ticket: TicketData;
+  labels?: TicketLabels;
 };
 
 /**
  * A single ticket card: poster + details on mobile, details + banner on desktop.
  * Rendered standalone when there's one ticket, or as a carousel slide when many.
  */
-const Ticket = ({ ticket }: TicketProps) => {
+const Ticket = ({ ticket, labels }: TicketProps) => {
   if (!ticket || !('_id' in ticket) || !('title' in ticket)) return null;
+
+  // Editable labels (Settings → Ticket Settings) with Swedish fallbacks.
+  const viewingLabel = labels?.viewingLabel || 'Visning';
+  const locationLabel = labels?.locationLabel || 'Plats';
+  const priceRowLabel = labels?.priceLabel || 'Pris';
 
   const venue = ticket.venue?.trim() || null;
   const priceLabel =
@@ -154,19 +160,19 @@ const Ticket = ({ ticket }: TicketProps) => {
           <dl className='space-y-2 text-b-16 2xl:text-b-21'>
             {desktopDate ? (
               <div className='flex justify-between gap-8'>
-                <dt className='text-white/90'>Visning</dt>
+                <dt className='text-white/90'>{viewingLabel}</dt>
                 <dd className='text-right'>{desktopDate}</dd>
               </div>
             ) : null}
             {venue ? (
               <div className='flex justify-between gap-8'>
-                <dt className='text-white/90'>Plats</dt>
+                <dt className='text-white/90'>{locationLabel}</dt>
                 <dd className='text-right'>{venue}</dd>
               </div>
             ) : null}
             {priceLabel ? (
               <div className='flex justify-between gap-8'>
-                <dt className='text-white/90'>Pris</dt>
+                <dt className='text-white/90'>{priceRowLabel}</dt>
                 <dd className='text-right'>{priceLabel}</dd>
               </div>
             ) : null}

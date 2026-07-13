@@ -33,6 +33,13 @@ export const settingsQuery = defineQuery(`
         languagesLabel,
         releaseDateLabel,
         durationLabel
+      },
+      ticketLabels {
+        titleSingular,
+        titlePlural,
+        viewingLabel,
+        locationLabel,
+        priceLabel
       }
     }
     `);
@@ -210,7 +217,7 @@ export const fetchHome = defineQuery(`
       _type == "ticketList" => {
         _key,
         _type,
-        heading,
+        showTitle,
         bottomSpacing,
         tickets[]->{
           _id,
@@ -507,7 +514,7 @@ export const fetchPage = defineQuery(`
       _type == "ticketList" => {
         _key,
         _type,
-        heading,
+        showTitle,
         bottomSpacing,
         tickets[]->{
           _id,

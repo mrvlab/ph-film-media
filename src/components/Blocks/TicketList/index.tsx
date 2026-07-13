@@ -1,7 +1,10 @@
 import type {
   FetchHomeResult,
   FetchPageResult,
+  SettingsQueryResult,
 } from '../../../../sanity.types';
+import { sanityFetch } from '@/sanity/lib/live';
+import { settingsQuery } from '@/sanity/lib/queries';
 import Ticket from './Ticket';
 import { TicketCarousel } from './TicketCarousel';
 
@@ -12,12 +15,27 @@ export type ITicketListBlock = Extract<
   { _type: 'ticketList' }
 >;
 
-const TicketList = (block: ITicketListBlock) => {
+export type TicketLabels = NonNullable<SettingsQueryResult>['ticketLabels'];
+
+const TicketList = async (block: ITicketListBlock) => {
   if (block._type !== 'ticketList') return null;
 
   const tickets = block.tickets ?? [];
   if (tickets.length === 0) return null;
   const count = tickets.length;
+
+  // Editable labels from Settings → Ticket Settings. This query is deduped with
+  // the one the page already runs, so it's not an extra round-trip.
+  const { data: settings } = await sanityFetch({ query: settingsQuery });
+  const labels = settings?.ticketLabels ?? null;
+
+  // Section title: plural for multiple, singular for one. Hidden via the block toggle.
+  const showTitle = block.showTitle !== false;
+  const sectionTitle = showTitle
+    ? count > 1
+      ? labels?.titlePlural || 'Visningar'
+      : labels?.titleSingular || 'Visning'
+    : null;
 
   // Bottom spacing defaults to true when unset (40px mobile / 80px desktop).
   const bottomSpacingClass =
@@ -27,9 +45,13 @@ const TicketList = (block: ITicketListBlock) => {
   // one ticket → standalone, many → peeking carousel.
   if (count > 1) {
     return (
-      <TicketCarousel heading={block.heading} className={bottomSpacingClass}>
+      <TicketCarousel heading={sectionTitle} className={bottomSpacingClass}>
         {tickets.map((ticket, i) => (
-          <Ticket key={('_id' in ticket && ticket._id) || i} ticket={ticket} />
+          <Ticket
+            key={('_id' in ticket && ticket._id) || i}
+            ticket={ticket}
+            labels={labels}
+          />
         ))}
       </TicketCarousel>
     );
@@ -40,11 +62,11 @@ const TicketList = (block: ITicketListBlock) => {
       key={block._key || 'ticketList'}
       className={`page-x-spacing flex flex-col gap-2.5 h-fit uppercase lg:gap-3 ${bottomSpacingClass}`}
     >
-      {block.heading ? (
-        <h2 className='text-h-67 lg:text-h-37 !leading-[1]'>{block.heading}</h2>
+      {sectionTitle ? (
+        <h2 className='text-h-67 lg:text-h-37 !leading-[1]'>{sectionTitle}</h2>
       ) : null}
 
-      <Ticket ticket={tickets[0]} />
+      <Ticket ticket={tickets[0]} labels={labels} />
     </section>
   );
 };

@@ -8,11 +8,6 @@ export const ticketList = defineType({
   icon: TagIcon,
   fields: [
     defineField({
-      name: 'heading',
-      title: 'Heading (optional)',
-      type: 'string',
-    }),
-    defineField({
       name: 'tickets',
       title: 'Tickets',
       type: 'array',
@@ -24,6 +19,14 @@ export const ticketList = defineType({
       ],
     }),
     defineField({
+      name: 'showTitle',
+      title: 'Show title',
+      type: 'boolean',
+      description:
+        'Show the section title (from Settings → Ticket Settings). On by default.',
+      initialValue: true,
+    }),
+    defineField({
       name: 'bottomSpacing',
       title: 'Bottom spacing',
       type: 'boolean',
@@ -33,16 +36,15 @@ export const ticketList = defineType({
   ],
   preview: {
     select: {
-      heading: 'heading',
       ticket0: 'tickets.0.title',
       count: 'tickets.length',
     },
-    prepare({ heading, ticket0, count }) {
+    prepare({ ticket0, count }) {
       const subtitle = count
         ? `${count} ticket${count === 1 ? '' : 's'}`
         : 'No tickets';
       return {
-        title: heading || ticket0 || 'Ticket List',
+        title: ticket0 || 'Ticket List',
         subtitle,
         media: TagIcon,
       };
