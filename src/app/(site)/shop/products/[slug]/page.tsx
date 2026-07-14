@@ -56,7 +56,7 @@ export async function generateMetadata({
 
 // Drop invalid variants and coerce to the client shape.
 function toPurchaseVariants(
-  variants: NonNullable<FetchProductResult>['variants']
+  variants: NonNullable<FetchProductResult>['variants'],
 ): PurchaseVariant[] {
   return (variants ?? [])
     .filter((v) => v.size != null && typeof v.stock === 'number')
@@ -141,7 +141,7 @@ export default async function ProductPage({
                 {...mainImage}
                 aspectRatio='square'
                 mode='contain'
-                className='rounded-lg bg-white'
+                className='aspect-4/5 object-cover rounded-lg bg-white'
               />
             ) : null}
             {thumbnails.length > 0 ? (
@@ -152,7 +152,7 @@ export default async function ProductPage({
                     {...g}
                     aspectRatio='square'
                     mode='contain'
-                    className='rounded-lg bg-white'
+                    className='aspect-4/5 object-cover rounded-lg bg-white'
                   />
                 ))}
               </div>

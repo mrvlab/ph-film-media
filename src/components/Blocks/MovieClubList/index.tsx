@@ -20,7 +20,7 @@ const MovieClubList = (block: IMovieClubListBlocks) => {
   return (
     <section
       key={block._key || 'movieClubList'}
-      className="page-x-spacing grid gap-10 grid-cols-1 md:grid-cols-2 md:gap-2 lg:gap-2 lg:grid-cols-3 xl:grid-cols-4"
+      className='page-x-spacing grid gap-10 grid-cols-1 md:grid-cols-2 md:gap-2 lg:gap-2 lg:grid-cols-3 xl:grid-cols-4'
     >
       <MovieClubGrid movies={movies} />
     </section>

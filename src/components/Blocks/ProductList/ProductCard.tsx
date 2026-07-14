@@ -15,13 +15,13 @@ const ProductCard = ({ product }: ProductCardProps) => {
   const href = slug?.current ? `/shop/products/${slug.current}` : null;
 
   const card = (
-    <article className='flex flex-col gap-3'>
+    <article className='flex flex-col gap-4'>
       {image && image._type === 'mediaType' && image.media ? (
         <SanityImage
           {...image}
           aspectRatio='square'
           mode='contain'
-          className='rounded-lg bg-white'
+          className='aspect-4/5 object-cover rounded-lg bg-white'
         />
       ) : (
         <div className='aspect-square w-full rounded-lg bg-white/5' />

@@ -30,8 +30,14 @@ const ProductList = (block: IProductListBlock) => {
         </h2>
       ) : null}
 
-      {/* Same grid as the movie club list. */}
-      <div className='grid grid-cols-1 gap-10 md:grid-cols-2 md:gap-2 lg:grid-cols-3 lg:gap-2 xl:grid-cols-4'>
+      {/* One product: 1 col mobile / 2 col tablet+desktop. Many: dense grid. */}
+      <div
+        className={
+          products.length === 1
+            ? 'grid grid-cols-1 gap-2 md:grid-cols-2'
+            : 'grid grid-cols-2 gap-2 md:grid-cols-2 lg:grid-cols-3 lg:gap-2 2xl:grid-cols-4'
+        }
+      >
         {products.map((product, i) => (
           <ProductCard
             key={('_id' in product && product._id) || i}
