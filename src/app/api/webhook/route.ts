@@ -3,16 +3,20 @@ import type Stripe from 'stripe';
 import { stripe } from '@/lib/stripe';
 import { computeSeatsSold } from '@/lib/tickets/computeSeatsSold';
 import { setSeatsSold } from '@/lib/tickets/setSeatsSold';
-import { writeClient } from '@/sanity/lib/writeClient';
+import { computeProductSales } from '@/lib/products/computeProductSales';
+import { setProductSales } from '@/lib/products/setProductSales';
 
 export const runtime = 'nodejs';
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
-// Stripe search is eventually consistent. After checkout.session.completed the
-// just-created PaymentIntent may not be indexed for a moment. Wait briefly so
-// our recompute includes it.
+// Stripe search is eventually consistent; wait before recomputing so the
+// just-created PaymentIntent is indexed.
 const SEARCH_INDEX_LAG_MS = 3000;
+
+type Target =
+  | { kind: 'ticket'; id: string }
+  | { kind: 'product'; id: string };
 
 export async function POST(request: Request) {
   if (!webhookSecret) {
@@ -36,48 +40,32 @@ export async function POST(request: Request) {
     });
   }
 
-  const ticketId = await resolveTicketId(event);
-  if (!ticketId) {
-    // Not an event we care about, or an event we care about but with no ticketId.
+  const target = await resolveTarget(event);
+  if (!target) {
+    // Unrelated event — ack it so Stripe stops retrying.
     return new Response(null, { status: 200 });
   }
 
-  const publishedId = ticketId.replace(/^drafts\./, '');
-
-  // Log the event for observability. This doubles as a duplicate-delivery
-  // marker, but our recompute is idempotent so duplicates are harmless anyway.
-  await writeClient
-    .createIfNotExists({
-      _id: `stripeEvent.${event.id}`,
-      _type: 'stripeEvent',
-      type: event.type,
-      ticketId: publishedId,
-      receivedAt: new Date(event.created * 1000).toISOString(),
-    })
-    .catch(() => {});
+  const publishedId = target.id.replace(/^drafts\./, '');
 
   try {
     if (event.type === 'checkout.session.completed') {
       await sleep(SEARCH_INDEX_LAG_MS);
     }
-    const seatsSold = await computeSeatsSold(publishedId);
-    await setSeatsSold(publishedId, seatsSold);
 
-    if (event.type === 'checkout.session.completed') {
-      const session = event.data.object as Stripe.Checkout.Session;
-      const email = session.customer_details?.email ?? 'unknown';
-      console.log(
-        `[EMAIL SIMULATION] Would send ticket confirmation to ${email} for ticket ${publishedId} (seatsSold=${seatsSold})`
-      );
+    if (target.kind === 'ticket') {
+      const seatsSold = await computeSeatsSold(publishedId);
+      await setSeatsSold(publishedId, seatsSold);
+      logResult(event, `ticket ${publishedId}`, `seatsSold=${seatsSold}`);
     } else {
-      console.log(
-        `[WEBHOOK] Recomputed seatsSold=${seatsSold} for ${publishedId} after ${event.type}`
-      );
+      const sales = await computeProductSales(publishedId);
+      await setProductSales(publishedId, sales);
+      logResult(event, `product ${publishedId}`, JSON.stringify(sales));
     }
   } catch (err) {
     const message = err instanceof Error ? err.message : 'unknown';
     console.error(
-      `[WEBHOOK] Failed to recompute seatsSold for ${publishedId}: ${message}`
+      `[WEBHOOK] Failed to recompute sales for ${publishedId}: ${message}`
     );
     return new Response('recompute_failed', { status: 500 });
   }
@@ -85,20 +73,36 @@ export async function POST(request: Request) {
   return new Response(null, { status: 200 });
 }
 
-async function resolveTicketId(event: Stripe.Event): Promise<string | null> {
+// Stripe sends its own receipt emails, so we only recompute stock and log.
+function logResult(event: Stripe.Event, subject: string, detail: string) {
+  console.log(
+    `[WEBHOOK] Recomputed ${detail} for ${subject} after ${event.type}`
+  );
+}
+
+async function resolveTarget(event: Stripe.Event): Promise<Target | null> {
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object as Stripe.Checkout.Session;
-    return session.metadata?.ticketId ?? null;
+    if (session.metadata?.ticketId) {
+      return { kind: 'ticket', id: session.metadata.ticketId };
+    }
+    if (session.metadata?.productId) {
+      return { kind: 'product', id: session.metadata.productId };
+    }
+    return null;
   }
 
   if (event.type === 'charge.refunded') {
     const charge = event.data.object as Stripe.Charge;
-    // Prefer metadata on the charge itself (which inherits from PI when set).
-    const direct = charge.metadata?.ticketId;
-    if (direct) return direct;
+    // Prefer metadata on the charge itself (which inherits from the PI).
+    if (charge.metadata?.ticketId) {
+      return { kind: 'ticket', id: charge.metadata.ticketId };
+    }
+    if (charge.metadata?.productId) {
+      return { kind: 'product', id: charge.metadata.productId };
+    }
 
-    // Legacy fallback: look up the session via payment_intent for charges made
-    // before we started stamping metadata on the PaymentIntent.
+    // Legacy fallback for pre-metadata charges: find the session via the PI.
     const paymentIntent =
       typeof charge.payment_intent === 'string'
         ? charge.payment_intent
@@ -108,7 +112,10 @@ async function resolveTicketId(event: Stripe.Event): Promise<string | null> {
       payment_intent: paymentIntent,
       limit: 1,
     });
-    return sessions.data[0]?.metadata?.ticketId ?? null;
+    const meta = sessions.data[0]?.metadata;
+    if (meta?.ticketId) return { kind: 'ticket', id: meta.ticketId };
+    if (meta?.productId) return { kind: 'product', id: meta.productId };
+    return null;
   }
 
   return null;

@@ -4,6 +4,10 @@
     {
       "path": "/api/tickets/reconcile",
       "schedule": "0 3 * * *"
+    },
+    {
+      "path": "/api/products/reconcile",
+      "schedule": "0 3 * * *"
     }
   ]
 }

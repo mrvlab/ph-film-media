@@ -251,6 +251,29 @@ export const fetchHome = defineQuery(`
           }
         }
       },
+      // Product List Block
+      _type == "productList" => {
+        _key,
+        _type,
+        title,
+        products[]->{
+          _id,
+          title,
+          slug,
+          price,
+          currency,
+          "image": gallery[0]{
+            _type,
+            media{
+              _type,
+              alt,
+              crop,
+              hotspot,
+              asset->{ ... }
+            }
+          }
+        }
+      },
       // Movie Hero Block
       _type == "moviesHeroCarousel" => {
         _type,
@@ -548,6 +571,29 @@ export const fetchPage = defineQuery(`
           }
         }
       },
+      // Product List Block
+      _type == "productList" => {
+        _key,
+        _type,
+        title,
+        products[]->{
+          _id,
+          title,
+          slug,
+          price,
+          currency,
+          "image": gallery[0]{
+            _type,
+            media{
+              _type,
+              alt,
+              crop,
+              hotspot,
+              asset->{ ... }
+            }
+          }
+        }
+      },
       // Movie Hero Block
       _type == "moviesHeroCarousel" => {
         _type,
@@ -819,5 +865,36 @@ export const fetchLatestProject = defineQuery(`
         asset->{ ... }
       }
     }
+  }
+`);
+
+// Single product by slug — powers the /shop/products/[slug] detail page.
+export const fetchProduct = defineQuery(`
+  *[_type == "product" && slug.current == $slug][0]{
+    _id,
+    _type,
+    title,
+    "slug": slug.current,
+    description,
+    price,
+    currency,
+    gallery[]{
+      _type,
+      media{ _type, alt, crop, hotspot, asset->{ ... } }
+    },
+    variants[]{
+      _key,
+      size,
+      stock,
+      sold
+    }
+  }
+`);
+
+// All product slugs — for generateStaticParams on the detail route.
+export const fetchAllProductSlugs = defineQuery(`
+  *[_type == "product" && defined(slug.current)]{
+    "slug": slug.current,
+    _updatedAt
   }
 `);
