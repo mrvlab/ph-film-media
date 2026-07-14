@@ -1404,7 +1404,7 @@
     }
   },
   {
-    "name": "screen",
+    "name": "lounge",
     "type": "document",
     "attributes": {
       "_id": {
@@ -1417,7 +1417,7 @@
         "type": "objectAttribute",
         "value": {
           "type": "string",
-          "value": "screen"
+          "value": "lounge"
         }
       },
       "_createdAt": {
@@ -1445,7 +1445,14 @@
         },
         "optional": true
       },
-      "screenImage": {
+      "date": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        },
+        "optional": true
+      },
+      "loungeImage": {
         "type": "objectAttribute",
         "value": {
           "type": "inline",
@@ -2616,6 +2623,74 @@
   },
   {
     "type": "type",
+    "name": "lounge.reference",
+    "value": {
+      "type": "object",
+      "attributes": {
+        "_ref": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "string"
+          }
+        },
+        "_type": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "string",
+            "value": "reference"
+          }
+        },
+        "_weak": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "boolean"
+          },
+          "optional": true
+        }
+      },
+      "dereferencesTo": "lounge"
+    }
+  },
+  {
+    "name": "loungeList",
+    "type": "type",
+    "value": {
+      "type": "object",
+      "attributes": {
+        "_type": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "string",
+            "value": "loungeList"
+          }
+        },
+        "lounges": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "array",
+            "of": {
+              "type": "object",
+              "attributes": {
+                "_key": {
+                  "type": "objectAttribute",
+                  "value": {
+                    "type": "string"
+                  }
+                }
+              },
+              "rest": {
+                "type": "inline",
+                "name": "lounge.reference"
+              }
+            }
+          },
+          "optional": true
+        }
+      }
+    }
+  },
+  {
+    "type": "type",
     "name": "distributions.reference",
     "value": {
       "type": "object",
@@ -2926,6 +3001,21 @@
                 "rest": {
                   "type": "inline",
                   "name": "distributionList"
+                }
+              },
+              {
+                "type": "object",
+                "attributes": {
+                  "_key": {
+                    "type": "objectAttribute",
+                    "value": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "rest": {
+                  "type": "inline",
+                  "name": "loungeList"
                 }
               },
               {

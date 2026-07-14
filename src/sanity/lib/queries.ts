@@ -382,6 +382,11 @@ export const fetchHome = defineQuery(`
         }
       }
       },
+      // Lounge List Block
+      _type == "loungeList" => {
+        _key,
+        _type
+      },
       // Projects List Block
       _type == "projectsList" => {
         _key,
@@ -702,6 +707,11 @@ export const fetchPage = defineQuery(`
         }
       }
       },
+      // Lounge List Block
+      _type == "loungeList" => {
+        _key,
+        _type
+      },
       // Projects List Block
       _type == "projectsList" => {
         _key,
@@ -841,6 +851,35 @@ export const fetchAllProjects = defineQuery(`
         _id,
         pageTitle,
         slug
+      }
+    }
+  }
+`);
+
+// All Lounge items, newest first — powers the Lounge List block.
+export const fetchAllLounges = defineQuery(`
+  *[_type == "lounge"] | order(coalesce(date, _createdAt) desc) {
+    _id,
+    _createdAt,
+    title,
+    date,
+    link{
+      linkType,
+      externalLink,
+      internalLink->{
+        _id,
+        pageTitle,
+        slug
+      }
+    },
+    loungeImage{
+      _type,
+      media{
+        _type,
+        alt,
+        crop,
+        hotspot,
+        asset->{ ... }
       }
     }
   }

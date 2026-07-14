@@ -1,6 +1,7 @@
 export { heroCarousel } from './heroCarousel';
 export { moviesHeroCarousel } from './moviesHeroCarousel';
 export { distributionList } from './distributionList';
+export { loungeList } from './loungeList';
 export { movieClubList } from './movieClubList';
 export { mediaCarousel } from './mediaCarousel';
 export { imageWithText } from './imageWithText';
