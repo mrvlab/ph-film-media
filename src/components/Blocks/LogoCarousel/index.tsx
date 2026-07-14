@@ -36,7 +36,7 @@ const LogoCarousel = (block: ILogoCarouselBlocks) => {
         <ul className='flex w-fit h-fit overflow-x-auto items-center justify-center gap-16 pr-16'>
           {logoItems?.map((logo, idx) =>
             logo.mediaItem?.media ? (
-              <li key={idx} className='w-[200px] h-20'>
+              <li key={idx} className='w-[20rem] h-20'>
                 <SanityImage
                   useImageAspect
                   className='w-full h-full !object-contain'

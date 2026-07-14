@@ -10,7 +10,7 @@ const LandingPageHeader = ({ header }: { header: FetchHeaderResult }) => {
   return (
     <nav
       ref={headerRef}
-      className='max-lg:min-h-[51.48px] max-lg:mt-5 z-50 fixed lg:relative lg:px-p-desktop lg:pt-6'
+      className='max-lg:min-h-[5.148rem] max-lg:mt-5 z-50 fixed lg:relative lg:px-p-desktop lg:pt-6'
       role='navigation'
       aria-label='Main menu'
     >

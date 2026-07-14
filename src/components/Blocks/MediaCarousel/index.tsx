@@ -18,7 +18,7 @@ const MediaCarousel = (block: IMediaCarouselBlock) => {
   return (
     <section className="pb-3 md:pb-10" data-sanity-edit-target>
       <motion.div
-        className="h-[calc(265px+1rem+1.5rem)] lg:h-[calc(265px+1.5rem+1.5rem)] overflow-hidden"
+        className="h-[calc(26.5rem+1.6rem+2.4rem)] lg:h-[calc(26.5rem+2.4rem+2.4rem)] overflow-hidden"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.4, ease: 'easeInOut', delay: 0.1 }}

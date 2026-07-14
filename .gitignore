@@ -44,3 +44,9 @@ next-env.d.ts
 
 # explicitly include .nvmrc
 !.nvmrc
+
+# AI agent / assistant tooling (local only)
+.agents/
+.claude/
+.kiro/
+skills-lock.json

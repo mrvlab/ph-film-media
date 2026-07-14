@@ -33,6 +33,13 @@ export const settingsQuery = defineQuery(`
         languagesLabel,
         releaseDateLabel,
         durationLabel
+      },
+      ticketLabels {
+        titleSingular,
+        titlePlural,
+        viewingLabel,
+        locationLabel,
+        priceLabel
       }
     }
     `);
@@ -206,14 +213,23 @@ export const fetchHome = defineQuery(`
           }
         }
       },
-      // Screens List Block
-      _type == "screensList" => {
+      // Ticket List Block
+      _type == "ticketList" => {
         _key,
         _type,
-        screens[]->{
+        showTitle,
+        bottomSpacing,
+        tickets[]->{
           _id,
           title,
-          screenImage{
+          slug,
+          date,
+          price,
+          currency,
+          totalSeats,
+          seatsSold,
+          venue,
+          poster{
             _type,
             media{
               _type,
@@ -223,13 +239,14 @@ export const fetchHome = defineQuery(`
               asset->{ ... }
             }
           },
-          link{
-            linkType,
-            externalLink,
-            internalLink->{
-              _id,
-              pageTitle,
-              slug
+          banner{
+            _type,
+            media{
+              _type,
+              alt,
+              crop,
+              hotspot,
+              asset->{ ... }
             }
           }
         }
@@ -493,14 +510,23 @@ export const fetchPage = defineQuery(`
           }
         }
       },
-      // Screens List Block
-      _type == "screensList" => {
+      // Ticket List Block
+      _type == "ticketList" => {
         _key,
         _type,
-        screens[]->{
+        showTitle,
+        bottomSpacing,
+        tickets[]->{
           _id,
           title,
-          screenImage{
+          slug,
+          date,
+          price,
+          currency,
+          totalSeats,
+          seatsSold,
+          venue,
+          poster{
             _type,
             media{
               _type,
@@ -510,13 +536,14 @@ export const fetchPage = defineQuery(`
               asset->{ ... }
             }
           },
-          link{
-            linkType,
-            externalLink,
-            internalLink->{
-              _id,
-              pageTitle,
-              slug
+          banner{
+            _type,
+            media{
+              _type,
+              alt,
+              crop,
+              hotspot,
+              asset->{ ... }
             }
           }
         }

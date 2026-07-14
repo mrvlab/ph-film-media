@@ -15,6 +15,10 @@ export const settings = defineType({
       name: 'distributionSettings',
       title: 'Distribution Settings',
     },
+    {
+      name: 'ticketSettings',
+      title: 'Ticket Settings',
+    },
   ],
   fields: [
     defineField({
@@ -67,6 +71,45 @@ export const settings = defineType({
         }),
       ],
       group: 'distributionSettings',
+    }),
+    defineField({
+      name: 'ticketLabels',
+      title: 'Ticket Labels',
+      description: 'Labels shown on the ticket cards.',
+      type: 'object',
+      fields: [
+        defineField({
+          name: 'titleSingular',
+          title: 'Section title — one ticket (Visning)',
+          type: 'string',
+          initialValue: 'Visning',
+        }),
+        defineField({
+          name: 'titlePlural',
+          title: 'Section title — multiple tickets (Visningar)',
+          type: 'string',
+          initialValue: 'Visningar',
+        }),
+        defineField({
+          name: 'viewingLabel',
+          title: 'Viewing Label — (Visning)',
+          type: 'string',
+          initialValue: 'Visning',
+        }),
+        defineField({
+          name: 'locationLabel',
+          title: 'Location Label (Plats)',
+          type: 'string',
+          initialValue: 'Plats',
+        }),
+        defineField({
+          name: 'priceLabel',
+          title: 'Price Label (Pris)',
+          type: 'string',
+          initialValue: 'Pris',
+        }),
+      ],
+      group: 'ticketSettings',
     }),
   ],
   preview: {

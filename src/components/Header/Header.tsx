@@ -10,7 +10,7 @@ const Header = async () => {
   return (
     <>
       <nav
-        className='fixed max-lg:min-h-[51.48px] max-lg:mt-5 z-40 lg:relative lg:grid lg:col-span-2 lg:row-span-full lg:pl-p-desktop lg:py-p-desktop'
+        className='fixed max-lg:min-h-[5.148rem] max-lg:mt-5 z-40 lg:relative lg:grid lg:col-span-2 lg:row-span-full lg:pl-p-desktop lg:py-p-desktop'
         role='navigation'
         aria-label='Main menu'
       >
