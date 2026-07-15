@@ -1,4 +1,5 @@
 import type { StructureBuilder, StructureResolver } from 'sanity/structure';
+import { BasketIcon } from '@sanity/icons';
 
 // Schema imports
 
@@ -7,6 +8,16 @@ import * as singelton from './schemaTypes/singelton';
 
 const contentSchemas = Object.values(content);
 const singletonSchemas = Object.values(singelton);
+
+// Document types that live together under the "Shop" sub-folder.
+const SHOP_TYPES = ['ticket', 'product'];
+
+const referenceSchemas = contentSchemas.filter(
+  (schema) => !SHOP_TYPES.includes(schema.name)
+);
+const shopSchemas = contentSchemas.filter((schema) =>
+  SHOP_TYPES.includes(schema.name)
+);
 
 export const structure: StructureResolver = (S: StructureBuilder) =>
   S.list()
@@ -23,13 +34,31 @@ export const structure: StructureResolver = (S: StructureBuilder) =>
         .child(
           S.list()
             .title('Content (References)')
-            .items(
-              contentSchemas.map((schema) =>
+            .items([
+              ...referenceSchemas.map((schema) =>
                 S.documentTypeListItem(schema.name).title(
                   schema.title || schema.name
                 )
-              )
-            )
+              ),
+
+              S.divider(),
+
+              // Shop — tickets & products grouped together
+              S.listItem()
+                .title('Shop')
+                .icon(BasketIcon)
+                .child(
+                  S.list()
+                    .title('Shop')
+                    .items(
+                      shopSchemas.map((schema) =>
+                        S.documentTypeListItem(schema.name).title(
+                          schema.title || schema.name
+                        )
+                      )
+                    )
+                ),
+            ])
         ),
 
       S.divider(),
