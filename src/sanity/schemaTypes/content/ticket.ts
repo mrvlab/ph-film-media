@@ -103,20 +103,16 @@ export const ticket = defineType({
     },
     prepare({ title, date, sold, total, poster, banner }) {
       const when = date
-        ? new Date(date).toLocaleString('en-US', {
-            dateStyle: 'short',
-            timeStyle: 'short',
-          })
+        ? new Date(date).toLocaleDateString('en-US', { dateStyle: 'short' })
         : 'no date';
       const soldNum = sold ?? 0;
       const totalNum = total ?? 0;
-      const status =
-        totalNum > 0 && soldNum >= totalNum
-          ? 'Sold out'
-          : `${soldNum}/${total ?? '?'} sold`;
+      const soldOut = totalNum > 0 && soldNum >= totalNum;
+      const status = soldOut ? 'Sold out' : `${soldNum}/${total ?? '?'} sold`;
+      const dot = soldOut ? '🔴' : '🟢';
       return {
         title: title || 'Untitled ticket',
-        subtitle: `${when} · ${status}`,
+        subtitle: `${when} · ${status} ${dot}`,
         media: poster || banner || TagIcon,
       };
     },

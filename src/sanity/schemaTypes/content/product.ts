@@ -13,7 +13,7 @@ const SIZE_OPTIONS: { title: string; value: string }[] = [
   { title: 'XXL', value: 'XXL' },
 ];
 
-type Variant = { size?: string };
+type Variant = { size?: string; stock?: number; sold?: number };
 
 export const product = defineType({
   name: 'product',
@@ -124,9 +124,10 @@ export const product = defineType({
             prepare({ size, stock, sold }) {
               const s = sold ?? 0;
               const t = stock ?? 0;
-              const status =
-                t > 0 && s >= t ? 'Sold out' : `${s}/${t} sold`;
-              return { title: size || 'Size', subtitle: status };
+              const soldOut = t - s <= 0;
+              const dot = soldOut ? '🔴' : '🟢';
+              const status = soldOut ? 'Sold out' : `${s}/${t} sold`;
+              return { title: size || 'Size', subtitle: `${status} ${dot}` };
             },
           },
         }),
@@ -157,19 +158,25 @@ export const product = defineType({
       price: 'price',
       currency: 'currency',
       image: 'gallery.0.media',
-      v0: 'variants.0.size',
-      count: 'variants.length',
+      variants: 'variants',
     },
-    prepare({ title, price, currency, image, v0, count }) {
+    prepare({ title, price, currency, image, variants }) {
       const priceLabel =
         typeof price === 'number'
           ? `${price} ${(currency || 'sek').toUpperCase()}`
           : 'no price';
-      const sizes =
-        count > 1 ? `${count} sizes` : v0 ? v0 : 'no sizes';
+      const list: Variant[] = Array.isArray(variants) ? variants : [];
+      const count = list.length;
+      const sizes = count > 1 ? `${count} sizes` : list[0]?.size || 'no sizes';
+      // Green if any size still has stock left, otherwise red.
+      const available = list.reduce(
+        (sum, v) => sum + Math.max(0, (v?.stock ?? 0) - (v?.sold ?? 0)),
+        0
+      );
+      const dot = available > 0 ? '🟢' : '🔴';
       return {
         title: title || 'Untitled product',
-        subtitle: `${priceLabel} · ${sizes}`,
+        subtitle: `${priceLabel} · ${sizes} ${dot}`,
         media: image || BasketIcon,
       };
     },
