@@ -1,9 +1,6 @@
 'use client';
 
 import React from 'react';
-import useEmblaCarousel from 'embla-carousel-react';
-import { WheelGesturesPlugin } from 'embla-carousel-wheel-gestures';
-import { usePrevNextButtons } from '@/components/Media/Carousel/CarouselArrowButtons';
 
 /** Right-pointing arrow; rotated 180° for the previous button. */
 const Arrow = ({ className }: { className?: string }) => (
@@ -32,25 +29,55 @@ type TicketCarouselProps = {
 };
 
 /**
- * Peeking carousel for 2+ tickets. Each child is one <Ticket> card, sized so the
- * next card peeks. Prev/next buttons show on desktop; mobile is drag/scroll only.
+ * Peeking carousel for 2+ tickets, using native scroll-snap. Desktop prev/next
+ * buttons scroll one card at a time and disable at the ends.
  */
 export function TicketCarousel({
   heading,
   className,
   children,
 }: TicketCarouselProps) {
-  const [emblaRef, emblaApi] = useEmblaCarousel({ align: 'start' }, [
-    WheelGesturesPlugin({ forceWheelAxis: 'x' }),
-  ]);
-  const {
-    prevBtnDisabled,
-    nextBtnDisabled,
-    onPrevButtonClick,
-    onNextButtonClick,
-  } = usePrevNextButtons(emblaApi);
+  const scrollerRef = React.useRef<HTMLDivElement>(null);
+  const [prevDisabled, setPrevDisabled] = React.useState(true);
+  const [nextDisabled, setNextDisabled] = React.useState(false);
 
   const slides = React.Children.toArray(children);
+
+  // Disable each arrow at its end of the range (1px slack for rounding).
+  const updateArrows = React.useCallback(() => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    const { scrollLeft, scrollWidth, clientWidth } = el;
+    setPrevDisabled(scrollLeft <= 1);
+    setNextDisabled(scrollLeft >= scrollWidth - clientWidth - 1);
+  }, []);
+
+  React.useEffect(() => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    // rAF-defer so the first setState isn't synchronous in the effect (repo lint).
+    const raf = requestAnimationFrame(updateArrows);
+    el.addEventListener('scroll', updateArrows, { passive: true });
+    window.addEventListener('resize', updateArrows);
+    return () => {
+      cancelAnimationFrame(raf);
+      el.removeEventListener('scroll', updateArrows);
+      window.removeEventListener('resize', updateArrows);
+    };
+  }, [updateArrows]);
+
+  // One "card" step = distance between two slide starts (card width + gap).
+  const scrollByStep = (dir: 1 | -1) => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    const first = el.children[0] as HTMLElement | undefined;
+    const second = el.children[1] as HTMLElement | undefined;
+    const step =
+      first && second
+        ? second.offsetLeft - first.offsetLeft
+        : (first?.offsetWidth ?? el.clientWidth);
+    el.scrollBy({ left: dir * step, behavior: 'smooth' });
+  };
 
   return (
     <section
@@ -67,8 +94,8 @@ export function TicketCarousel({
           <button
             type='button'
             aria-label='Föregående'
-            onClick={onPrevButtonClick}
-            disabled={prevBtnDisabled}
+            onClick={() => scrollByStep(-1)}
+            disabled={prevDisabled}
             className={arrowButtonClass}
           >
             <Arrow className='rotate-180' />
@@ -76,8 +103,8 @@ export function TicketCarousel({
           <button
             type='button'
             aria-label='Nästa'
-            onClick={onNextButtonClick}
-            disabled={nextBtnDisabled}
+            onClick={() => scrollByStep(1)}
+            disabled={nextDisabled}
             className={arrowButtonClass}
           >
             <Arrow />
@@ -85,21 +112,19 @@ export function TicketCarousel({
         </div>
       </div>
 
-      {/* Bleed past page-x-spacing's right gutter so cards run to the edge. */}
+      {/* Full-bleed both edges; pl/scroll-pl re-inset the first card to the gutter. */}
       <div
-        className='overflow-hidden -mr-p-mobile lg:-mr-p-desktop'
-        ref={emblaRef}
+        ref={scrollerRef}
+        className='flex gap-2.5 overflow-x-auto overscroll-x-contain snap-x snap-mandatory -ml-p-mobile -mr-p-mobile pl-p-mobile scroll-pl-p-mobile lg:ml-0 lg:gap-6 lg:pl-0 lg:scroll-pl-0 lg:-mr-p-desktop [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden'
       >
-        <div className='flex gap-2.5 lg:gap-6'>
-          {slides.map((child, i) => (
-            <div
-              key={i}
-              className='min-w-0 flex-[0_0_82%] last:mr-p-mobile lg:flex-[0_0_63%] lg:last:mr-p-desktop'
-            >
-              {child}
-            </div>
-          ))}
-        </div>
+        {slides.map((child, i) => (
+          <div
+            key={i}
+            className='min-w-0 shrink-0 snap-start flex-[0_0_82%] last:mr-p-mobile lg:flex-[0_0_63%] lg:last:mr-p-desktop'
+          >
+            {child}
+          </div>
+        ))}
       </div>
     </section>
   );
