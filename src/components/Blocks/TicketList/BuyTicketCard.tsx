@@ -1,27 +1,26 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { useBuyTicket } from './useBuyTicket';
+
+import { useTicketGate } from './TicketGate';
 
 type BuyTicketCardProps = {
-  ticketId: string;
-  /** When true (sold out) the card is inert — no click, no checkout. */
+  /** When true (sold out) the card is inert — no click, no gate. */
   disabled?: boolean;
   className?: string;
   children: ReactNode;
 };
 
 /**
- * Wraps a ticket's content so the entire card acts as the buy button (mobile).
- * Falls back to a plain, non-interactive container when sold out.
+ * Wraps a ticket's content so the entire card opens the members-only gate
+ * (mobile). Falls back to a plain, non-interactive container when sold out.
  */
 export function BuyTicketCard({
-  ticketId,
   disabled,
   className,
   children,
 }: BuyTicketCardProps) {
-  const { startCheckout, loading, error } = useBuyTicket(ticketId);
+  const openGate = useTicketGate();
 
   if (disabled) {
     return <div className={className}>{children}</div>;
@@ -32,18 +31,16 @@ export function BuyTicketCard({
       role='button'
       tabIndex={0}
       aria-label='Köp biljett'
-      aria-disabled={loading || undefined}
-      onClick={startCheckout}
+      onClick={openGate}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
-          startCheckout();
+          openGate();
         }
       }}
-      className={`cursor-pointer ${loading ? 'cursor-wait' : ''} ${className ?? ''}`}
+      className={`cursor-pointer ${className ?? ''}`}
     >
       {children}
-      {error ? <p className='text-b-14 text-red-400'>{error}</p> : null}
     </div>
   );
 }

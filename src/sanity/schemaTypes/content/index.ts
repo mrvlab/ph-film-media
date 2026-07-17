@@ -8,3 +8,4 @@ export { projects } from './projects';
 export { lounge } from './lounge';
 export { ticket } from './ticket';
 export { product } from './product';
+export { member } from './member';

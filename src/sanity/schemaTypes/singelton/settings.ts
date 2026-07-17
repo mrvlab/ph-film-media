@@ -19,6 +19,10 @@ export const settings = defineType({
       name: 'ticketSettings',
       title: 'Ticket Settings',
     },
+    {
+      name: 'membershipSettings',
+      title: 'Membership',
+    },
   ],
   fields: [
     defineField({
@@ -110,6 +114,31 @@ export const settings = defineType({
         }),
       ],
       group: 'ticketSettings',
+    }),
+    defineField({
+      name: 'membership',
+      title: 'Membership fee',
+      description:
+        'The one-time Filmklubben membership fee charged when a visitor joins. This drives both the Stripe charge and the price shown in the signup modal.',
+      type: 'object',
+      group: 'membershipSettings',
+      fields: [
+        defineField({
+          name: 'fee',
+          title: 'Fee (major units, e.g. SEK)',
+          type: 'number',
+          initialValue: 49,
+          validation: (Rule) => Rule.required().min(0),
+        }),
+        defineField({
+          name: 'currency',
+          title: 'Currency (ISO 4217, lowercase)',
+          type: 'string',
+          initialValue: 'sek',
+          validation: (Rule) => Rule.required().lowercase().length(3),
+        }),
+      ],
+      options: { columns: 2 },
     }),
   ],
   preview: {

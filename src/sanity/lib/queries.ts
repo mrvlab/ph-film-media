@@ -40,6 +40,10 @@ export const settingsQuery = defineQuery(`
         viewingLabel,
         locationLabel,
         priceLabel
+      },
+      membership {
+        fee,
+        currency
       }
     }
     `);

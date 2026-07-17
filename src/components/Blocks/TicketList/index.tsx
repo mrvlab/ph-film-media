@@ -4,7 +4,8 @@ import type {
   SettingsQueryResult,
 } from '../../../../sanity.types';
 import { sanityFetch } from '@/sanity/lib/live';
-import { settingsQuery } from '@/sanity/lib/queries';
+import { fetchFooter, settingsQuery } from '@/sanity/lib/queries';
+import { formatMembershipFee } from '@/lib/members/membershipFee';
 import Ticket from './Ticket';
 import { TicketCarousel } from './TicketCarousel';
 
@@ -29,6 +30,14 @@ const TicketList = async (block: ITicketListBlock) => {
   const { data: settings } = await sanityFetch({ query: settingsQuery });
   const labels = settings?.ticketLabels ?? null;
 
+  const { data: footer } = await sanityFetch({ query: fetchFooter });
+  const contactEmail = footer?.email ?? null;
+
+  const membershipFeeLabel = formatMembershipFee(
+    settings?.membership?.fee,
+    settings?.membership?.currency,
+  );
+
   // Section title: plural for multiple, singular for one. Hidden via the block toggle.
   const showTitle = block.showTitle !== false;
   const sectionTitle = showTitle
@@ -38,8 +47,7 @@ const TicketList = async (block: ITicketListBlock) => {
     : null;
 
   // Bottom spacing defaults to true when unset (40px mobile / 80px desktop).
-  const bottomSpacingClass =
-    block.bottomSpacing !== false ? 'mb-10 lg:mb-20' : '';
+  const bottomSpacingClass = block.bottomSpacing !== false ? 'mb-20' : '';
 
   // The same Ticket card is used throughout; only the wrapper differs:
   // one ticket → standalone, many → peeking carousel.
@@ -51,6 +59,8 @@ const TicketList = async (block: ITicketListBlock) => {
             key={('_id' in ticket && ticket._id) || i}
             ticket={ticket}
             labels={labels}
+            contactEmail={contactEmail}
+            membershipFeeLabel={membershipFeeLabel}
           />
         ))}
       </TicketCarousel>
@@ -66,7 +76,12 @@ const TicketList = async (block: ITicketListBlock) => {
         <h2 className='text-h-67 lg:text-h-37 !leading-[1]'>{sectionTitle}</h2>
       ) : null}
 
-      <Ticket ticket={tickets[0]} labels={labels} />
+      <Ticket
+        ticket={tickets[0]}
+        labels={labels}
+        contactEmail={contactEmail}
+        membershipFeeLabel={membershipFeeLabel}
+      />
     </section>
   );
 };

@@ -1,5 +1,5 @@
 import type { StructureBuilder, StructureResolver } from 'sanity/structure';
-import { BasketIcon } from '@sanity/icons';
+import { BasketIcon, UsersIcon } from '@sanity/icons';
 
 // Schema imports
 
@@ -12,11 +12,14 @@ const singletonSchemas = Object.values(singelton);
 // Document types that live together under the "Shop" sub-folder.
 const SHOP_TYPES = ['ticket', 'product'];
 
+const TOP_LEVEL_TYPES = ['member'];
+
 const referenceSchemas = contentSchemas.filter(
-  (schema) => !SHOP_TYPES.includes(schema.name)
+  (schema) =>
+    !SHOP_TYPES.includes(schema.name) && !TOP_LEVEL_TYPES.includes(schema.name),
 );
 const shopSchemas = contentSchemas.filter((schema) =>
-  SHOP_TYPES.includes(schema.name)
+  SHOP_TYPES.includes(schema.name),
 );
 
 export const structure: StructureResolver = (S: StructureBuilder) =>
@@ -27,6 +30,8 @@ export const structure: StructureResolver = (S: StructureBuilder) =>
       S.documentTypeListItem('page').title('Pages'),
 
       S.divider(),
+      // Members — Filmklubben members (their own top-level section)
+      S.documentTypeListItem('member').title('Members').icon(UsersIcon),
 
       // Content
       S.listItem()
@@ -37,8 +42,8 @@ export const structure: StructureResolver = (S: StructureBuilder) =>
             .items([
               ...referenceSchemas.map((schema) =>
                 S.documentTypeListItem(schema.name).title(
-                  schema.title || schema.name
-                )
+                  schema.title || schema.name,
+                ),
               ),
 
               S.divider(),
@@ -53,12 +58,12 @@ export const structure: StructureResolver = (S: StructureBuilder) =>
                     .items(
                       shopSchemas.map((schema) =>
                         S.documentTypeListItem(schema.name).title(
-                          schema.title || schema.name
-                        )
-                      )
-                    )
+                          schema.title || schema.name,
+                        ),
+                      ),
+                    ),
                 ),
-            ])
+            ]),
         ),
 
       S.divider(),
@@ -68,6 +73,6 @@ export const structure: StructureResolver = (S: StructureBuilder) =>
         S.listItem()
           .title(schema.title || schema.name)
           .child(S.document().schemaType(schema.name).documentId(schema.name))
-          .icon(schema.icon || undefined)
+          .icon(schema.icon || undefined),
       ),
     ]);

@@ -8,6 +8,7 @@ export const ticket = defineType({
   icon: TagIcon,
   groups: [
     { name: 'details', title: 'Details' },
+    { name: 'access', title: 'Access code' },
     { name: 'media', title: 'Media' },
   ],
   fieldsets: [{ name: 'pricing', title: 'Pricing', options: { columns: 2 } }],
@@ -39,6 +40,15 @@ export const ticket = defineType({
       type: 'string',
       group: 'details',
       description: 'Where this viewing takes place. Free text.',
+    }),
+    defineField({
+      name: 'accessCode',
+      title: 'Access code',
+      type: 'string',
+      group: 'access',
+      description:
+        'Shared secret code for this screening. Distribute it to members via the newsletter. Buyers must enter it (and be a member) to purchase a ticket.',
+      validation: (Rule) => Rule.required(),
     }),
     defineField({
       name: 'price',
@@ -103,7 +113,11 @@ export const ticket = defineType({
     },
     prepare({ title, date, sold, total, poster, banner }) {
       const when = date
-        ? new Date(date).toLocaleDateString('en-US', { dateStyle: 'short' })
+        ? new Date(date).toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+          })
         : 'no date';
       const soldNum = sold ?? 0;
       const totalNum = total ?? 0;
