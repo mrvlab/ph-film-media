@@ -36,6 +36,9 @@
   --radius-sm: 0.4rem; /* 4px */
   --radius-lg: 0.8rem; /* 8px */
 
+  /* Shared modal backdrop blur (video overlay + membership gate) */
+  --backdrop-blur: 0.4rem; /* 4px */
+
   /* Colors */
   --color-black: rgba(10, 10, 10, 1);
   --color-white: rgba(255, 255, 255, 1);

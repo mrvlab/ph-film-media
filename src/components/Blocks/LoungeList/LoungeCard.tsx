@@ -7,18 +7,6 @@ import VideoOverlay from '@/components/VideoOverlay/VideoOverlay';
 import { extractVideoInfo } from '@/components/VideoOverlay/videoUtils';
 import { ILoungeItem } from '.';
 
-// "2026-07-11" -> "JULY 11, 2026"
-const formatLoungeDate = (date: string | null | undefined) => {
-  if (!date) return '';
-  return new Date(date)
-    .toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    })
-    .toUpperCase();
-};
-
 // Outlined play triangle, sized via className.
 const PlayTriangle = ({ className }: { className?: string }) => (
   <svg
@@ -37,11 +25,17 @@ const PlayTriangle = ({ className }: { className?: string }) => (
   </svg>
 );
 
-const LoungeCard = ({ lounge }: { lounge: ILoungeItem }) => {
+const LoungeCard = ({
+  lounge,
+  number,
+}: {
+  lounge: ILoungeItem;
+  number: number;
+}) => {
   const [isOpen, setIsOpen] = useState(false);
 
   if (!lounge || !('_id' in lounge)) return null;
-  const { title, date, link, loungeImage } = lounge;
+  const { title, link, loungeImage } = lounge;
 
   const externalLink = link?.externalLink ?? '';
   const { platform, id: videoId } = extractVideoInfo(externalLink);
@@ -65,10 +59,10 @@ const LoungeCard = ({ lounge }: { lounge: ILoungeItem }) => {
     setIsOpen(true);
   };
 
-  const formattedDate = formatLoungeDate(date);
+  const loungeLabel = `Salongen #${number}`;
 
   const rootClassName =
-    'group block w-full text-left border-b border-white/20 pb-8 pt-8 first:pt-0 cursor-pointer focus-visible:outline-2 focus-visible:outline-blue-500';
+    'group block w-full text-left cursor-pointer focus-visible:outline-2 focus-visible:outline-blue-500';
 
   const renderImage = (playIconClassName: string) => (
     <div className='relative overflow-hidden rounded-lg'>
@@ -90,25 +84,21 @@ const LoungeCard = ({ lounge }: { lounge: ILoungeItem }) => {
       {/* Mobile layout */}
       <div className='flex items-start gap-4 lg:hidden'>
         <div className='w-[42%] shrink-0'>{renderImage('h-10 w-10')}</div>
-        <div className='flex flex-1 flex-col gap-3 pt-1'>
-          <h3 className='text-b-16 !font-lato font-bold'>{title}</h3>
-          {formattedDate && (
-            <p className='text-b-14 text-gray'>{formattedDate}</p>
-          )}
+        <div className='flex flex-1 h-full flex-col gap-3 pt-1'>
+          <h3 className='text-b-21 !font-lato font-bold'>{title}</h3>
+          <p className='text-b-14 text-gray'>{loungeLabel}</p>
         </div>
       </div>
 
       {/* Desktop layout */}
-      <div className='hidden lg:grid lg:grid-cols-24 lg:items-center lg:gap-x-2'>
-        {formattedDate && (
-          <p className='text-b-16 text-gray lg:col-start-1 lg:col-span-3'>
-            {formattedDate}
-          </p>
-        )}
-        <div className='lg:col-start-4 lg:col-span-6'>
+      <div className='hidden lg:grid lg:grid-cols-24 lg:items-stretch lg:gap-x-[2rem]'>
+        <p className='text-b-16 text-gray lg:col-start-1 lg:col-span-5 lg:self-start'>
+          {loungeLabel}
+        </p>
+        <div className='lg:col-start-6 lg:col-span-7 lg:self-start'>
           {renderImage('h-20 w-20 2xl:h-24 2xl:w-24')}
         </div>
-        <h3 className='text-b-37 !font-lato font-bold lg:col-start-11 lg:col-span-14'>
+        <h3 className='text-b-37 !font-lato font-bold lg:col-start-13 lg:col-span-12 lg:self-start lg:h-full lg:border-b lg:border-white/20'>
           {title}
         </h3>
       </div>

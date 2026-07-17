@@ -122,7 +122,7 @@ export function TicketGateModal({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.15 }}
-      className='fixed inset-0 z-[1100] flex items-center justify-center bg-black/70 px-p-mobile lg:px-p-desktop'
+      className='fixed inset-0 z-[1100] flex items-center justify-center bg-black/70 backdrop-blur-[var(--backdrop-blur)] px-p-mobile lg:px-p-desktop'
     >
       <motion.div
         onClick={(e) => e.stopPropagation()}

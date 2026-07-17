@@ -12,9 +12,16 @@ const LoungeList = async () => {
   if (!lounges?.length) return null;
 
   return (
-    <section className='page-x-spacing grid' data-sanity-edit-target>
+    <section
+      className='page-x-spacing flex flex-col gap-y-10'
+      data-sanity-edit-target
+    >
       {lounges.map((lounge, index) => (
-        <LoungeCard key={`${lounge._id}-${index}`} lounge={lounge} />
+        <LoungeCard
+          key={`${lounge._id}-${index}`}
+          lounge={lounge}
+          number={lounges.length - index}
+        />
       ))}
     </section>
   );
