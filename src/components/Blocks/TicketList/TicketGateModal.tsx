@@ -6,7 +6,7 @@ import { motion, easeInOut } from 'framer-motion';
 
 import { useMembershipGate } from './useMembershipGate';
 
-type GateView = 'choice' | 'join' | 'code' | 'joined' | 'disabled';
+type GateView = 'choice' | 'join' | 'code' | 'joined' | 'already' | 'disabled';
 
 type TicketGateModalProps = {
   ticketId: string;
@@ -82,7 +82,7 @@ export function TicketGateModal({
   async function handleJoinSubmit(e: FormEvent) {
     e.preventDefault();
     const outcome = await checkOrJoin(firstName, lastName, email);
-    if (outcome === 'is_member') goTo('code');
+    if (outcome === 'is_member') goTo('already');
     else if (outcome === 'disabled') goTo('disabled');
     // 'redirecting' → navigating to Stripe; null → error already shown.
   }
@@ -105,7 +105,9 @@ export function TicketGateModal({
           ? 'Lös in din kod'
           : view === 'joined'
             ? 'Välkommen!'
-            : 'Något gick fel';
+            : view === 'already'
+              ? 'Du är redan medlem'
+              : 'Något gick fel';
 
   const joinDisabled =
     loading || firstName.trim() === '' || email.trim() === '';
@@ -291,6 +293,31 @@ export function TicketGateModal({
                 Du är nu medlem i Filmklubben. Håll utkik i din e-post — koden
                 till visningen skickas via vårt nyhetsbrev. Har du redan koden
                 kan du lösa in den nedan.
+              </p>
+              <div className='mt-8 flex flex-col gap-3'>
+                <button
+                  type='button'
+                  onClick={() => goTo('code')}
+                  className={primaryBtn}
+                >
+                  Lös in din kod
+                </button>
+                <button
+                  type='button'
+                  onClick={onClose}
+                  className={secondaryBtn}
+                >
+                  Stäng
+                </button>
+              </div>
+            </>
+          ) : null}
+
+          {view === 'already' ? (
+            <>
+              <p className='mt-5 text-b-16 leading-snug text-black/80 lg:text-b-21'>
+                Du är redan medlem i Filmklubben. Lös in din kod nedan för att
+                köpa din biljett.
               </p>
               <div className='mt-8 flex flex-col gap-3'>
                 <button
