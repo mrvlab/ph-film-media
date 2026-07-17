@@ -28,7 +28,7 @@ const CARD_VARIANTS: Variants = {
 // Animation queue management
 const useAnimationQueue = () => {
   const [animatedCards, setAnimatedCards] = React.useState<Set<number>>(
-    new Set()
+    new Set(),
   );
   const hasAnimated = useRef(false);
 
@@ -39,8 +39,8 @@ const useAnimationQueue = () => {
     Array.from({ length: totalCards }, (_, i) =>
       setTimeout(
         () => setAnimatedCards((prev) => new Set([...prev, i])),
-        i * 200
-      )
+        i * 200,
+      ),
     );
   }, []);
 
@@ -53,7 +53,6 @@ const useIsDesktop = () => {
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    setIsMounted(true);
     let resizeTimeout: NodeJS.Timeout;
     const checkIsDesktop = () => setIsDesktop(window.innerWidth >= 1024);
     const debouncedCheck = () => {
@@ -61,9 +60,13 @@ const useIsDesktop = () => {
       resizeTimeout = setTimeout(checkIsDesktop, 100);
     };
 
-    checkIsDesktop();
+    const raf = requestAnimationFrame(() => {
+      setIsMounted(true);
+      checkIsDesktop();
+    });
     window.addEventListener('resize', debouncedCheck);
     return () => {
+      cancelAnimationFrame(raf);
       window.removeEventListener('resize', debouncedCheck);
       clearTimeout(resizeTimeout);
     };
@@ -80,9 +83,11 @@ const HeroCarouselBlock = ({ block }: { block: BlockListItem }) => {
   React.useEffect(() => {
     if (isDesktop && 'mediaCard' in block && block.mediaCard?.length) {
       startAnimations(block.mediaCard.length);
-      setTimeout(() => setIsReady(true), 50);
+      const timer = setTimeout(() => setIsReady(true), 50);
+      return () => clearTimeout(timer);
     } else if (!isDesktop) {
-      setIsReady(true);
+      const raf = requestAnimationFrame(() => setIsReady(true));
+      return () => cancelAnimationFrame(raf);
     }
   }, [block, startAnimations, isDesktop]);
 
@@ -150,7 +155,7 @@ const HeroCarouselBlock = ({ block }: { block: BlockListItem }) => {
             card={card}
             index={idx}
           />
-        )
+        ),
       )}
     </HeroCarouselWithIndicators>
   );
