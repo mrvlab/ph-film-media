@@ -118,7 +118,11 @@ export async function POST(request: Request) {
       ],
       metadata: { productId: product._id, size },
       // Also on the PaymentIntent — search only indexes PI/Charge metadata.
-      payment_intent_data: { metadata: { productId: product._id, size } },
+      // description is the label shown in the Stripe dashboard Transactions list.
+      payment_intent_data: {
+        metadata: { productId: product._id, size },
+        description: productName,
+      },
       success_url: `${origin}/shop/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}${cancelPath}`,
     });

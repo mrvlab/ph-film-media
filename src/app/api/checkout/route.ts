@@ -147,6 +147,12 @@ export async function POST(request: Request) {
   const showDescription =
     [datePart, venuePart].filter(Boolean).join(" · ") || undefined;
 
+  // Transaction description shown in the Stripe dashboard; date disambiguates
+  // repeat screenings of the same film.
+  const ticketDescription = datePart
+    ? `${ticket.title} – ${datePart}`
+    : ticket.title;
+
   let session: Stripe.Checkout.Session;
   try {
     session = await stripe.checkout.sessions.create({
@@ -176,6 +182,7 @@ export async function POST(request: Request) {
       // metadata later (search only indexes PI/Charge metadata, not Session).
       payment_intent_data: {
         metadata: { ticketId: ticket._id, email: normalizeEmail(rawEmail) },
+        description: ticketDescription,
       },
       success_url: `${origin}/tickets/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}${cancelPath}`,
