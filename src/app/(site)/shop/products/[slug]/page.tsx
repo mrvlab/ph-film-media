@@ -11,10 +11,10 @@ import { client } from '@/sanity/lib/client';
 import { urlFor } from '@/sanity/lib/image';
 import Header from '@/components/Header/Header';
 import Footer from '@/components/Footer/Footer';
-import SanityImage from '@/components/Media/SanityImage';
 import ProductPurchase, {
   type PurchaseVariant,
 } from '@/components/Blocks/ProductList/ProductPurchase';
+import ProductGallery from './ProductGallery';
 import JsonLd from '@/components/JsonLd';
 import { formatPrice } from '@/lib/products/formatPrice';
 import { getSiteUrl } from '@/utils/siteUrl';
@@ -99,10 +99,10 @@ export default async function ProductPage({
     variants[0]?.size ||
     '';
 
-  // First gallery image is the primary; the rest are thumbnails.
+  // First gallery image is the primary (used for SEO/OG); ProductGallery lets
+  // the shopper swap the large image by clicking any thumbnail.
   const gallery = (product.gallery ?? []).filter((g) => g?.media?.asset);
   const mainImage = gallery[0] ?? null;
-  const thumbnails = gallery.slice(1);
 
   // Product JSON-LD for SEO.
   const anyInStock = inStock.length > 0;
@@ -135,29 +135,7 @@ export default async function ProductPage({
         id='product-main-content'
       >
         <section className='page-x-spacing grid gap-8 lg:grid-cols-2 lg:gap-12'>
-          <div className='flex flex-col gap-3'>
-            {mainImage ? (
-              <SanityImage
-                {...mainImage}
-                aspectRatio='square'
-                mode='contain'
-                className='aspect-4/5 object-cover rounded-lg bg-white'
-              />
-            ) : null}
-            {thumbnails.length > 0 ? (
-              <div className='grid grid-cols-4 gap-2'>
-                {thumbnails.map((g, i) => (
-                  <SanityImage
-                    key={i}
-                    {...g}
-                    aspectRatio='square'
-                    mode='contain'
-                    className='aspect-4/5 object-cover rounded-lg bg-white'
-                  />
-                ))}
-              </div>
-            ) : null}
-          </div>
+          <ProductGallery gallery={gallery} />
 
           <div className='flex flex-col gap-6 lg:pt-4'>
             {product.title ? (

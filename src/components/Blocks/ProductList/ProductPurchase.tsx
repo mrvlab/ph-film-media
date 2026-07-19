@@ -86,7 +86,7 @@ export default function ProductPurchase({
         type='button'
         onClick={() => selected && startCheckout(productId, selected.size)}
         disabled={loading || soldOut || !selected}
-        className='primary-button w-full disabled:cursor-not-allowed disabled:opacity-50 lg:w-fit'
+        className='primary-button w-full disabled:cursor-not-allowed disabled:opacity-50'
         aria-label='Köp produkt'
       >
         {soldOut ? 'Slutsåld' : loading ? 'Laddar…' : 'Köp'}
