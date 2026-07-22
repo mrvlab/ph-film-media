@@ -2,6 +2,9 @@ import { FetchHeaderResult } from '../../../../sanity.types';
 
 export type IDesktopMenuBar = {
   header: FetchHeaderResult;
+  isOpen: boolean;
+  onToggle: () => void;
+  onClose: () => void;
   baseClassesOverride?: string;
 };
 

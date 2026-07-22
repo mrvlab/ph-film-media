@@ -6,7 +6,7 @@ import { initViewportScale } from '@/lib/viewportScale';
 const oswald = Oswald({
   variable: '--font-oswald',
   subsets: ['latin'],
-  weight: ['600'],
+  weight: ['600', '700'],
 });
 
 const lato = Lato({

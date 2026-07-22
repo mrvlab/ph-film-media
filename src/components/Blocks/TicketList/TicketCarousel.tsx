@@ -81,7 +81,7 @@ export function TicketCarousel({
 
   return (
     <section
-      className={`page-x-spacing flex flex-col gap-4 h-fit lg:gap-3 ${className ?? ''}`}
+      className={`page-x-spacing flex flex-col gap-4 h-fit lg:gap-6 ${className ?? ''}`}
     >
       <div className='flex items-center gap-4 lg:gap-6'>
         {heading ? (
