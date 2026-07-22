@@ -16,8 +16,8 @@ const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 const SEARCH_INDEX_LAG_MS = 3000;
 
 type Target =
-  | { kind: "ticket"; id: string }
-  | { kind: "product"; id: string }
+  | { kind: "ticket"; id: string; ensurePaymentIntentId?: string }
+  | { kind: "product"; id: string; ensurePaymentIntentId?: string }
   | { kind: "membership"; session: Stripe.Checkout.Session };
 
 export async function POST(request: Request) {
@@ -68,11 +68,17 @@ export async function POST(request: Request) {
     }
 
     if (target.kind === "ticket") {
-      const seatsSold = await computeSeatsSold(publishedId);
+      const seatsSold = await computeSeatsSold(
+        publishedId,
+        target.ensurePaymentIntentId,
+      );
       await setSeatsSold(publishedId, seatsSold);
       logResult(event, `ticket ${publishedId}`, `seatsSold=${seatsSold}`);
     } else {
-      const sales = await computeProductSales(publishedId);
+      const sales = await computeProductSales(
+        publishedId,
+        target.ensurePaymentIntentId,
+      );
       await setProductSales(publishedId, sales);
       logResult(event, `product ${publishedId}`, JSON.stringify(sales));
     }
@@ -104,11 +110,25 @@ async function resolveTarget(event: Stripe.Event): Promise<Target | null> {
     if (session.metadata?.type === "membership") {
       return { kind: "membership", session };
     }
+    // The PaymentIntent for this sale is likely not in Stripe's search index
+    // yet; pass it so the recompute counts it via a direct retrieve.
+    const ensurePaymentIntentId =
+      typeof session.payment_intent === "string"
+        ? session.payment_intent
+        : (session.payment_intent?.id ?? undefined);
     if (session.metadata?.ticketId) {
-      return { kind: "ticket", id: session.metadata.ticketId };
+      return {
+        kind: "ticket",
+        id: session.metadata.ticketId,
+        ensurePaymentIntentId,
+      };
     }
     if (session.metadata?.productId) {
-      return { kind: "product", id: session.metadata.productId };
+      return {
+        kind: "product",
+        id: session.metadata.productId,
+        ensurePaymentIntentId,
+      };
     }
     return null;
   }
