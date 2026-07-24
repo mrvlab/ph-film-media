@@ -15,9 +15,9 @@ type TicketRow = { _id: string; title: string | null; seatsSold: number | null }
 //   - No body → reconcile every ticket document.
 //   - Body { "ticketId": "<id>" } → reconcile only that one.
 //
-// Auth: `Authorization: Bearer <token>`, where token is either $CRON_SECRET
-// (Vercel Cron sends this automatically) or a signed-in Studio editor's Sanity
-// session token (used by the "Resync stock from Stripe" document action).
+// Auth: `Authorization: Bearer <token>` where token equals $CRON_SECRET
+// (Vercel Cron sends this automatically). Also callable manually with the same
+// secret; stock otherwise stays current via the webhook on each purchase/refund.
 export async function POST(request: Request) {
   if (!(await authorizeReconcileRequest(request))) {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
