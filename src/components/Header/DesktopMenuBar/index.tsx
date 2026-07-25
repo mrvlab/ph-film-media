@@ -15,8 +15,9 @@ import {
   isLinkActive,
 } from './utils';
 
-const ENTER = { duration: 0.35, ease: easeOut };
-const EXIT = { duration: 0.18, ease: easeInOut };
+// Match the mobile menu's snappy 150ms reveal; close just fades out (no slide).
+const ENTER = { duration: 0.15, ease: easeOut };
+const EXIT = { duration: 0.12, ease: easeInOut };
 
 const DesktopMenuBar = ({
   header,
@@ -61,7 +62,7 @@ const DesktopMenuBar = ({
             aria-label='Menu'
             initial={{ x: '-100%' }}
             animate={{ x: 0 }}
-            exit={{ x: '-100%', transition: EXIT }}
+            exit={{ opacity: 0, transition: EXIT }}
             transition={ENTER}
             className='fixed left-0 top-0 z-20 h-full w-full max-w-[35.2rem] bg-white text-black px-p-desktop py-p-desktop'
           >
