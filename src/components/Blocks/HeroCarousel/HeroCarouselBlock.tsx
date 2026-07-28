@@ -39,7 +39,7 @@ const useAnimationQueue = () => {
     Array.from({ length: totalCards }, (_, i) =>
       setTimeout(
         () => setAnimatedCards((prev) => new Set([...prev, i])),
-        i * 200,
+        i * 150,
       ),
     );
   }, []);
@@ -132,7 +132,7 @@ const HeroCarouselBlock = ({ block }: { block: BlockListItem }) => {
           : {
               playOnInit: true,
               stopOnInteraction: false,
-              stopOnMouseEnter: isDesktop,
+              stopOnMouseEnter: false,
               delay: isDesktop ? 3500 : 6000,
             }
       }
