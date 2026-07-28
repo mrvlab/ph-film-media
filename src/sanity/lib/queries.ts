@@ -130,7 +130,8 @@ export const fetchHome = defineQuery(`
         _key,
         _type,
         titleType,
-        title,
+        // Fall back to the page document's title when no block title is set.
+        "title": coalesce(title, ^.pageTitle),
         pageTitleImage{
           _type,
           media{
@@ -459,7 +460,8 @@ export const fetchPage = defineQuery(`
         _key,
         _type,
         titleType,
-        title,
+        // Fall back to the page document's title when no block title is set.
+        "title": coalesce(title, ^.pageTitle),
         pageTitleImage{
           _type,
           media{
