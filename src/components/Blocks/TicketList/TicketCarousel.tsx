@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { motion } from 'framer-motion';
 
 /** Right-pointing arrow; rotated 180° for the previous button. */
 const Arrow = ({ className }: { className?: string }) => (
@@ -113,9 +114,13 @@ export function TicketCarousel({
       </div>
 
       {/* Full-bleed both edges; pl/scroll-pl re-inset the first card to the gutter. */}
-      <div
+      <motion.div
         ref={scrollerRef}
         className='flex gap-2.5 overflow-x-auto overscroll-x-contain snap-x snap-mandatory -ml-p-mobile -mr-p-mobile pl-p-mobile scroll-pl-p-mobile lg:ml-0 lg:gap-6 lg:pl-0 lg:scroll-pl-0 lg:-mr-p-desktop [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden'
+        initial={{ opacity: 0, y: 8 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: 'easeInOut' }}
+        viewport={{ once: true }}
       >
         {slides.map((child, i) => (
           <div
@@ -125,7 +130,7 @@ export function TicketCarousel({
             {child}
           </div>
         ))}
-      </div>
+      </motion.div>
     </section>
   );
 }
