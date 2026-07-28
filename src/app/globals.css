@@ -45,6 +45,7 @@
   --color-gray: rgba(255, 255, 255, 0.4);
   --color-background: rgba(10, 10, 10, 1);
   --color-dark-gray: rgba(24, 24, 26, 1);
+  --color-apricot: rgba(255, 213, 146, 1);
 
   /* Aspect ratios */
   --aspect-3/4: 3 / 4;

@@ -389,7 +389,11 @@ export const fetchHome = defineQuery(`
       // Lounge List Block
       _type == "loungeList" => {
         _key,
-        _type
+        _type,
+        inPartnerWith{
+          _type,
+          items
+        }
       },
       // Projects List Block
       _type == "projectsList" => {
@@ -714,7 +718,11 @@ export const fetchPage = defineQuery(`
       // Lounge List Block
       _type == "loungeList" => {
         _key,
-        _type
+        _type,
+        inPartnerWith{
+          _type,
+          items
+        }
       },
       // Projects List Block
       _type == "projectsList" => {

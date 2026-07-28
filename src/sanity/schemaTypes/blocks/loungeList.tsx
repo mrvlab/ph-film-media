@@ -1,27 +1,32 @@
 import { ListIcon } from '@sanity/icons';
 import { Card, Flex, Stack, Text } from '@sanity/ui';
-import { defineField, defineType } from 'sanity';
+import { defineField, defineType, ObjectInputProps } from 'sanity';
 
-// Read-only help text. Renders no editable fields, so nothing is ever stored
-// on the block — it only tells the editor what the block does.
-function LoungeListInput() {
+// Help text above the editable fields. The Lounge items themselves are
+// auto-listed (nothing to configure), but the "In Partner With" marquee below
+// is editable, so we render the default field form underneath the note.
+function LoungeListInput(props: ObjectInputProps) {
   return (
-    <Card padding={4} radius={2} tone='transparent' border>
-      <Flex align='flex-start' gap={3}>
-        <Text size={3} muted>
-          <ListIcon />
-        </Text>
-        <Stack space={3}>
-          <Text size={1} weight='semibold'>
-            Lounge List
+    <Stack space={4}>
+      <Card padding={4} radius={2} tone='transparent' border>
+        <Flex align='flex-start' gap={3}>
+          <Text size={3} muted>
+            <ListIcon />
           </Text>
-          <Text size={1} muted>
-            Automatically shows all Lounge items, newest first. Nothing to
-            configure here — manage items under Content → Lounge.
-          </Text>
-        </Stack>
-      </Flex>
-    </Card>
+          <Stack space={3}>
+            <Text size={1} weight='semibold'>
+              Lounge List
+            </Text>
+            <Text size={1} muted>
+              Automatically shows all Lounge items, newest first — manage items
+              under Content → Lounge. Use the &ldquo;In Partner With&rdquo; field
+              below to configure the looping partner marquee.
+            </Text>
+          </Stack>
+        </Flex>
+      </Card>
+      {props.renderDefault(props)}
+    </Stack>
   );
 }
 
@@ -34,15 +39,10 @@ export const loungeList = defineType({
     input: LoungeListInput,
   },
   fields: [
-    // Placeholder field: object types must declare at least one field. It's
-    // hidden and never rendered (the custom input above replaces the form), so
-    // no value is ever written to the document.
     defineField({
-      name: 'note',
-      title: 'Note',
-      type: 'string',
-      hidden: true,
-      readOnly: true,
+      name: 'inPartnerWith',
+      title: 'In Partner With',
+      type: 'inPartnerWith',
     }),
   ],
   preview: {
