@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { motion, type MotionProps } from 'framer-motion';
 import SanityImage from '@/components/Media/SanityImage';
 import VideoOverlay from '@/components/VideoOverlay/VideoOverlay';
 import { extractVideoInfo } from '@/components/VideoOverlay/videoUtils';
@@ -25,13 +26,21 @@ const PlayTriangle = ({ className }: { className?: string }) => (
   </svg>
 );
 
+type LoungeCardProps = {
+  lounge: ILoungeItem;
+  number: number;
+  index: number;
+  revealRef: (el: HTMLDivElement | null) => void;
+  revealProps: MotionProps;
+};
+
 const LoungeCard = ({
   lounge,
   number,
-}: {
-  lounge: ILoungeItem;
-  number: number;
-}) => {
+  index,
+  revealRef,
+  revealProps,
+}: LoungeCardProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   if (!lounge || !('_id' in lounge)) return null;
@@ -105,29 +114,31 @@ const LoungeCard = ({
     </>
   );
 
-  if (isVideo && platform && videoId) {
-    return (
-      <>
-        <button
-          type='button'
-          onClick={openOverlay}
-          aria-label={`Play video for ${title ?? 'lounge item'}`}
-          className={rootClassName}
-        >
-          {content}
-        </button>
-        <VideoOverlay
-          isOpen={isOpen}
-          onClose={() => setIsOpen(false)}
-          platform={platform}
-          videoId={videoId}
-        />
-      </>
-    );
-  }
+  // The overlay (position: fixed) is kept OUTSIDE the reveal wrapper's transform.
+  let inner: React.ReactNode;
+  let overlay: React.ReactNode = null;
 
-  if (href) {
-    return (
+  if (isVideo && platform && videoId) {
+    inner = (
+      <button
+        type='button'
+        onClick={openOverlay}
+        aria-label={`Play video for ${title ?? 'lounge item'}`}
+        className={rootClassName}
+      >
+        {content}
+      </button>
+    );
+    overlay = (
+      <VideoOverlay
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        platform={platform}
+        videoId={videoId}
+      />
+    );
+  } else if (href) {
+    inner = (
       <Link
         href={href}
         aria-label={title ?? 'Lounge item'}
@@ -138,9 +149,18 @@ const LoungeCard = ({
         {content}
       </Link>
     );
+  } else {
+    inner = <div className={rootClassName}>{content}</div>;
   }
 
-  return <div className={rootClassName}>{content}</div>;
+  return (
+    <>
+      <motion.div ref={revealRef} data-index={index} {...revealProps}>
+        {inner}
+      </motion.div>
+      {overlay}
+    </>
+  );
 };
 
 export default LoungeCard;
