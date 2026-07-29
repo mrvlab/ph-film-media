@@ -932,6 +932,7 @@ export const fetchProduct = defineQuery(`
     price,
     currency,
     gallery[]{
+      _key,
       _type,
       media{ _type, alt, crop, hotspot, asset->{ ... } }
     },

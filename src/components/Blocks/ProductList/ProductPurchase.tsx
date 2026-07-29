@@ -3,6 +3,7 @@
 import { useState } from 'react';
 
 import { formatPrice } from '@/lib/products/formatPrice';
+import { dataAttr } from '@/sanity/lib/utils';
 import { useBuyProduct } from './useBuyProduct';
 
 export type PurchaseVariant = {
@@ -48,12 +49,19 @@ export default function ProductPurchase({
     window.history.replaceState(null, '', url);
   }
 
+  // Route price and sizes to their fields on the product document so
+  // Presentation highlights each individually.
+  const fieldAttr = (path: string) =>
+    dataAttr({ id: productId, type: 'product', path }).toString();
+
   return (
     <div className='flex flex-col gap-6'>
-      <p className='text-b-21'>{formatPrice(price, currency)}</p>
+      <p className='text-b-21' data-sanity={fieldAttr('price')}>
+        {formatPrice(price, currency)}
+      </p>
 
       {showSizes ? (
-        <div className='flex flex-col gap-2'>
+        <div className='flex flex-col gap-2' data-sanity={fieldAttr('variants')}>
           <span className='text-b-9 uppercase tracking-[0.12em] text-white/50'>
             Storlek
           </span>

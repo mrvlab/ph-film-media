@@ -2257,7 +2257,7 @@ export type FetchLatestProjectResult = {
   } | null;
 } | null;
 // Variable: fetchProduct
-// Query: *[_type == "product" && slug.current == $slug][0]{    _id,    _type,    title,    "slug": slug.current,    description,    price,    currency,    gallery[]{      _type,      media{ _type, alt, crop, hotspot, asset->{ ... } }    },    variants[]{      _key,      size,      stock,      sold    }  }
+// Query: *[_type == "product" && slug.current == $slug][0]{    _id,    _type,    title,    "slug": slug.current,    description,    price,    currency,    gallery[]{      _key,      _type,      media{ _type, alt, crop, hotspot, asset->{ ... } }    },    variants[]{      _key,      size,      stock,      sold    }  }
 export type FetchProductResult = {
   _id: string;
   _type: "product";
@@ -2267,6 +2267,7 @@ export type FetchProductResult = {
   price: number | null;
   currency: string | null;
   gallery: Array<{
+    _key: string;
     _type: "mediaType";
     media: {
       _type: "image";
@@ -2327,7 +2328,7 @@ declare module "@sanity/client" {
     "\n  *[_type == \"projects\"] | order(_createdAt desc) {\n    _id,\n    _type,\n    _createdAt,\n    _updatedAt,\n    _rev,\n    title,\n    description,\n    projectImage {\n      _type,\n      media {\n        _type,\n        alt,\n        crop,\n        hotspot,\n        asset->{ ... }\n      }\n    },\n    link{\n      linkType,\n      externalLink,\n      internalLink->{\n        _id,\n        pageTitle,\n        slug\n      }\n    }\n  }\n": FetchAllProjectsResult;
     "\n  *[_type == \"lounge\"] | order(coalesce(date, _createdAt) desc) {\n    _id,\n    _createdAt,\n    title,\n    date,\n    link{\n      linkType,\n      externalLink,\n      internalLink->{\n        _id,\n        pageTitle,\n        slug\n      }\n    },\n    loungeImage{\n      _type,\n      media{\n        _type,\n        alt,\n        crop,\n        hotspot,\n        asset->{ ... }\n      }\n    }\n  }\n": FetchAllLoungesResult;
     "\n  *[_type == \"projects\"] | order(_createdAt desc)[0] {\n    _id,\n    _type,\n    _createdAt,\n    _updatedAt,\n    _rev,\n    title,\n    description,\n    projectImage {\n      _type,\n      media {\n        _type,\n        \"alt\": coalesce(alt, null),\n        crop,\n        hotspot,\n        asset->{ ... }\n      }\n    }\n  }\n": FetchLatestProjectResult;
-    "\n  *[_type == \"product\" && slug.current == $slug][0]{\n    _id,\n    _type,\n    title,\n    \"slug\": slug.current,\n    description,\n    price,\n    currency,\n    gallery[]{\n      _type,\n      media{ _type, alt, crop, hotspot, asset->{ ... } }\n    },\n    variants[]{\n      _key,\n      size,\n      stock,\n      sold\n    }\n  }\n": FetchProductResult;
+    "\n  *[_type == \"product\" && slug.current == $slug][0]{\n    _id,\n    _type,\n    title,\n    \"slug\": slug.current,\n    description,\n    price,\n    currency,\n    gallery[]{\n      _key,\n      _type,\n      media{ _type, alt, crop, hotspot, asset->{ ... } }\n    },\n    variants[]{\n      _key,\n      size,\n      stock,\n      sold\n    }\n  }\n": FetchProductResult;
     "\n  *[_type == \"product\" && defined(slug.current)]{\n    \"slug\": slug.current,\n    _updatedAt\n  }\n": FetchAllProductSlugsResult;
   }
 }

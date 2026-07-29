@@ -35,6 +35,7 @@ const HeaderNav: React.FC<IHeaderNav> = ({ header }) => {
       }`}
       role='navigation'
       aria-label='Main menu'
+      data-sanity-edit-target
     >
       <div className='z-50 lg:grid lg:grid-cols-1 lg:grid-rows-1 lg:h-full'>
         <MobileMenuBar header={header} />

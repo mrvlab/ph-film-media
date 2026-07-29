@@ -71,6 +71,7 @@ const TicketList = async (block: ITicketListBlock) => {
     <section
       key={block._key || 'ticketList'}
       className={`page-x-spacing flex flex-col gap-2.5 h-fit uppercase lg:gap-3 ${bottomSpacingClass}`}
+      data-sanity-edit-target
     >
       {sectionTitle ? (
         <h2 className='text-h-67 lg:text-h-37 !leading-[1]'>{sectionTitle}</h2>

@@ -9,6 +9,7 @@ import {
 } from '@/sanity/lib/queries';
 import { client } from '@/sanity/lib/client';
 import { urlFor } from '@/sanity/lib/image';
+import { dataAttr } from '@/sanity/lib/utils';
 import Header from '@/components/Header/Header';
 import Footer from '@/components/Footer/Footer';
 import ProductPurchase, {
@@ -135,7 +136,7 @@ export default async function ProductPage({
         id='product-main-content'
       >
         <section className='page-x-spacing grid gap-8 lg:grid-cols-2 lg:gap-12'>
-          <ProductGallery gallery={gallery} />
+          <ProductGallery productId={product._id} gallery={gallery} />
 
           <div className='flex flex-col gap-6 lg:pt-4'>
             {product.title ? (
@@ -159,7 +160,14 @@ export default async function ProductPage({
                 initialSize={initialSize}
               />
             ) : (
-              <p className='text-b-16 text-white/50'>
+              <p
+                className='text-b-16 text-white/50'
+                data-sanity={dataAttr({
+                  id: product._id,
+                  type: 'product',
+                  path: 'price',
+                }).toString()}
+              >
                 {formatPrice(product.price ?? 0, product.currency)}
               </p>
             )}
