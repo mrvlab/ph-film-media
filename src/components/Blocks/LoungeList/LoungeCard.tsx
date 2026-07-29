@@ -91,8 +91,10 @@ const LoungeCard = ({
   const content = (
     <>
       {/* Mobile layout */}
-      <div className='flex items-start gap-4 lg:hidden'>
-        <div className='w-[42%] shrink-0'>{renderImage('h-10 w-10')}</div>
+      <div className='flex items-start gap-4 pb-4 mb-4 border-b border-white/20 lg:hidden'>
+        <div className='w-1/2 md:w-[42%] shrink-0'>
+          {renderImage('h-10 w-10')}
+        </div>
         <div className='flex flex-1 h-full flex-col gap-3 pt-1'>
           <h3 className='text-b-21 !font-lato font-bold'>{title}</h3>
           <p className='text-b-14 text-gray'>{loungeLabel}</p>

@@ -26,7 +26,7 @@ const LoungeList = async (block: ILoungeListBlock) => {
   return (
     <section className='flex flex-col gap-y-10' data-sanity-edit-target>
       <InPartnerWith items={block.inPartnerWith?.items} />
-      <div className='page-x-spacing flex flex-col gap-y-10'>
+      <div className='page-x-spacing flex flex-col lg:gap-y-10'>
         <LoungeGrid lounges={lounges} />
       </div>
     </section>
