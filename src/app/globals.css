@@ -6,24 +6,38 @@
   --font-lato: 'Lato', ui-sans-serif, system-ui, sans-serif;
   --default-font-family: var(--font-lato);
 
+  /* Viewport scale factor; set at runtime by src/lib/viewportScale.ts (1 = default). */
+  --sw: 1;
+
+  /* Convention: 1rem = 10px (root is 62.5%). Tailwind's rem scales are neutralized
+     below so --sw: 1 renders identically to a 16px base. */
+  --spacing: 0.4rem;
+
   /* Header scale */
-  --text-h-12: 0.75rem; /* 12px */
-  --text-h-16: 1rem; /* 16px */
-  --text-h-21: 1.312rem; /* 21px */
-  --text-h-28: 1.75rem; /* 28px */
-  --text-h-37: 2.312rem; /* 37px */
-  --text-h-50: 3.125rem; /* 50px */
-  --text-h-67: 4.187rem; /* 67px */
-  --text-h-90: 5.625rem; /* 90px */
+  --text-h-12: 1.2rem; /* 12px */
+  --text-h-16: 1.6rem; /* 16px */
+  --text-h-21: 2.1rem; /* 21px */
+  --text-h-28: 2.8rem; /* 28px */
+  --text-h-37: 3.7rem; /* 37px */
+  --text-h-50: 5rem; /* 50px */
+  --text-h-67: 6.7rem; /* 67px */
+  --text-h-90: 9rem; /* 90px */
 
   /* Body scale */
-  --text-b-9: 0.562rem; /* 9px */
-  --text-b-12: 0.75rem; /* 12px */
-  --text-b-14: 0.875rem; /* 14px */
-  --text-b-16: 1rem; /* 16px */
-  --text-b-21: 1.312rem; /* 21px */
-  --text-b-28: 1.75rem; /* 28px */
-  --text-b-37: 2.312rem; /* 37px */
+  --text-b-9: 0.9rem; /* 9px */
+  --text-b-12: 1.2rem; /* 12px */
+  --text-b-14: 1.4rem; /* 14px */
+  --text-b-16: 1.6rem; /* 16px */
+  --text-b-21: 2.1rem; /* 21px */
+  --text-b-28: 2.8rem; /* 28px */
+  --text-b-37: 3.7rem; /* 37px */
+
+  /* Neutralize Tailwind default radii in use (== 4px / 8px @16px base) */
+  --radius-sm: 0.4rem; /* 4px */
+  --radius-lg: 0.8rem; /* 8px */
+
+  /* Shared modal backdrop blur (video overlay + membership gate) */
+  --backdrop-blur: 0.4rem; /* 4px */
 
   /* Colors */
   --color-black: rgba(10, 10, 10, 1);
@@ -31,8 +45,10 @@
   --color-gray: rgba(255, 255, 255, 0.4);
   --color-background: rgba(10, 10, 10, 1);
   --color-dark-gray: rgba(24, 24, 26, 1);
+  --color-apricot: rgba(255, 213, 146, 1);
 
   /* Aspect ratios */
+  --aspect-3/4: 3 / 4;
   --aspect-5/2: 5 / 2;
   --aspect-16/9: 16 / 9;
   --aspect-4/5: 4 / 5;
@@ -40,17 +56,17 @@
   --aspect-2/3: 2 / 3;
 
   /* Header */
-  --header-height-desktop: 63.48px;
-  --header-height-desktop-landing-page: 200px;
+  --header-height-desktop: 6.348rem; /* 63.48px */
+  --header-height-desktop-landing-page: 20rem; /* 200px */
 
-  --header-height-mobile: 75px;
+  --header-height-mobile: 7.5rem; /* 75px */
   --header-height-mobile-with-spacing: calc(
     var(--header-height-mobile) + var(--spacing-p-mobile)
   );
 
   /* Page padding */
-  --spacing-p-mobile: 1.25rem;
-  --spacing-p-desktop: 2.5rem;
+  --spacing-p-mobile: 2rem; /* 20px */
+  --spacing-p-desktop: 4rem; /* 40px */
 
   --z-index-backdrop: 90;
   --z-index-overlay: 100;
@@ -82,7 +98,7 @@
   }
 
   .ticket-button {
-    @apply text-b-14 px-7 py-[13.02px] leading-[normal] h-fit whitespace-nowrap duration-300 bg-white text-black cursor-pointer lg:text-b-16;
+    @apply text-b-14 px-7 py-[1.302rem] leading-[normal] h-fit whitespace-nowrap duration-300 bg-white text-black cursor-pointer hover:opacity-90 lg:text-b-16;
     position: relative;
     float: left;
     border-right: dotted 1px #000;
@@ -139,12 +155,28 @@
   }
 }
 
+/* Defines what 1rem equals: 10px * --sw. */
+html {
+  font-size: calc(62.5% * var(--sw));
+}
+
 body {
   background: var(--color-black);
   color: var(--color-white);
   font-family: var(--default-font-family);
+  /* Base for inherited text: 16px. Without this it would fall back to the 10px root. */
+  font-size: 1.6rem;
   overflow-x: hidden;
   @apply min-h-svh lg:min-h-screen bg-background text-white;
+}
+
+/* Hide scrollbars globally — scroll still works, the bar is just invisible. */
+* {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* legacy Edge / IE */
+}
+*::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Edge */
 }
 
 h1,

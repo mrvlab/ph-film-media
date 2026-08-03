@@ -33,6 +33,17 @@ export const settingsQuery = defineQuery(`
         languagesLabel,
         releaseDateLabel,
         durationLabel
+      },
+      ticketLabels {
+        titleSingular,
+        titlePlural,
+        viewingLabel,
+        locationLabel,
+        priceLabel
+      },
+      membership {
+        fee,
+        currency
       }
     }
     `);
@@ -119,7 +130,8 @@ export const fetchHome = defineQuery(`
         _key,
         _type,
         titleType,
-        title,
+        // Fall back to the page document's title when no block title is set.
+        "title": coalesce(title, ^.pageTitle),
         pageTitleImage{
           _type,
           media{
@@ -206,14 +218,23 @@ export const fetchHome = defineQuery(`
           }
         }
       },
-      // Screens List Block
-      _type == "screensList" => {
+      // Ticket List Block
+      _type == "ticketList" => {
         _key,
         _type,
-        screens[]->{
+        showTitle,
+        bottomSpacing,
+        tickets[]->{
           _id,
           title,
-          screenImage{
+          slug,
+          date,
+          price,
+          currency,
+          totalSeats,
+          seatsSold,
+          venue,
+          poster{
             _type,
             media{
               _type,
@@ -223,13 +244,37 @@ export const fetchHome = defineQuery(`
               asset->{ ... }
             }
           },
-          link{
-            linkType,
-            externalLink,
-            internalLink->{
-              _id,
-              pageTitle,
-              slug
+          banner{
+            _type,
+            media{
+              _type,
+              alt,
+              crop,
+              hotspot,
+              asset->{ ... }
+            }
+          }
+        }
+      },
+      // Product List Block
+      _type == "productList" => {
+        _key,
+        _type,
+        title,
+        products[]->{
+          _id,
+          title,
+          slug,
+          price,
+          currency,
+          "image": gallery[0]{
+            _type,
+            media{
+              _type,
+              alt,
+              crop,
+              hotspot,
+              asset->{ ... }
             }
           }
         }
@@ -342,6 +387,15 @@ export const fetchHome = defineQuery(`
         }
       }
       },
+      // Lounge List Block
+      _type == "loungeList" => {
+        _key,
+        _type,
+        inPartnerWith{
+          _type,
+          items
+        }
+      },
       // Projects List Block
       _type == "projectsList" => {
         _key,
@@ -406,7 +460,8 @@ export const fetchPage = defineQuery(`
         _key,
         _type,
         titleType,
-        title,
+        // Fall back to the page document's title when no block title is set.
+        "title": coalesce(title, ^.pageTitle),
         pageTitleImage{
           _type,
           media{
@@ -493,14 +548,23 @@ export const fetchPage = defineQuery(`
           }
         }
       },
-      // Screens List Block
-      _type == "screensList" => {
+      // Ticket List Block
+      _type == "ticketList" => {
         _key,
         _type,
-        screens[]->{
+        showTitle,
+        bottomSpacing,
+        tickets[]->{
           _id,
           title,
-          screenImage{
+          slug,
+          date,
+          price,
+          currency,
+          totalSeats,
+          seatsSold,
+          venue,
+          poster{
             _type,
             media{
               _type,
@@ -510,13 +574,37 @@ export const fetchPage = defineQuery(`
               asset->{ ... }
             }
           },
-          link{
-            linkType,
-            externalLink,
-            internalLink->{
-              _id,
-              pageTitle,
-              slug
+          banner{
+            _type,
+            media{
+              _type,
+              alt,
+              crop,
+              hotspot,
+              asset->{ ... }
+            }
+          }
+        }
+      },
+      // Product List Block
+      _type == "productList" => {
+        _key,
+        _type,
+        title,
+        products[]->{
+          _id,
+          title,
+          slug,
+          price,
+          currency,
+          "image": gallery[0]{
+            _type,
+            media{
+              _type,
+              alt,
+              crop,
+              hotspot,
+              asset->{ ... }
             }
           }
         }
@@ -628,6 +716,15 @@ export const fetchPage = defineQuery(`
           }
         }
       }
+      },
+      // Lounge List Block
+      _type == "loungeList" => {
+        _key,
+        _type,
+        inPartnerWith{
+          _type,
+          items
+        }
       },
       // Projects List Block
       _type == "projectsList" => {
@@ -773,6 +870,35 @@ export const fetchAllProjects = defineQuery(`
   }
 `);
 
+// All Lounge items, newest first — powers the Lounge List block.
+export const fetchAllLounges = defineQuery(`
+  *[_type == "lounge"] | order(coalesce(date, _createdAt) desc) {
+    _id,
+    _createdAt,
+    title,
+    date,
+    link{
+      linkType,
+      externalLink,
+      internalLink->{
+        _id,
+        pageTitle,
+        slug
+      }
+    },
+    loungeImage{
+      _type,
+      media{
+        _type,
+        alt,
+        crop,
+        hotspot,
+        asset->{ ... }
+      }
+    }
+  }
+`);
+
 export const fetchLatestProject = defineQuery(`
   *[_type == "projects"] | order(_createdAt desc)[0] {
     _id,
@@ -792,5 +918,37 @@ export const fetchLatestProject = defineQuery(`
         asset->{ ... }
       }
     }
+  }
+`);
+
+// Single product by slug — powers the /shop/products/[slug] detail page.
+export const fetchProduct = defineQuery(`
+  *[_type == "product" && slug.current == $slug][0]{
+    _id,
+    _type,
+    title,
+    "slug": slug.current,
+    description,
+    price,
+    currency,
+    gallery[]{
+      _key,
+      _type,
+      media{ _type, alt, crop, hotspot, asset->{ ... } }
+    },
+    variants[]{
+      _key,
+      size,
+      stock,
+      sold
+    }
+  }
+`);
+
+// All product slugs — for generateStaticParams on the detail route.
+export const fetchAllProductSlugs = defineQuery(`
+  *[_type == "product" && defined(slug.current)]{
+    "slug": slug.current,
+    _updatedAt
   }
 `);

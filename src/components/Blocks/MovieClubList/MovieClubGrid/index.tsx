@@ -2,19 +2,28 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { usePathname } from 'next/navigation';
 import MovieClubCard from '../MovieClubCard';
 import { IMovieClubListBlocks } from '..';
-import { useViewTransitionAnimation } from '@/hooks/useViewTransitionReady';
-import { VIEW_TRANSITION_CONFIG } from '@/config/viewTransitionConfig';
+import {
+  useStaggeredGridReveal,
+  type ColumnQuery,
+} from '@/hooks/useStaggeredGridReveal';
 
 type IMovieClubGrid = {
   movies: IMovieClubListBlocks['movies'];
 };
 
+const COLUMN_QUERIES: readonly ColumnQuery[] = [
+  ['(min-width: 1280px)', 4],
+  ['(min-width: 1024px)', 3],
+  ['(min-width: 768px)', 2],
+];
+
 const MovieClubGrid = ({ movies }: IMovieClubGrid) => {
-  const pathname = usePathname();
-  const { isReady, animationKey } = useViewTransitionAnimation(pathname);
+  const { animationKey, setRef, getItemProps } = useStaggeredGridReveal(
+    COLUMN_QUERIES,
+    movies?.length ?? 0,
+  );
 
   return (
     <React.Fragment key={animationKey}>
@@ -26,38 +35,9 @@ const MovieClubGrid = ({ movies }: IMovieClubGrid) => {
         return (
           <motion.div
             key={`${movieItem._id}-${index}`}
-            initial={{ opacity: 0, y: 5, scale: 0.95 }}
-            animate={
-              isReady
-                ? {
-                    opacity: 1,
-                    y: 0,
-                    scale: 1,
-                    transition: {
-                      duration: 0.9,
-                      ease: [0.25, 0.46, 0.45, 0.94],
-                      delay: index * (VIEW_TRANSITION_CONFIG.staggerDelay / 1000), // Stagger effect
-                    },
-                  }
-                : undefined
-            }
-            whileInView={
-              !isReady
-                ? undefined
-                : {
-                    opacity: 1,
-                    y: 0,
-                    scale: 1,
-                    transition: {
-                      duration: 0.9,
-                      ease: [0.25, 0.46, 0.45, 0.94],
-                    },
-                  }
-            }
-            viewport={{
-              once: true,
-              amount: 0.4,
-            }}
+            ref={setRef}
+            data-index={index}
+            {...getItemProps(index)}
           >
             <MovieClubCard movie={movieItem} />
           </motion.div>

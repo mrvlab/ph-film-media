@@ -5,4 +5,7 @@ export { directors } from './directors';
 export { writers } from './writers';
 export { movieClub } from './movieClub';
 export { projects } from './projects';
-export { screen } from './screen';
+export { lounge } from './lounge';
+export { ticket } from './ticket';
+export { product } from './product';
+export { member } from './member';

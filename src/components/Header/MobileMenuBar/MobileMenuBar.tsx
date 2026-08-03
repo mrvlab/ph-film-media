@@ -72,7 +72,7 @@ const MobileMenuBar: React.FC<IMobileMenuBar> = ({ header }) => {
         )}
       </AnimatePresence>
       <div
-        className='flex flex-col bg-white text-black justify-between w-full max-w-[352px] z-[101] rounded-[3px] lg:hidden'
+        className='flex flex-col bg-white text-black justify-between w-full max-w-[35.2rem] z-[101] rounded-[3px] lg:hidden'
         role='dialog'
         aria-modal='true'
         tabIndex={-1}
@@ -112,7 +112,7 @@ const MobileMenuBar: React.FC<IMobileMenuBar> = ({ header }) => {
               exit='closed'
               transition={{ duration: 0.15, ease: 'easeIn' }}
               style={{ originY: 0, willChange: 'height, opacity' }}
-              className='flex flex-col items-start text-b-21 w-full max-w-[352px] bg-white text-black p-6 overflow-hidden gap-3 rounded-bl-[3px] rounded-br-[3px]'
+              className='flex flex-col items-start text-b-21 w-full max-w-[35.2rem] bg-white text-black p-6 overflow-hidden gap-3 rounded-bl-[3px] rounded-br-[3px]'
             >
               <li className='pt-3 border-t border-black/40 w-full'>
                 <button

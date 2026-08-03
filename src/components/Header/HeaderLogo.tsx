@@ -25,57 +25,64 @@ const HeaderLogo = ({ header, variant = 'both' }: HeaderLogoProps) => {
     <>
       {isHome ? (
         <h1 className='lg:flex lg:col-span-full lg:row-span-1'>
-          <Link
-            href='/'
-            className='w-full'
-            aria-current='page'
-            aria-label='homepage | PH Film & Media'
-          >
-            {mobileLogo && showMobileLogo && (
-              <div className='w-fit lg:hidden'>
-                <SanityImage
-                  {...mobileLogo}
-                  className='max-h-full w-auto object-contain'
-                  aspectRatio='4/5'
-                />
-              </div>
-            )}
-            {desktopLogo && showDesktopLogo && (
-              <div className='w-full h-full hidden lg:block'>
-                <SanityImage
-                  {...desktopLogo}
-                  className='max-h-full w-auto object-contain'
-                  aspectRatio='4/5'
-                />
-              </div>
-            )}
-          </Link>
-        </h1>
-      ) : (
-        <Link
-          href='/'
-          className='lg:flex w-full lg:col-span-full lg:row-span-1'
-          aria-label='PH Film & Media homepage'
-        >
           {mobileLogo && showMobileLogo && (
-            <div className='w-fit lg:hidden'>
+            <Link
+              href='/'
+              className='w-fit lg:hidden'
+              aria-current='page'
+              aria-label='homepage | PH Film & Media'
+            >
               <SanityImage
                 {...mobileLogo}
                 className='max-h-full w-auto object-contain'
                 aspectRatio='4/5'
               />
-            </div>
+            </Link>
           )}
           {desktopLogo && showDesktopLogo && (
-            <div className='w-full h-full hidden lg:block'>
+            <Link
+              href='/'
+              className='w-full h-full hidden lg:block'
+              aria-current='page'
+              aria-label='homepage | PH Film & Media'
+            >
               <SanityImage
                 {...desktopLogo}
                 className='max-h-full w-auto object-contain'
                 aspectRatio='4/5'
               />
-            </div>
+            </Link>
           )}
-        </Link>
+        </h1>
+      ) : (
+        <div className='lg:flex w-full lg:col-span-full lg:row-span-1'>
+          {mobileLogo && showMobileLogo && (
+            <Link
+              href='/'
+              className='w-fit lg:hidden'
+              aria-label='PH Film & Media homepage'
+            >
+              <SanityImage
+                {...mobileLogo}
+                className='max-h-full w-auto object-contain'
+                aspectRatio='4/5'
+              />
+            </Link>
+          )}
+          {desktopLogo && showDesktopLogo && (
+            <Link
+              href='/'
+              className='w-full h-fit hidden lg:block'
+              aria-label='PH Film & Media homepage'
+            >
+              <SanityImage
+                {...desktopLogo}
+                className='max-h-full w-auto object-contain'
+                aspectRatio='4/5'
+              />
+            </Link>
+          )}
+        </div>
       )}
     </>
   );

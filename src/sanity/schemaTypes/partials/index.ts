@@ -7,3 +7,4 @@ export { trailerType } from './trailerType';
 export { ticketType } from './ticketType';
 export { buttonType } from './buttonType';
 export { visibilityType } from './visibilityType';
+export { inPartnerWith } from './inPartnerWith';

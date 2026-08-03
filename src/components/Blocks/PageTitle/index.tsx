@@ -32,18 +32,18 @@ const PageTitle = (block: PageTitleProps) => {
       data-sanity-edit-target
     >
       {titleType === 'image' && pageTitleImage?.media ? (
-        <div className="grid md:grid-cols-2 md:gap-2 lg:gap-2 lg:grid-cols-3 xl:grid-cols-4">
-          <div className="w-full max-w-2xl col-span-full md:col-span-1 lg:col-start-3 lg:col-span-1 xl:col-start-4">
+        <div className='grid md:grid-cols-2 md:gap-2 lg:gap-2 lg:grid-cols-3 2xl:grid-cols-4'>
+          <div className='w-full max-w-2xl col-span-full md:col-span-1 lg:col-start-3 lg:col-span-1 xl:col-start-4'>
             <SanityImage
-              _type="mediaType"
+              _type='mediaType'
               media={pageTitleImage.media}
               useImageAspect={true}
-              className="!w-full !aspect-[unset]"
+              className='!w-full !aspect-[unset]'
             />
           </div>
         </div>
       ) : (
-        <h1 className="text-h-50 break-words uppercase lg:leading-[1.4] 2xl:text-h-67">
+        <h1 className='text-h-50 break-words uppercase lg:leading-[1.4] 2xl:text-h-67'>
           {title}
         </h1>
       )}

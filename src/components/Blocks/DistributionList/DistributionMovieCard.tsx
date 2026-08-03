@@ -63,7 +63,7 @@ const DistributionMovieCard = ({
 
   const movieUrl = generateDistributionMovieSlug(
     slug?.current ?? '',
-    movie.slug?.current ?? ''
+    movie.slug?.current ?? '',
   );
 
   const handleButtonClick = (e: React.MouseEvent, url: string) => {
@@ -82,7 +82,9 @@ const DistributionMovieCard = ({
       <h4 className='text-h-12 !font-lato font-bold text-gray uppercase'>
         {label}
       </h4>
-      {items?.map((item) => <p key={item._id}>{Object.values(item)[1]}</p>)}
+      {items?.map((item) => (
+        <p key={item._id}>{Object.values(item)[1]}</p>
+      ))}
     </div>
   );
 
@@ -120,7 +122,7 @@ const DistributionMovieCard = ({
     <Link
       href={movieUrl}
       aria-label={`View details for ${title}`}
-      className='grid grid-cols-1 border-t border-white/20 pt-4 max-lg:first:pt-0 max-lg:first:border-t-0 lg:grid-cols-24 lg:gap-x-2 cursor-pointer focus-visible:outline-2 focus-visible:outline-blue-500'
+      className='grid grid-cols-1 border-t border-white/20 pt-4 max-lg:first:pt-0 max-lg:first:border-t-0 lg:text-b-14 lg:grid-cols-24 lg:gap-x-2 cursor-pointer focus-visible:outline-2 focus-visible:outline-blue-500'
       data-sanity-edit-target
     >
       <div

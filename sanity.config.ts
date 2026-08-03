@@ -15,6 +15,7 @@ import { apiVersion, dataset, projectId, studioUrl } from './src/sanity/env';
 import { schema } from './src/sanity/schemaTypes';
 import { structure } from './src/sanity/structure';
 import { resolve } from './src/sanity/presentation/resolve';
+import { MarkExistingMemberAction } from './src/sanity/actions/markExistingMember';
 
 export default defineConfig({
   basePath: '/studio',
@@ -22,6 +23,13 @@ export default defineConfig({
   dataset,
   // Add and edit the content schema in the './sanity/schemaTypes' folder
   schema,
+  document: {
+    // Add the "Mark as existing member" action to member documents only.
+    actions: (prev, context) =>
+      context.schemaType === 'member'
+        ? [...prev, MarkExistingMemberAction]
+        : prev,
+  },
   plugins: [
     structureTool({ structure }),
     presentationTool({

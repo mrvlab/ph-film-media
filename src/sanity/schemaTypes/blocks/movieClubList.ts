@@ -1,4 +1,4 @@
-import { ListIcon } from '@sanity/icons';
+import { ListIcon } from '@sanity/icons/List';
 import { defineArrayMember, defineField, defineType } from 'sanity';
 
 export const movieClubList = defineType({

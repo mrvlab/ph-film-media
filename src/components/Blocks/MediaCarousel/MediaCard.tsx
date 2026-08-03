@@ -13,7 +13,7 @@ const MediaCard = ({ carouselItem }: { carouselItem: IMediaCard }) => {
 
   return (
     <li
-      className='flex flex-col gap-4 lg:gap-6 w-[354px] xl:w-[400px]'
+      className='flex flex-col gap-4 lg:gap-6 w-[35.4rem] xl:w-[40rem]'
       role='listitem'
       data-sanity-edit-target
     >
@@ -28,7 +28,7 @@ const MediaCard = ({ carouselItem }: { carouselItem: IMediaCard }) => {
       </div>
 
       {title && (
-        <h4 className='text-b-16 font-bold !font-lato min-h-[1.5rem]'>
+        <h4 className='text-b-16 font-bold !font-lato min-h-[2.4rem]'>
           {title}
         </h4>
       )}

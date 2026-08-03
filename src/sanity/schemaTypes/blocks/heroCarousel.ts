@@ -1,4 +1,6 @@
-import { ImageIcon, ListIcon, TextIcon } from '@sanity/icons';
+import { ImageIcon } from '@sanity/icons/Image';
+import { ListIcon } from '@sanity/icons/List';
+import { TextIcon } from '@sanity/icons/Text';
 import { defineField, defineType } from 'sanity';
 
 export const heroCarousel = defineType({

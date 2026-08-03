@@ -1,10 +1,12 @@
 export { heroCarousel } from './heroCarousel';
 export { moviesHeroCarousel } from './moviesHeroCarousel';
 export { distributionList } from './distributionList';
+export { loungeList } from './loungeList';
 export { movieClubList } from './movieClubList';
 export { mediaCarousel } from './mediaCarousel';
 export { imageWithText } from './imageWithText';
 export { logoCarousel } from './logoCarousel';
 export { pageTitle } from './pageTitle';
 export { projectsList } from './projectsList';
-export { screensList } from './screensList';
+export { ticketList } from './ticketList';
+export { productList } from './productList';

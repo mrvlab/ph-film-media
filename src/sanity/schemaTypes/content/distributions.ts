@@ -1,4 +1,5 @@
-import { PlayIcon, InlineElementIcon } from '@sanity/icons';
+import { PlayIcon } from '@sanity/icons/Play';
+import { InlineElementIcon } from '@sanity/icons/InlineElement';
 import { defineField, defineType } from 'sanity';
 
 export const distributions = defineType({

@@ -1,4 +1,4 @@
-import { ThLargeIcon } from '@sanity/icons';
+import { ThLargeIcon } from '@sanity/icons/ThLarge';
 import { defineField, defineType } from 'sanity';
 
 export const projectsList = defineType({

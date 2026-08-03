@@ -31,7 +31,6 @@ const HeroCarouselWithIndicators: React.FC<PropType> = ({
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Setup plugins
   const plugins = [
     autoplayOptions ? Autoplay(autoplayOptions) : undefined,
     WheelGesturesPlugin({ forceWheelAxis: 'x' }),
@@ -39,11 +38,41 @@ const HeroCarouselWithIndicators: React.FC<PropType> = ({
 
   const [emblaRef, emblaApi] = useEmblaCarousel(
     options,
-    plugins as NonNullable<(typeof plugins)[number]>[]
+    plugins as NonNullable<(typeof plugins)[number]>[],
   );
 
   const { selectedIndex, scrollSnaps, onDotButtonClick } =
     useDotButton(emblaApi);
+
+  // Pause autoplay while the cursor moves; resume after it rests 3s or leaves.
+  useEffect(() => {
+    if (!emblaApi || isMobile) return;
+    const autoplay = emblaApi.plugins().autoplay;
+    if (!autoplay) return;
+
+    const root = emblaApi.rootNode();
+    let idleTimer: ReturnType<typeof setTimeout> | undefined;
+
+    const pause = () => {
+      autoplay.stop();
+      if (idleTimer) clearTimeout(idleTimer);
+      idleTimer = setTimeout(() => autoplay.play(), 2500);
+    };
+    const resume = () => {
+      if (idleTimer) clearTimeout(idleTimer);
+      autoplay.play();
+    };
+
+    root.addEventListener('mouseenter', pause);
+    root.addEventListener('mousemove', pause);
+    root.addEventListener('mouseleave', resume);
+    return () => {
+      root.removeEventListener('mouseenter', pause);
+      root.removeEventListener('mousemove', pause);
+      root.removeEventListener('mouseleave', resume);
+      if (idleTimer) clearTimeout(idleTimer);
+    };
+  }, [emblaApi, isMobile]);
 
   return (
     <div className='relative flex flex-col h-full w-full'>
