@@ -1,4 +1,4 @@
-import { ListIcon } from '@sanity/icons';
+import { ListIcon } from '@sanity/icons/List';
 import { Card, Flex, Stack, Text } from '@sanity/ui';
 import { defineField, defineType, ObjectInputProps } from 'sanity';
 

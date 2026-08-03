@@ -1,4 +1,4 @@
-import { EyeOpenIcon } from '@sanity/icons';
+import { EyeOpenIcon } from '@sanity/icons/EyeOpen';
 import { defineField, defineType } from 'sanity';
 
 export const visibilityType = defineType({

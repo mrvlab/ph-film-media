@@ -1,4 +1,4 @@
-import { TagIcon } from '@sanity/icons';
+import { TagIcon } from '@sanity/icons/Tag';
 import { defineArrayMember, defineField, defineType } from 'sanity';
 
 export const ticketList = defineType({

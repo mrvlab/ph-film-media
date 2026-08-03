@@ -1,4 +1,5 @@
-import { ImageIcon, TextIcon } from '@sanity/icons';
+import { ImageIcon } from '@sanity/icons/Image';
+import { TextIcon } from '@sanity/icons/Text';
 import { defineField, defineType } from 'sanity';
 
 export const imageWithText = defineType({

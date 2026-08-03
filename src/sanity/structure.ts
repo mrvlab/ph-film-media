@@ -1,5 +1,6 @@
 import type { StructureBuilder, StructureResolver } from 'sanity/structure';
-import { BasketIcon, UsersIcon } from '@sanity/icons';
+import { BasketIcon } from '@sanity/icons/Basket';
+import { UsersIcon } from '@sanity/icons/Users';
 
 // Schema imports
 

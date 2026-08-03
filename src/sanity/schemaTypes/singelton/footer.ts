@@ -1,4 +1,4 @@
-import { DoubleChevronDownIcon } from '@sanity/icons';
+import { DoubleChevronDownIcon } from '@sanity/icons/DoubleChevronDown';
 import { defineField, defineType } from 'sanity';
 
 export const footer = defineType({

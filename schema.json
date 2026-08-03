@@ -37,38 +37,8 @@
       "seo": {
         "type": "objectAttribute",
         "value": {
-          "type": "object",
-          "attributes": {
-            "metaTitle": {
-              "type": "objectAttribute",
-              "value": {
-                "type": "string"
-              },
-              "optional": true
-            },
-            "metaDescription": {
-              "type": "objectAttribute",
-              "value": {
-                "type": "string"
-              },
-              "optional": true
-            },
-            "metaImage": {
-              "type": "objectAttribute",
-              "value": {
-                "type": "inline",
-                "name": "mediaType"
-              },
-              "optional": true
-            },
-            "_type": {
-              "type": "objectAttribute",
-              "value": {
-                "type": "string",
-                "value": "seo"
-              }
-            }
-          }
+          "type": "inline",
+          "name": "seo"
         },
         "optional": true
       },
@@ -196,6 +166,44 @@
           }
         },
         "optional": true
+      }
+    }
+  },
+  {
+    "name": "seo",
+    "type": "type",
+    "value": {
+      "type": "object",
+      "attributes": {
+        "_type": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "string",
+            "value": "seo"
+          }
+        },
+        "metaTitle": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "string"
+          },
+          "optional": true
+        },
+        "metaDescription": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "string"
+          },
+          "optional": true
+        },
+        "metaImage": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "inline",
+            "name": "mediaType"
+          },
+          "optional": true
+        }
       }
     }
   },
@@ -902,65 +910,6 @@
           },
           "optional": true
         }
-      }
-    }
-  },
-  {
-    "name": "seo",
-    "type": "document",
-    "attributes": {
-      "_id": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "string"
-        }
-      },
-      "_type": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "string",
-          "value": "seo"
-        }
-      },
-      "_createdAt": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "string"
-        }
-      },
-      "_updatedAt": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "string"
-        }
-      },
-      "_rev": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "string"
-        }
-      },
-      "metaTitle": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "string"
-        },
-        "optional": true
-      },
-      "metaDescription": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "string"
-        },
-        "optional": true
-      },
-      "metaImage": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "inline",
-          "name": "mediaType"
-        },
-        "optional": true
       }
     }
   },
@@ -3282,38 +3231,8 @@
       "seo": {
         "type": "objectAttribute",
         "value": {
-          "type": "object",
-          "attributes": {
-            "metaTitle": {
-              "type": "objectAttribute",
-              "value": {
-                "type": "string"
-              },
-              "optional": true
-            },
-            "metaDescription": {
-              "type": "objectAttribute",
-              "value": {
-                "type": "string"
-              },
-              "optional": true
-            },
-            "metaImage": {
-              "type": "objectAttribute",
-              "value": {
-                "type": "inline",
-                "name": "mediaType"
-              },
-              "optional": true
-            },
-            "_type": {
-              "type": "objectAttribute",
-              "value": {
-                "type": "string",
-                "value": "seo"
-              }
-            }
-          }
+          "type": "inline",
+          "name": "seo"
         },
         "optional": true
       }
@@ -3562,6 +3481,13 @@
           "optional": true
         },
         "blurHash": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "string"
+          },
+          "optional": true
+        },
+        "thumbHash": {
           "type": "objectAttribute",
           "value": {
             "type": "string"

@@ -1,4 +1,4 @@
-import { TextIcon } from '@sanity/icons';
+import { TextIcon } from '@sanity/icons/Text';
 import { useEffect } from 'react';
 
 import { defineField, defineType, ObjectInputProps, set, unset } from 'sanity';

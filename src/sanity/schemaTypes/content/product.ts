@@ -1,4 +1,4 @@
-import { BasketIcon } from '@sanity/icons';
+import { BasketIcon } from '@sanity/icons/Basket';
 import { defineArrayMember, defineField, defineType } from 'sanity';
 
 // Preset sizes. `value` goes into checkout metadata and the ?size= URL, so
