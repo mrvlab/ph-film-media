@@ -70,7 +70,7 @@ const TicketList = async (block: ITicketListBlock) => {
   return (
     <section
       key={block._key || 'ticketList'}
-      className={`page-x-spacing flex flex-col gap-2.5 h-fit uppercase lg:gap-3 ${bottomSpacingClass}`}
+      className={`page-x-spacing flex flex-col gap-2.5 h-fit uppercase lg:gap-10 ${bottomSpacingClass}`}
       data-sanity-edit-target
     >
       {sectionTitle ? (

@@ -1,7 +1,6 @@
 import Image from 'next/image';
 
 import { urlFor } from '@/sanity/lib/image';
-import { BuyTicketButton } from './BuyTicketButton';
 import { BuyTicketCard } from './BuyTicketCard';
 import { TicketGate } from './TicketGate';
 import type { ITicketListBlock, TicketLabels } from '.';
@@ -88,13 +87,16 @@ const Ticket = ({
     : null;
   const time = date ? timeOfDay.format(date) : null;
 
-  // Reused for both breakpoints; ticket-shaped cutouts read against the black bg.
+  // Desktop pill. Purely visual: the whole desktop card (BuyTicketCard below)
+  // is the actual button, so this is aria-hidden to avoid nesting two buttons.
   const action = soldOut ? (
     <div className='ticket-button cursor-not-allowed opacity-50'>
       <span>Slutsåld</span>
     </div>
   ) : (
-    <BuyTicketButton />
+    <div className='ticket-button' aria-hidden='true'>
+      <span>Köp biljett</span>
+    </div>
   );
 
   return (
@@ -158,54 +160,60 @@ const Ticket = ({
           </div>
         </BuyTicketCard>
 
-        {/* Desktop: details (left) */}
-        <div className='hidden lg:flex lg:w-1/3 lg:flex-col lg:gap-8 lg:justify-between lg:mr-[2.7rem] lg:border-b lg:border-white/15'>
-          <div className='space-y-8'>
-            <h2 className='text-h-28 font-bold'>{ticket.title}</h2>
+        {/* Desktop: the entire card (details + banner) opens the gate */}
+        <BuyTicketCard
+          disabled={soldOut}
+          className='hidden lg:flex lg:items-stretch lg:w-full'
+        >
+          {/* details (left) */}
+          <div className='lg:flex lg:w-1/3 lg:flex-col lg:gap-8 lg:justify-between lg:mr-[2.7rem] lg:border-b lg:border-white/15'>
+            <div className='space-y-8'>
+              <h2 className='text-h-28 font-bold'>{ticket.title}</h2>
 
-            <dl className='space-y-2 text-b-16 2xl:text-b-21'>
-              {desktopDate ? (
-                <div className='flex justify-between gap-8'>
-                  <dt className='text-white/90'>{viewingLabel}</dt>
-                  <dd className='text-right'>{desktopDate}</dd>
-                </div>
-              ) : null}
-              {venue ? (
-                <div className='flex justify-between gap-8'>
-                  <dt className='text-white/90'>{locationLabel}</dt>
-                  <dd className='text-right'>{venue}</dd>
-                </div>
-              ) : null}
-              {priceLabel ? (
-                <div className='flex justify-between gap-8'>
-                  <dt className='text-white/90'>{priceRowLabel}</dt>
-                  <dd className='text-right'>{priceLabel}</dd>
-                </div>
-              ) : null}
-            </dl>
-          </div>
-
-          <div className='flex justify-end pb-5'>
-            <div className='flow-root'>{action}</div>
-          </div>
-        </div>
-
-        {/* Desktop: banner (landscape, falls back to poster) */}
-        <div className='relative hidden bg-black/30 lg:block lg:aspect-[16/9] lg:w-2/3'>
-          {bannerUrl ? (
-            <Image
-              src={bannerUrl}
-              alt={bannerAlt}
-              fill
-              sizes='(min-width: 1024px) 66vw, 100vw'
-              className='object-cover rounded-lg'
-            />
-          ) : (
-            <div className='absolute inset-0 grid place-items-center text-white/40 text-h-12 uppercase tracking-[0.12em]'>
-              Ingen banner
+              <dl className='space-y-2 text-b-16 2xl:text-b-21'>
+                {desktopDate ? (
+                  <div className='flex justify-between gap-8'>
+                    <dt className='text-white/90'>{viewingLabel}</dt>
+                    <dd className='text-right'>{desktopDate}</dd>
+                  </div>
+                ) : null}
+                {venue ? (
+                  <div className='flex justify-between gap-8'>
+                    <dt className='text-white/90'>{locationLabel}</dt>
+                    <dd className='text-right'>{venue}</dd>
+                  </div>
+                ) : null}
+                {priceLabel ? (
+                  <div className='flex justify-between gap-8'>
+                    <dt className='text-white/90'>{priceRowLabel}</dt>
+                    <dd className='text-right'>{priceLabel}</dd>
+                  </div>
+                ) : null}
+              </dl>
             </div>
-          )}
-        </div>
+
+            <div className='flex justify-end pb-5'>
+              <div className='flow-root'>{action}</div>
+            </div>
+          </div>
+
+          {/* banner (landscape, falls back to poster) */}
+          <div className='relative bg-black/30 lg:block lg:aspect-[16/9] lg:w-2/3'>
+            {bannerUrl ? (
+              <Image
+                src={bannerUrl}
+                alt={bannerAlt}
+                fill
+                sizes='(min-width: 1024px) 66vw, 100vw'
+                className='object-cover rounded-lg'
+              />
+            ) : (
+              <div className='absolute inset-0 grid place-items-center text-white/40 text-h-12 uppercase tracking-[0.12em]'>
+                Ingen banner
+              </div>
+            )}
+          </div>
+        </BuyTicketCard>
       </div>
     </TicketGate>
   );
