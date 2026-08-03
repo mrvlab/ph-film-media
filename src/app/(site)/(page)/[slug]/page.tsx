@@ -70,6 +70,16 @@ export default async function Page({
     ],
   });
 
+  // On /shop, a lone ticketList block leaves the page looking empty (the second
+  // module is missing). Render it as a vertical column of big ticket cards so it
+  // fills the space instead of a single horizontal carousel.
+  const blocks = data.blockList ?? [];
+  const shopSoloTicketList =
+    slug === 'shop' &&
+    blocks.length === 1 &&
+    '_type' in blocks[0] &&
+    blocks[0]._type === 'ticketList';
+
   return (
     <>
       <JsonLd data={breadcrumbJsonLd} />
@@ -87,6 +97,9 @@ export default async function Page({
               index={idx}
               slug={data.slug || undefined}
               className="grid grid-cols-1"
+              columnLayout={
+                shopSoloTicketList && block._type === 'ticketList'
+              }
             />
           );
         })}

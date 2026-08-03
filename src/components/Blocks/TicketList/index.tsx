@@ -18,8 +18,15 @@ export type ITicketListBlock = Extract<
 
 export type TicketLabels = NonNullable<SettingsQueryResult>['ticketLabels'];
 
-const TicketList = async (block: ITicketListBlock) => {
+// `columnLayout` is set by the page when this is the only block on /shop, so the
+// tickets stack vertically as big cards instead of a peeking carousel — the page
+// would otherwise look empty with a single horizontal module.
+type ITicketListProps = ITicketListBlock & { columnLayout?: boolean };
+
+const TicketList = async (block: ITicketListProps) => {
   if (block._type !== 'ticketList') return null;
+
+  const columnLayout = block.columnLayout === true;
 
   const tickets = block.tickets ?? [];
   if (tickets.length === 0) return null;
@@ -49,41 +56,57 @@ const TicketList = async (block: ITicketListBlock) => {
   // Bottom spacing defaults to true when unset (40px mobile / 80px desktop).
   const bottomSpacingClass = block.bottomSpacing !== false ? 'mb-20' : '';
 
-  // The same Ticket card is used throughout; only the wrapper differs:
-  // one ticket → standalone, many → peeking carousel.
-  if (count > 1) {
+  const ticketCards = tickets.map((ticket, i) => (
+    <Ticket
+      key={('_id' in ticket && ticket._id) || i}
+      ticket={ticket}
+      labels={labels}
+      contactEmail={contactEmail}
+      membershipFeeLabel={membershipFeeLabel}
+    />
+  ));
+
+  // One ticket → standalone big card.
+  if (count === 1) {
     return (
-      <TicketCarousel heading={sectionTitle} className={bottomSpacingClass}>
-        {tickets.map((ticket, i) => (
-          <Ticket
-            key={('_id' in ticket && ticket._id) || i}
-            ticket={ticket}
-            labels={labels}
-            contactEmail={contactEmail}
-            membershipFeeLabel={membershipFeeLabel}
-          />
-        ))}
-      </TicketCarousel>
+      <section
+        key={block._key || 'ticketList'}
+        className={`page-x-spacing flex flex-col gap-2.5 h-fit uppercase lg:gap-10 ${bottomSpacingClass}`}
+        data-sanity-edit-target
+      >
+        {sectionTitle ? (
+          <h2 className='text-h-67 lg:text-h-37 !leading-[1]'>{sectionTitle}</h2>
+        ) : null}
+        {ticketCards}
+      </section>
     );
   }
 
-  return (
-    <section
-      key={block._key || 'ticketList'}
-      className={`page-x-spacing flex flex-col gap-2.5 h-fit uppercase lg:gap-10 ${bottomSpacingClass}`}
-      data-sanity-edit-target
-    >
-      {sectionTitle ? (
-        <h2 className='text-h-67 lg:text-h-37 !leading-[1]'>{sectionTitle}</h2>
-      ) : null}
+  // Many tickets → peeking carousel.
+  const carousel = (
+    <TicketCarousel heading={sectionTitle} className={bottomSpacingClass}>
+      {ticketCards}
+    </TicketCarousel>
+  );
 
-      <Ticket
-        ticket={tickets[0]}
-        labels={labels}
-        contactEmail={contactEmail}
-        membershipFeeLabel={membershipFeeLabel}
-      />
-    </section>
+  if (!columnLayout) return carousel;
+
+  // Solo /shop block: keep the carousel on mobile, but stack the big cards as a
+  // vertical column on desktop so the otherwise-empty page fills out.
+  return (
+    <>
+      <div className='lg:hidden'>{carousel}</div>
+      <section
+        key={block._key || 'ticketList'}
+        className={`hidden page-x-spacing h-fit uppercase lg:flex lg:flex-col lg:gap-16 ${bottomSpacingClass}`}
+        data-sanity-edit-target
+      >
+        {sectionTitle ? (
+          <h2 className='text-h-67 lg:text-h-37 !leading-[1]'>{sectionTitle}</h2>
+        ) : null}
+        {ticketCards}
+      </section>
+    </>
   );
 };
 

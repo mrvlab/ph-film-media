@@ -53,15 +53,11 @@ const Ticket = ({
   if (!ticket || !('_id' in ticket) || !('title' in ticket)) return null;
 
   // Editable labels (Settings → Ticket Settings) with Swedish fallbacks.
+  // Price is intentionally not shown on the card — buyers see it at checkout.
   const viewingLabel = labels?.viewingLabel || 'Visning';
   const locationLabel = labels?.locationLabel || 'Plats';
-  const priceRowLabel = labels?.priceLabel || 'Pris';
 
   const venue = ticket.venue?.trim() || null;
-  const priceLabel =
-    ticket.price != null
-      ? `${ticket.price} ${ticket.currency?.toUpperCase() ?? ''}`.trim()
-      : null;
 
   const sold = ticket.seatsSold ?? 0;
   const total = ticket.totalSeats ?? 0;
@@ -135,19 +131,14 @@ const Ticket = ({
             <h2 className='text-h-28 text-white/50'>{ticket.title}</h2>
 
             <div className='flex flex-col gap-[0.8rem]'>
-              {mobileDate || priceLabel ? (
+              {mobileDate ? (
                 <div className='flex items-baseline justify-between gap-4 text-b-16 uppercase'>
                   <p className='flex gap-2'>
-                    {mobileDate ? (
-                      <span className='font-bold text-white'>{mobileDate}</span>
-                    ) : null}
+                    <span className='font-bold text-white'>{mobileDate}</span>
                     {time ? (
                       <span className='text-white/40'> | {time}</span>
                     ) : null}
                   </p>
-                  {priceLabel ? (
-                    <p className='shrink-0 text-white/60'>{priceLabel}</p>
-                  ) : null}
                 </div>
               ) : null}
 
@@ -181,12 +172,6 @@ const Ticket = ({
                   <div className='flex justify-between gap-8'>
                     <dt className='text-white/90'>{locationLabel}</dt>
                     <dd className='text-right'>{venue}</dd>
-                  </div>
-                ) : null}
-                {priceLabel ? (
-                  <div className='flex justify-between gap-8'>
-                    <dt className='text-white/90'>{priceRowLabel}</dt>
-                    <dd className='text-right'>{priceLabel}</dd>
                   </div>
                 ) : null}
               </dl>
