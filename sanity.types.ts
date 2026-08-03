@@ -220,6 +220,7 @@ export type Member = {
   amount?: number;
   currency?: string;
   paidAt?: string;
+  paymentBypassedAt?: string;
   stripeSessionId?: string;
   stripePaymentIntentId?: string;
 };

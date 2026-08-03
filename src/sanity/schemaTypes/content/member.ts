@@ -121,6 +121,20 @@ export const member = defineType({
       group: 'payment',
       readOnly: true,
     }),
+    // Stamped by the "Mark as existing member" document action when an admin
+    // grandfathers in a member who joined before online payments existed. Its
+    // presence both records that the fee was bypassed (not paid via Stripe) and
+    // locks the action so it can only be applied once. Hidden until set.
+    defineField({
+      name: 'paymentBypassedAt',
+      title: 'Payment bypassed at',
+      type: 'datetime',
+      group: 'payment',
+      readOnly: true,
+      hidden: ({ value }) => !value,
+      description:
+        'Read-only. Set when this member was marked as an existing member (payment bypassed) instead of paying online.',
+    }),
     // Hidden from the Studio UI — kept only as an audit trail linking a member
     // to their initial payment in the Stripe dashboard (written by the webhook).
     defineField({
@@ -156,6 +170,7 @@ export const member = defineType({
       amount: 'amount',
       currency: 'currency',
       status: 'status',
+      paymentBypassedAt: 'paymentBypassedAt',
     },
     prepare({
       firstName,
@@ -165,15 +180,20 @@ export const member = defineType({
       amount,
       currency,
       status,
+      paymentBypassedAt,
     }) {
       const name = [firstName, lastName].filter(Boolean).join(' ');
-      const when = joinedAt
-        ? `Joined: ${new Date(joinedAt).toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric',
-          })}`
-        : 'Not joined yet';
+      // Members grandfathered in before online payments read "Existing member"
+      // rather than a join date.
+      const when = paymentBypassedAt
+        ? 'Existing member'
+        : joinedAt
+          ? `Joined: ${new Date(joinedAt).toLocaleDateString('en-US', {
+              month: 'short',
+              day: 'numeric',
+              year: 'numeric',
+            })}`
+          : 'Not joined yet';
       const paid =
         amount != null
           ? `${amount} ${(currency || '').toUpperCase()}`.trim()

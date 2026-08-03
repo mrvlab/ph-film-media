@@ -1193,6 +1193,13 @@
         },
         "optional": true
       },
+      "paymentBypassedAt": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        },
+        "optional": true
+      },
       "stripeSessionId": {
         "type": "objectAttribute",
         "value": {
