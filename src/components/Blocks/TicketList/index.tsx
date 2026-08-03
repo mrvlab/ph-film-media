@@ -8,6 +8,7 @@ import { fetchFooter, settingsQuery } from '@/sanity/lib/queries';
 import { formatMembershipFee } from '@/lib/members/membershipFee';
 import Ticket from './Ticket';
 import { TicketCarousel } from './TicketCarousel';
+import { TicketColumn } from './TicketColumn';
 
 export type ITicketListBlock = Extract<
   NonNullable<
@@ -104,7 +105,7 @@ const TicketList = async (block: ITicketListProps) => {
         {sectionTitle ? (
           <h2 className='text-h-67 lg:text-h-37 !leading-[1]'>{sectionTitle}</h2>
         ) : null}
-        {ticketCards}
+        <TicketColumn>{ticketCards}</TicketColumn>
       </section>
     </>
   );
