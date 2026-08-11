@@ -2,6 +2,12 @@
 
 import { useEffect, useState } from "react";
 
+import {
+  trackEcommerce,
+  trackException,
+  type AnalyticsItem,
+} from "@/lib/analytics/gtag";
+
 // Swedish, user-facing messages for the API error envelope.
 function membershipErrorMessage(code: unknown, status: number): string {
   switch (code) {
@@ -44,7 +50,11 @@ export type JoinOutcome = "is_member" | "redirecting" | "disabled" | null;
  *    if no → redirect to the 29 kr membership Stripe Checkout.
  *  - buyTicket: validate member + access code, then redirect to ticket Checkout.
  */
-export function useMembershipGate(ticketId: string) {
+export function useMembershipGate(
+  ticketId: string,
+  item?: AnalyticsItem | null,
+  currency?: string | null,
+) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -81,6 +91,9 @@ export function useMembershipGate(ticketId: string) {
       const json = await res.json();
       if (!res.ok) {
         setLoading(false);
+        trackException(`membership:${json?.error ?? res.status}`, {
+          item_id: ticketId,
+        });
         // Revoked members get a dedicated support view, not an inline error.
         if (json?.error === "membership_disabled") return "disabled";
         setError(membershipErrorMessage(json?.error, res.status));
@@ -103,6 +116,21 @@ export function useMembershipGate(ticketId: string) {
         } catch {
           // Ignore storage failures (private mode, etc.) — the join still works.
         }
+        // Fired before the redirect so gtag's beacon leaves with the unload.
+        // The fee lives in Sanity Settings, so the sale value is filled in by
+        // the `purchase` event on the way back from Stripe.
+        trackEcommerce("begin_checkout", {
+          items: [
+            {
+              item_id: "membership",
+              item_name: "Medlemskap Filmklubben",
+              item_category: "Medlemskap",
+              quantity: 1,
+            },
+          ],
+          currency,
+          checkout_type: "membership",
+        });
         // Stay in loading through the redirect (no reset here).
         window.location.assign(json.url);
         return "redirecting";
@@ -112,6 +140,7 @@ export function useMembershipGate(ticketId: string) {
       return null;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Request failed");
+      trackException("membership:network", { item_id: ticketId });
       setLoading(false);
       return null;
     }
@@ -140,6 +169,10 @@ export function useMembershipGate(ticketId: string) {
       const json = await res.json();
       if (!res.ok) {
         setLoading(false);
+        trackException(`ticket_checkout:${json?.error ?? res.status}`, {
+          item_id: ticketId,
+          item_name: item?.item_name,
+        });
         // Revoked members get a dedicated support view, not an inline error.
         if (json?.error !== "membership_disabled") {
           setError(checkoutErrorMessage(json?.error, res.status));
@@ -147,6 +180,14 @@ export function useMembershipGate(ticketId: string) {
         return json?.error ?? "error";
       }
       if (json.url) {
+        // Fired before the redirect so gtag's beacon leaves with the unload.
+        if (item) {
+          trackEcommerce("begin_checkout", {
+            items: [item],
+            currency,
+            checkout_type: "ticket",
+          });
+        }
         window.location.assign(json.url);
         return null;
       }
@@ -155,6 +196,7 @@ export function useMembershipGate(ticketId: string) {
       return "no_url";
     } catch (err) {
       setError(err instanceof Error ? err.message : "Request failed");
+      trackException("ticket_checkout:network", { item_id: ticketId });
       setLoading(false);
       return "network";
     }

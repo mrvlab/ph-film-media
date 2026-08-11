@@ -3,6 +3,7 @@
 import { useState } from 'react';
 
 import { formatPrice } from '@/lib/products/formatPrice';
+import { trackEvent } from '@/lib/analytics/gtag';
 import { dataAttr } from '@/sanity/lib/utils';
 import { useBuyProduct } from './useBuyProduct';
 
@@ -15,6 +16,8 @@ export type PurchaseVariant = {
 
 type ProductPurchaseProps = {
   productId: string;
+  /** Analytics only — the heading already renders the title. */
+  productTitle: string;
   price: number;
   currency: string | null;
   variants: PurchaseVariant[];
@@ -25,13 +28,18 @@ const isSoldOut = (v: PurchaseVariant) => (v.sold ?? 0) >= v.stock;
 
 export default function ProductPurchase({
   productId,
+  productTitle,
   price,
   currency,
   variants,
   initialSize,
 }: ProductPurchaseProps) {
   const [size, setSize] = useState(initialSize);
-  const { startCheckout, loading, error } = useBuyProduct();
+  const { startCheckout, loading, error } = useBuyProduct({
+    title: productTitle,
+    price,
+    currency,
+  });
 
   const selected = variants.find((v) => v.size === size) ?? variants[0] ?? null;
   const soldOut = selected ? isSoldOut(selected) : true;
@@ -43,6 +51,12 @@ export default function ProductPurchase({
 
   function selectSize(next: string) {
     setSize(next);
+    // Which sizes shoppers reach for, including ones they never buy.
+    trackEvent('select_size', {
+      item_id: productId,
+      item_name: productTitle,
+      item_variant: next,
+    });
     // Reflect the choice in the URL so it's shareable/bookmarkable (?size=M).
     const url = new URL(window.location.href);
     url.searchParams.set('size', next);

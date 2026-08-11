@@ -8,6 +8,8 @@ import {
   useStaggeredGridReveal,
   type ColumnQuery,
 } from '@/hooks/useStaggeredGridReveal';
+import { trackEcommerce } from '@/lib/analytics/gtag';
+import { toProductItem } from './analyticsItem';
 
 type IProductGrid = {
   products: NonNullable<IProductListBlock['products']>;
@@ -39,11 +41,24 @@ const ProductGrid = ({ products, single }: IProductGrid) => {
       {products.map((product, index) => {
         if (!product || !('_id' in product)) return null;
 
+        // Click-through from the grid — GA4's step between impression and detail.
+        const trackSelect = () => {
+          const item = toProductItem(product);
+          if (!item) return;
+          trackEcommerce('select_item', {
+            items: [{ ...item, index, item_list_id: 'shop' }],
+            currency: 'currency' in product ? product.currency : null,
+            item_list_id: 'shop',
+            value: 0,
+          });
+        };
+
         return (
           <motion.div
             key={`${product._id}-${index}`}
             ref={setRef}
             data-index={index}
+            onClick={trackSelect}
             {...getItemProps(index)}
           >
             <ProductCard product={product} />

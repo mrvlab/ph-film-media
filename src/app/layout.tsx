@@ -2,6 +2,8 @@ import { Lato, Oswald } from 'next/font/google';
 import '@/app/globals.css';
 import { ViewTransitions } from 'next-view-transitions';
 import { initViewportScale } from '@/lib/viewportScale';
+import GoogleAnalytics from '@/components/Analytics/GoogleAnalytics';
+import PurchaseTracker from '@/components/Analytics/PurchaseTracker';
 
 const oswald = Oswald({
   variable: '--font-oswald',
@@ -51,6 +53,8 @@ export default async function RootLayout({
           className={`grid lg:grid-cols-12 lg:grid-rows-6 lg:gap-x-p-desktop lg:h-screen lg:overflow-hidden antialiased ${lato.variable} ${oswald.variable}`}
         >
           {children}
+          <GoogleAnalytics />
+          <PurchaseTracker />
         </body>
       </html>
     </ViewTransitions>

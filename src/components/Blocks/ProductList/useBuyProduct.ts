@@ -2,8 +2,21 @@
 
 import { useEffect, useState } from 'react';
 
+import {
+  trackEcommerce,
+  trackException,
+  type AnalyticsItem,
+} from '@/lib/analytics/gtag';
+
+/** What GA4 should report for the product being bought (title, price, size). */
+export type CheckoutItem = {
+  title: string;
+  price: number;
+  currency: string | null;
+};
+
 /** Shared Stripe-checkout logic for a product size, used by the buy button. */
-export function useBuyProduct() {
+export function useBuyProduct(item?: CheckoutItem) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -39,10 +52,29 @@ export function useBuyProduct() {
           const detail = json?.message ? ` — ${json.message}` : '';
           setError(`Error: ${code}${detail}`);
         }
+        trackException(`product_checkout:${json?.error ?? res.status}`, {
+          item_id: productId,
+          item_variant: size,
+        });
         setLoading(false);
         return;
       }
       if (json.url) {
+        // Fired before the redirect so gtag's beacon leaves with the unload.
+        if (item) {
+          const gaItem: AnalyticsItem = {
+            item_id: productId,
+            item_name: item.title,
+            item_category: 'Produkt',
+            item_variant: size,
+            price: item.price,
+            quantity: 1,
+          };
+          trackEcommerce('begin_checkout', {
+            items: [gaItem],
+            currency: item.currency,
+          });
+        }
         // Stay in loading through the redirect (no reset here).
         window.location.assign(json.url);
         return;
@@ -51,6 +83,7 @@ export function useBuyProduct() {
       setLoading(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Request failed');
+      trackException('product_checkout:network', { item_id: productId });
       setLoading(false);
     }
   }

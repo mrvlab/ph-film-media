@@ -2,6 +2,8 @@
 
 import React, { useState } from 'react';
 
+import { trackEvent } from '@/lib/analytics/gtag';
+
 interface ClickableEmailProps {
   email: string;
 }
@@ -11,6 +13,10 @@ const ClickableEmail = ({ email }: ClickableEmailProps) => {
 
   const handleEmailClick = async () => {
     if (!email) return;
+
+    // Contact intent — GA4's automatic outbound-click tracking never sees this,
+    // since copying the address isn't a navigation.
+    trackEvent('contact_email_copy', { link_url: `mailto:${email}` });
 
     // Check if clipboard API is available
     if (!navigator?.clipboard?.writeText) {

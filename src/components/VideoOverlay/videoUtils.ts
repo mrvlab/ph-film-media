@@ -26,7 +26,9 @@ export const extractVideoInfo = (url: string): VideoInfo => {
 // Build the autoplay embed URL for a detected platform/id pair.
 export const buildEmbedUrl = (platform: VideoPlatform, id: string): string => {
   if (platform === 'youtube') {
-    return `https://www.youtube.com/embed/${id}?autoplay=1`;
+    // enablejsapi=1 is what lets GA4's enhanced measurement report
+    // video_start / video_progress / video_complete for the embed.
+    return `https://www.youtube.com/embed/${id}?autoplay=1&enablejsapi=1`;
   }
   return `https://player.vimeo.com/video/${id}?autoplay=1`;
 };

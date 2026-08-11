@@ -4,12 +4,16 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, easeInOut } from 'framer-motion';
 
+import { trackEvent, type AnalyticsItem } from '@/lib/analytics/gtag';
 import { useMembershipGate } from './useMembershipGate';
 
 type GateView = 'choice' | 'join' | 'code' | 'joined' | 'already' | 'disabled';
 
 type TicketGateModalProps = {
   ticketId: string;
+  /** GA4 item for the screening behind this gate. */
+  item?: AnalyticsItem | null;
+  currency?: string | null;
   // Footer contact email, shown when a member's access has been revoked.
   contactEmail?: string | null;
   // Membership fee label (e.g. "49 kr") from Settings, shown on the join step.
@@ -45,6 +49,8 @@ function Spinner() {
 
 export function TicketGateModal({
   ticketId,
+  item,
+  currency,
   contactEmail,
   membershipFeeLabel,
   initialView = 'choice',
@@ -57,7 +63,7 @@ export function TicketGateModal({
   const [email, setEmail] = useState(initialEmail);
   const [code, setCode] = useState('');
   const { loading, error, setError, checkOrJoin, buyTicket } =
-    useMembershipGate(ticketId);
+    useMembershipGate(ticketId, item, currency);
 
   // Lock body scroll and wire Escape-to-close while mounted (i.e. open).
   useEffect(() => {
@@ -74,9 +80,16 @@ export function TicketGateModal({
   }, [onClose]);
 
   // Switch step and clear any stale error from the previous step.
+  // Each step is reported so the gate's drop-off is visible in GA (Engagement →
+  // Events, or as a funnel exploration over `gate_step`).
   function goTo(next: GateView) {
     setError(null);
     setView(next);
+    trackEvent('ticket_gate_step', {
+      gate_step: next,
+      item_id: ticketId,
+      item_name: item?.item_name,
+    });
   }
 
   async function handleJoinSubmit(e: FormEvent) {

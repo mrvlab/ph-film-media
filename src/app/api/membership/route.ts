@@ -74,7 +74,9 @@ export async function POST(request: Request) {
   // On success, return to the page the user came from (the shop) with a flag so
   // the client can reopen that ticket's modal on the thank-you step — no more
   // standalone success page. Respect any existing query string on cancelPath.
-  const returnPath = `${cancelPath}${cancelPath.includes("?") ? "&" : "?"}membership=joined`;
+  // session_id lets the client report the join as a GA4 purchase (and sign_up)
+  // once Stripe confirms it; the ticket gate strips both flags after reading.
+  const returnPath = `${cancelPath}${cancelPath.includes("?") ? "&" : "?"}membership=joined&session_id={CHECKOUT_SESSION_ID}`;
 
   // The fee is configured in Settings → Membership (falls back to the default).
   const settings = await client.fetch(settingsQuery);

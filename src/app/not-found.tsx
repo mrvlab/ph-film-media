@@ -1,9 +1,12 @@
 import Header from '@/components/Header/Header';
 import { Link } from 'next-view-transitions';
 
+import TrackNotFound from '@/components/Analytics/TrackNotFound';
+
 export default function Custom404() {
   return (
     <>
+      <TrackNotFound />
       <Header />
       <main
         className='grid lg:col-span-10 lg:row-span-full lg:overflow-y-scroll lg:py-p-desktop'
