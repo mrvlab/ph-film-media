@@ -6,6 +6,8 @@ import type {
 import { sanityFetch } from '@/sanity/lib/live';
 import { fetchFooter, settingsQuery } from '@/sanity/lib/queries';
 import { formatMembershipFee } from '@/lib/members/membershipFee';
+import TrackListView from '@/components/Analytics/TrackListView';
+import { toTicketItem } from './analyticsItem';
 import Ticket from './Ticket';
 import { TicketCarousel } from './TicketCarousel';
 import { TicketColumn } from './TicketColumn';
@@ -57,6 +59,20 @@ const TicketList = async (block: ITicketListProps) => {
   // Bottom spacing defaults to true when unset (40px mobile / 80px desktop).
   const bottomSpacingClass = block.bottomSpacing !== false ? 'mb-20' : '';
 
+  // Rendered exactly once per block — the solo-/shop layout renders the cards
+  // twice (mobile carousel + desktop column) and both mount, so a tracker in
+  // each branch would report the impression twice.
+  const trackedItems = tickets.map(toTicketItem).filter((item) => item !== null);
+  const currency = tickets.find((t) => t && 'currency' in t)?.currency ?? null;
+  const listTracker = (
+    <TrackListView
+      listId='tickets'
+      listName='Visningar'
+      items={trackedItems}
+      currency={currency}
+    />
+  );
+
   const ticketCards = tickets.map((ticket, i) => (
     <Ticket
       key={('_id' in ticket && ticket._id) || i}
@@ -75,6 +91,7 @@ const TicketList = async (block: ITicketListProps) => {
         className={`page-x-spacing flex flex-col gap-2.5 h-fit uppercase lg:gap-10 ${bottomSpacingClass}`}
         data-sanity-edit-target
       >
+        {listTracker}
         {sectionTitle ? (
           <h2 className='text-h-67 lg:text-h-37 !leading-[1]'>{sectionTitle}</h2>
         ) : null}
@@ -90,12 +107,19 @@ const TicketList = async (block: ITicketListProps) => {
     </TicketCarousel>
   );
 
-  if (!columnLayout) return carousel;
+  if (!columnLayout)
+    return (
+      <>
+        {listTracker}
+        {carousel}
+      </>
+    );
 
   // Solo /shop block: keep the carousel on mobile, but stack the big cards as a
   // vertical column on desktop so the otherwise-empty page fills out.
   return (
     <>
+      {listTracker}
       <div className='lg:hidden'>{carousel}</div>
       <section
         key={block._key || 'ticketList'}

@@ -9,6 +9,7 @@ import {
 } from "react";
 import { AnimatePresence } from "framer-motion";
 
+import { trackEcommerce, type AnalyticsItem } from "@/lib/analytics/gtag";
 import { TicketGateModal } from "./TicketGateModal";
 
 // Lets the buy button and the whole-card trigger open one shared gate modal.
@@ -22,6 +23,9 @@ type TicketGateProps = {
   ticketId: string;
   contactEmail?: string | null;
   membershipFeeLabel?: string;
+  /** GA4 item for this screening; null when the ticket ref is unresolved. */
+  item?: AnalyticsItem | null;
+  currency?: string | null;
   children: ReactNode;
 };
 
@@ -39,6 +43,8 @@ export function TicketGate({
   ticketId,
   contactEmail,
   membershipFeeLabel,
+  item,
+  currency,
   children,
 }: TicketGateProps) {
   const [open, setOpen] = useState(false);
@@ -75,6 +81,8 @@ export function TicketGate({
         // ignore
       }
       params.delete("membership");
+      // PurchaseTracker reads session_id during render, so it's safe to drop.
+      params.delete("session_id");
       const qs = params.toString();
       window.history.replaceState(
         null,
@@ -87,6 +95,18 @@ export function TicketGate({
 
   // Manual opens (clicking a ticket) always start fresh on the choice step.
   function openFresh() {
+    // Clicking the card is both the click-through and the detail view — there
+    // is no separate ticket page, the modal is the product detail.
+    if (item) {
+      trackEcommerce("select_item", {
+        items: [{ ...item, item_list_id: "tickets" }],
+        currency,
+        item_list_id: "tickets",
+        item_list_name: "Visningar",
+        value: 0,
+      });
+      trackEcommerce("view_item", { items: [item], currency });
+    }
     setInitialView("choice");
     setPrefillEmail("");
     setOpen(true);
@@ -100,6 +120,8 @@ export function TicketGate({
           <TicketGateModal
             key="gate"
             ticketId={ticketId}
+            item={item}
+            currency={currency}
             contactEmail={contactEmail}
             membershipFeeLabel={membershipFeeLabel}
             initialView={initialView}

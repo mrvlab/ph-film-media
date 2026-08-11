@@ -17,6 +17,7 @@ import ProductPurchase, {
 } from '@/components/Blocks/ProductList/ProductPurchase';
 import ProductGallery from './ProductGallery';
 import JsonLd from '@/components/JsonLd';
+import TrackItemView from '@/components/Analytics/TrackItemView';
 import { formatPrice } from '@/lib/products/formatPrice';
 import { getSiteUrl } from '@/utils/siteUrl';
 import type {
@@ -130,6 +131,17 @@ export default async function ProductPage({
   return (
     <>
       <JsonLd data={productJsonLd} />
+      <TrackItemView
+        item={{
+          item_id: product._id,
+          item_name: product.title ?? 'Produkt',
+          item_category: 'Produkt',
+          price: product.price ?? undefined,
+          quantity: 1,
+          ...(initialSize ? { item_variant: initialSize } : {}),
+        }}
+        currency={product.currency}
+      />
       <Header />
       <main
         className='grid grid-cols-1 max-lg:pt-[22%] mt-[var(--header-height-mobile)] lg:mt-0 lg:col-span-10 lg:row-span-full lg:overflow-y-scroll lg:py-p-desktop'
@@ -154,6 +166,7 @@ export default async function ProductPage({
             {variants.length > 0 ? (
               <ProductPurchase
                 productId={product._id}
+                productTitle={product.title ?? 'Produkt'}
                 price={product.price ?? 0}
                 currency={product.currency}
                 variants={variants}

@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { urlFor } from '@/sanity/lib/image';
 import { BuyTicketCard } from './BuyTicketCard';
 import { TicketGate } from './TicketGate';
+import { toTicketItem } from './analyticsItem';
 import type { ITicketListBlock, TicketLabels } from '.';
 
 type TicketData = NonNullable<ITicketListBlock['tickets']>[number];
@@ -100,6 +101,8 @@ const Ticket = ({
       ticketId={ticket._id}
       contactEmail={contactEmail}
       membershipFeeLabel={membershipFeeLabel}
+      item={toTicketItem(ticket)}
+      currency={'currency' in ticket ? ticket.currency : null}
     >
       <div className='lg:flex lg:items-stretch'>
         {/* Mobile: the entire card opens the members-only gate */}

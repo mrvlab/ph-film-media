@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { TrailerType } from '../../../sanity.types';
 import VideoOverlay from '../VideoOverlay/VideoOverlay';
 import { extractVideoInfo } from '../VideoOverlay/videoUtils';
+import { trackEvent } from '@/lib/analytics/gtag';
 
 type ITrailerOverlay = {
   trailer: TrailerType;
@@ -18,6 +19,13 @@ const TrailerOverlay = ({ trailer, triggerIcon }: ITrailerOverlay) => {
   const openOverlay = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    // Playback itself is measured by GA4 for YouTube embeds; this covers the
+    // open (and is the only signal for Vimeo, which GA4 can't instrument).
+    trackEvent('trailer_open', {
+      video_platform: platform,
+      video_id: videoId,
+      video_title: trailer.trailerLinkLabel ?? undefined,
+    });
     setIsOpen(true);
   };
   const closeOverlay = () => setIsOpen(false);
