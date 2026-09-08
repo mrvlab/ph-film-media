@@ -1,5 +1,5 @@
 import React from 'react';
-import { client } from '@/sanity/lib/client';
+import { sanityFetch } from '@/sanity/lib/live';
 import { fetchAllLounges } from '@/sanity/lib/queries';
 import type {
   FetchAllLoungesResult,
@@ -19,7 +19,7 @@ type ILoungeListBlock = Extract<
 >;
 
 const LoungeList = async (block: ILoungeListBlock) => {
-  const lounges = await client.fetch(fetchAllLounges);
+  const { data: lounges } = await sanityFetch({ query: fetchAllLounges });
 
   if (!lounges?.length) return null;
 

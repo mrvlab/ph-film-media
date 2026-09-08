@@ -1,5 +1,5 @@
 import React from 'react';
-import { client } from '@/sanity/lib/client';
+import { sanityFetch } from '@/sanity/lib/live';
 import { fetchAllProjects } from '@/sanity/lib/queries';
 
 import type { FetchHomeResult } from '../../../../sanity.types';
@@ -18,7 +18,7 @@ const ProjectsList = async ({
   showFeaturedProjectCard,
   featuredProjectCardOverride,
 }: IProjectsList) => {
-  const projects = await client.fetch(fetchAllProjects);
+  const { data: projects } = await sanityFetch({ query: fetchAllProjects });
 
   // Sort projects by creation date
   const sortedProjects = projects.sort((a, b) => {
