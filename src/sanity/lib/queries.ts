@@ -870,9 +870,11 @@ export const fetchAllProjects = defineQuery(`
   }
 `);
 
-// All Lounge items, newest first — powers the Lounge List block.
+// All Lounge items, newest added first — powers the Lounge List block.
+// Ordered by creation, not the editorial `date` field, so the numbering
+// matches the order items were added in the Studio.
 export const fetchAllLounges = defineQuery(`
-  *[_type == "lounge"] | order(coalesce(date, _createdAt) desc) {
+  *[_type == "lounge"] | order(_createdAt desc) {
     _id,
     _createdAt,
     title,
