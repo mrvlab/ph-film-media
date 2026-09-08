@@ -2310,7 +2310,7 @@ export type FetchAllProjectsResult = Array<{
 
 // Source: src/sanity/lib/queries.ts
 // Variable: fetchAllLounges
-// Query: *[_type == "lounge"] | order(coalesce(date, _createdAt) desc) {    _id,    _createdAt,    title,    date,    link{      linkType,      externalLink,      internalLink->{        _id,        pageTitle,        slug      }    },    loungeImage{      _type,      media{        _type,        alt,        crop,        hotspot,        asset->{ ... }      }    }  }
+// Query: *[_type == "lounge"] | order(_createdAt desc) {    _id,    _createdAt,    title,    date,    link{      linkType,      externalLink,      internalLink->{        _id,        pageTitle,        slug      }    },    loungeImage{      _type,      media{        _type,        alt,        crop,        hotspot,        asset->{ ... }      }    }  }
 export type FetchAllLoungesResult = Array<{
   _id: string;
   _createdAt: string;
@@ -2475,7 +2475,7 @@ declare module "@sanity/client" {
     '\n  *[_type == "distributions" && defined(slug.current)]{\n   "slug": slug.current,\n   _updatedAt\n  }\n': FetchAllDistributionMovieSlugsResult;
     '\n  *[_type == "page" && count(blockList[_type == "distributionList"]) > 0][0]{\n    "slug": slug.current\n  }\n': FetchDistributionParentSlugResult;
     '\n  *[_type == "projects"] | order(_createdAt desc) {\n    _id,\n    _type,\n    _createdAt,\n    _updatedAt,\n    _rev,\n    title,\n    description,\n    projectImage {\n      _type,\n      media {\n        _type,\n        alt,\n        crop,\n        hotspot,\n        asset->{ ... }\n      }\n    },\n    link{\n      linkType,\n      externalLink,\n      internalLink->{\n        _id,\n        pageTitle,\n        slug\n      }\n    }\n  }\n': FetchAllProjectsResult;
-    '\n  *[_type == "lounge"] | order(coalesce(date, _createdAt) desc) {\n    _id,\n    _createdAt,\n    title,\n    date,\n    link{\n      linkType,\n      externalLink,\n      internalLink->{\n        _id,\n        pageTitle,\n        slug\n      }\n    },\n    loungeImage{\n      _type,\n      media{\n        _type,\n        alt,\n        crop,\n        hotspot,\n        asset->{ ... }\n      }\n    }\n  }\n': FetchAllLoungesResult;
+    '\n  *[_type == "lounge"] | order(_createdAt desc) {\n    _id,\n    _createdAt,\n    title,\n    date,\n    link{\n      linkType,\n      externalLink,\n      internalLink->{\n        _id,\n        pageTitle,\n        slug\n      }\n    },\n    loungeImage{\n      _type,\n      media{\n        _type,\n        alt,\n        crop,\n        hotspot,\n        asset->{ ... }\n      }\n    }\n  }\n': FetchAllLoungesResult;
     '\n  *[_type == "projects"] | order(_createdAt desc)[0] {\n    _id,\n    _type,\n    _createdAt,\n    _updatedAt,\n    _rev,\n    title,\n    description,\n    projectImage {\n      _type,\n      media {\n        _type,\n        "alt": coalesce(alt, null),\n        crop,\n        hotspot,\n        asset->{ ... }\n      }\n    }\n  }\n': FetchLatestProjectResult;
     '\n  *[_type == "product" && slug.current == $slug][0]{\n    _id,\n    _type,\n    title,\n    "slug": slug.current,\n    description,\n    price,\n    currency,\n    gallery[]{\n      _key,\n      _type,\n      media{ _type, alt, crop, hotspot, asset->{ ... } }\n    },\n    variants[]{\n      _key,\n      size,\n      stock,\n      sold\n    }\n  }\n': FetchProductResult;
     '\n  *[_type == "product" && defined(slug.current)]{\n    "slug": slug.current,\n    _updatedAt\n  }\n': FetchAllProductSlugsResult;
