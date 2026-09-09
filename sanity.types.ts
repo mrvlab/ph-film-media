@@ -2462,8 +2462,7 @@ export type FetchAllProductSlugsResult = Array<{
 }>;
 
 // Query TypeMap
-import "@sanity/client";
-declare module "@sanity/client" {
+declare global {
   interface SanityQueries {
     '\n  *[_type == "page" && defined(slug.current)]{\n    "slug": slug.current,\n    _updatedAt\n  }\n': FetchAllPageSlugsResult;
     '\n    *[_type == "settings"][0]{\n      _id,\n      _type,\n      seo {\n        metaTitle,\n        metaDescription,\n        metaImage {\n          _type,\n          media {\n            _type,\n            alt,\n            crop,\n            hotspot,\n            asset->{ ... }\n          }\n        }\n      },\n      distributionMovieDetailTitles {\n        descriptionLabel,\n        directorsLabel,\n        writersLabel,\n        actorsLabel,\n        languagesLabel,\n        releaseDateLabel,\n        durationLabel\n      },\n      ticketLabels {\n        titleSingular,\n        titlePlural,\n        viewingLabel,\n        locationLabel,\n        priceLabel\n      },\n      membership {\n        fee,\n        currency\n      }\n    }\n    ': SettingsQueryResult;
@@ -2480,4 +2479,8 @@ declare module "@sanity/client" {
     '\n  *[_type == "product" && slug.current == $slug][0]{\n    _id,\n    _type,\n    title,\n    "slug": slug.current,\n    description,\n    price,\n    currency,\n    gallery[]{\n      _key,\n      _type,\n      media{ _type, alt, crop, hotspot, asset->{ ... } }\n    },\n    variants[]{\n      _key,\n      size,\n      stock,\n      sold\n    }\n  }\n': FetchProductResult;
     '\n  *[_type == "product" && defined(slug.current)]{\n    "slug": slug.current,\n    _updatedAt\n  }\n': FetchAllProductSlugsResult;
   }
+}
+// Lets @sanity/client releases that predate the global registry read it too
+declare module "@sanity/client" {
+  interface SanityQueries extends globalThis.SanityQueries {}
 }
