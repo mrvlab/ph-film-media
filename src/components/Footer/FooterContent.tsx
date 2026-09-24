@@ -15,7 +15,7 @@ const currentYear = new Date().getFullYear();
 const MENU_HEADING = 'Meny';
 const DEFAULT_CTA_LABEL = 'Bli medlem';
 const DEFAULT_CTA_TEXT =
-  'Visningarna är endast för medlemmar. Ett säsongsmedlemskap ger dig möjlighet att köpa biljetter till alla filmer vi visar, från första till sista visningen.';
+  'Visningarna är endast för medlemmar. Ett säsongsmedlemskap ger dig möjlighet att köpa biljetter till alla visningar från och med att du blir medlem och säsongen ut.';
 
 type IFooterContent = {
   data: FetchFooterResult;
