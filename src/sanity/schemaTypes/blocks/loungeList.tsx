@@ -7,13 +7,13 @@ import { defineField, defineType, ObjectInputProps } from 'sanity';
 // is editable, so we render the default field form underneath the note.
 function LoungeListInput(props: ObjectInputProps) {
   return (
-    <Stack space={4}>
+    <Stack gap={4}>
       <Card padding={4} radius={2} tone='transparent' border>
         <Flex align='flex-start' gap={3}>
           <Text size={3} muted>
             <ListIcon />
           </Text>
-          <Stack space={3}>
+          <Stack gap={3}>
             <Text size={1} weight='semibold'>
               Lounge List
             </Text>
