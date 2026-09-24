@@ -10,7 +10,7 @@ import {
 import { AnimatePresence } from "framer-motion";
 
 import { trackEcommerce, type AnalyticsItem } from "@/lib/analytics/gtag";
-import { TicketGateModal } from "./TicketGateModal";
+import { TicketGateModal, type GateMode } from "./TicketGateModal";
 
 // Lets the buy button and the whole-card trigger open one shared gate modal.
 const OpenGateContext = createContext<(() => void) | null>(null);
@@ -20,7 +20,14 @@ export function useTicketGate(): () => void {
 }
 
 type TicketGateProps = {
-  ticketId: string;
+  /** Omitted in membership mode, where there is no screening behind the gate. */
+  ticketId?: string;
+  /**
+   * "ticket" gates a screening (join → code → checkout); "membership" only sells
+   * the membership itself, so it opens straight on the join step and never
+   * offers the access-code step.
+   */
+  mode?: GateMode;
   contactEmail?: string | null;
   membershipFeeLabel?: string;
   /** GA4 item for this screening; null when the ticket ref is unresolved. */
@@ -30,6 +37,10 @@ type TicketGateProps = {
 };
 
 const PENDING_JOIN_KEY = "phmedia:pendingJoin";
+
+// Stands in for a ticket id when the gate sells the membership on its own —
+// it's also the item_id useMembershipGate already reports for that checkout.
+const MEMBERSHIP_GATE_ID = "membership";
 
 /**
  * Wraps a ticket card and hosts a single members-only gate modal. Both the
@@ -41,14 +52,21 @@ const PENDING_JOIN_KEY = "phmedia:pendingJoin";
  */
 export function TicketGate({
   ticketId,
+  mode = "ticket",
   contactEmail,
   membershipFeeLabel,
   item,
   currency,
   children,
 }: TicketGateProps) {
+  const isMembership = mode === "membership";
+  const gateId = ticketId ?? MEMBERSHIP_GATE_ID;
+  const firstView = isMembership ? "join" : "choice";
+
   const [open, setOpen] = useState(false);
-  const [initialView, setInitialView] = useState<"choice" | "joined">("choice");
+  const [initialView, setInitialView] = useState<"choice" | "join" | "joined">(
+    firstView,
+  );
   const [prefillEmail, setPrefillEmail] = useState("");
 
   // After Stripe redirects back with `?membership=joined`, reopen this ticket's
@@ -67,7 +85,7 @@ export function TicketGate({
       } catch {
         pending = null;
       }
-      if (!pending || pending.ticketId !== ticketId) return;
+      if (!pending || pending.ticketId !== gateId) return;
 
       setPrefillEmail(pending.email ?? "");
       setInitialView("joined");
@@ -91,9 +109,9 @@ export function TicketGate({
       );
     });
     return () => cancelAnimationFrame(frame);
-  }, [ticketId]);
+  }, [gateId]);
 
-  // Manual opens (clicking a ticket) always start fresh on the choice step.
+  // Manual opens always start fresh on the gate's first step.
   function openFresh() {
     // Clicking the card is both the click-through and the detail view — there
     // is no separate ticket page, the modal is the product detail.
@@ -107,7 +125,7 @@ export function TicketGate({
       });
       trackEcommerce("view_item", { items: [item], currency });
     }
-    setInitialView("choice");
+    setInitialView(firstView);
     setPrefillEmail("");
     setOpen(true);
   }
@@ -119,7 +137,8 @@ export function TicketGate({
         {open ? (
           <TicketGateModal
             key="gate"
-            ticketId={ticketId}
+            ticketId={gateId}
+            mode={mode}
             item={item}
             currency={currency}
             contactEmail={contactEmail}
