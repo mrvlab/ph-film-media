@@ -101,17 +101,20 @@ export const fetchFooter = defineQuery(`
   *[_type == "footer"][0]{
     _id,
     _type,
-    title,
     email,
-    text[],
-    socialMediaLinks[]{
+    ctaText,
+    ctaLabel,
+    contactLinks[]{
       _key,
-      linkType,
-      externalLink,
-      internalLink->{
-        _id,
-        pageTitle,
-        slug
+      label,
+      link{
+        linkType,
+        externalLink,
+        internalLink->{
+          _id,
+          pageTitle,
+          slug
+        }
       }
     },
     rights

@@ -9,8 +9,16 @@ import { useMembershipGate } from './useMembershipGate';
 
 type GateView = 'choice' | 'join' | 'code' | 'joined' | 'already' | 'disabled';
 
+/**
+ * "ticket" gates a screening: join or redeem an access code, then buy a ticket.
+ * "membership" sells the membership on its own (the footer CTA), so there is no
+ * code to redeem and no ticket checkout at the end.
+ */
+export type GateMode = 'ticket' | 'membership';
+
 type TicketGateModalProps = {
   ticketId: string;
+  mode?: GateMode;
   /** GA4 item for the screening behind this gate. */
   item?: AnalyticsItem | null;
   currency?: string | null;
@@ -49,6 +57,7 @@ function Spinner() {
 
 export function TicketGateModal({
   ticketId,
+  mode = 'ticket',
   item,
   currency,
   contactEmail,
@@ -57,6 +66,7 @@ export function TicketGateModal({
   initialEmail = '',
   onClose,
 }: TicketGateModalProps) {
+  const isMembership = mode === 'membership';
   const [view, setView] = useState<GateView>(initialView);
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -195,8 +205,9 @@ export function TicketGateModal({
           {view === 'join' ? (
             <>
               <p className='mt-5 text-b-16 leading-snug text-black/80 lg:text-b-21'>
-                Fyll i dina uppgifter för att bli medlem i Filmklubben. Koden
-                till visningen skickas till din mejl.
+                {isMembership
+                  ? 'Fyll i dina uppgifter för att bli medlem i Filmklubben.'
+                  : 'Fyll i dina uppgifter för att bli medlem i Filmklubben. Koden till visningen skickas till din mejl.'}
               </p>
               <form onSubmit={handleJoinSubmit} className='mt-8'>
                 <div className='flex flex-col gap-6'>
@@ -303,22 +314,24 @@ export function TicketGateModal({
           {view === 'joined' ? (
             <>
               <p className='mt-5 text-b-16 leading-snug text-black/80 lg:text-b-21'>
-                Du är nu medlem i Filmklubben. Håll utkik i din e-post — koden
-                till visningen skickas via vårt nyhetsbrev. Har du redan koden
-                kan du lösa in den nedan.
+                {isMembership
+                  ? 'Du är nu medlem i Filmklubben. Håll utkik i din e-post — koderna till våra visningar skickas via vårt nyhetsbrev.'
+                  : 'Du är nu medlem i Filmklubben. Håll utkik i din e-post — koden till visningen skickas via vårt nyhetsbrev. Har du redan koden kan du lösa in den nedan.'}
               </p>
               <div className='mt-8 flex flex-col gap-3'>
-                <button
-                  type='button'
-                  onClick={() => goTo('code')}
-                  className={primaryBtn}
-                >
-                  Lös in din kod
-                </button>
+                {isMembership ? null : (
+                  <button
+                    type='button'
+                    onClick={() => goTo('code')}
+                    className={primaryBtn}
+                  >
+                    Lös in din kod
+                  </button>
+                )}
                 <button
                   type='button'
                   onClick={onClose}
-                  className={secondaryBtn}
+                  className={isMembership ? primaryBtn : secondaryBtn}
                 >
                   Stäng
                 </button>
@@ -329,21 +342,24 @@ export function TicketGateModal({
           {view === 'already' ? (
             <>
               <p className='mt-5 text-b-16 leading-snug text-black/80 lg:text-b-21'>
-                Du är redan medlem i Filmklubben. Lös in din kod nedan för att
-                köpa din biljett.
+                {isMembership
+                  ? 'Du är redan medlem i Filmklubben. Koderna till våra visningar skickas via vårt nyhetsbrev.'
+                  : 'Du är redan medlem i Filmklubben. Lös in din kod nedan för att köpa din biljett.'}
               </p>
               <div className='mt-8 flex flex-col gap-3'>
-                <button
-                  type='button'
-                  onClick={() => goTo('code')}
-                  className={primaryBtn}
-                >
-                  Lös in din kod
-                </button>
+                {isMembership ? null : (
+                  <button
+                    type='button'
+                    onClick={() => goTo('code')}
+                    className={primaryBtn}
+                  >
+                    Lös in din kod
+                  </button>
+                )}
                 <button
                   type='button'
                   onClick={onClose}
-                  className={secondaryBtn}
+                  className={isMembership ? primaryBtn : secondaryBtn}
                 >
                   Stäng
                 </button>

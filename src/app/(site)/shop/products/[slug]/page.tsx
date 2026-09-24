@@ -2,11 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
 import { sanityFetch } from '@/sanity/lib/live';
-import {
-  fetchProduct,
-  fetchFooter,
-  fetchAllProductSlugs,
-} from '@/sanity/lib/queries';
+import { fetchProduct, fetchAllProductSlugs } from '@/sanity/lib/queries';
 import { client } from '@/sanity/lib/client';
 import { urlFor } from '@/sanity/lib/image';
 import { dataAttr } from '@/sanity/lib/utils';
@@ -22,7 +18,6 @@ import { formatPrice } from '@/lib/products/formatPrice';
 import { getSiteUrl } from '@/utils/siteUrl';
 import type {
   FetchProductResult,
-  FetchFooterResult,
   FetchAllProductSlugsResult,
 } from '../../../../../../sanity.types';
 
@@ -86,10 +81,6 @@ export default async function ProductPage({
   });
 
   if (!product) notFound();
-
-  const { data: footer }: { data: FetchFooterResult } = await sanityFetch({
-    query: fetchFooter,
-  });
 
   const variants = toPurchaseVariants(product.variants);
 
@@ -187,7 +178,7 @@ export default async function ProductPage({
           </div>
         </section>
 
-        <Footer footer={footer} />
+        <Footer />
       </main>
     </>
   );

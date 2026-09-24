@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react';
 
-import { useTicketGate } from './TicketGate';
+import { useTicketGate } from '@/components/Membership/TicketGate';
 
 type BuyTicketCardProps = {
   /** When true (sold out) the card is inert — no click, no gate. */

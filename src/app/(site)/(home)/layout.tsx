@@ -1,8 +1,7 @@
 import '@/app/globals.css';
 import Footer from '@/components/Footer/Footer';
 import Header from '@/components/Header/Header';
-import { fetchFooter, fetchHome } from '@/sanity/lib/queries';
-import { FetchFooterResult } from '../../../../sanity.types';
+import { fetchHome } from '@/sanity/lib/queries';
 import { sanityFetch } from '@/sanity/lib/live';
 
 export default async function HomeLayout({
@@ -15,9 +14,6 @@ export default async function HomeLayout({
     params: { slug: '/' },
   });
 
-  const { data: footer }: { data: FetchFooterResult } = await sanityFetch({
-    query: fetchFooter,
-  });
 
   // Check if first block is hero carousel
   const firstBlock = homeData?.blockList?.[0];
@@ -32,7 +28,7 @@ export default async function HomeLayout({
         id='home-main-content'
       >
         {children}
-        <Footer footer={footer} />
+        <Footer />
       </main>
     </>
   );

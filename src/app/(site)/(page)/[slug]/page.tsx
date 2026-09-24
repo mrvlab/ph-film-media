@@ -1,15 +1,10 @@
 import { sanityFetch } from '@/sanity/lib/live';
-import {
-  fetchPage,
-  fetchFooter,
-  fetchAllPageSlugs,
-} from '@/sanity/lib/queries';
+import { fetchPage, fetchAllPageSlugs } from '@/sanity/lib/queries';
 import { notFound } from 'next/navigation';
 import { generateMetadata } from '@/utils/generateMetadata';
 import BlockRenderer from '@/components/PageBuilder/BlockRenderer';
 import type {
   FetchPageResult,
-  FetchFooterResult,
   FetchAllPageSlugsResult,
 } from '../../../../../sanity.types';
 import Header from '@/components/Header/Header';
@@ -52,10 +47,6 @@ export default async function Page({
   if (!data) {
     notFound();
   }
-
-  const { data: footer }: { data: FetchFooterResult } = await sanityFetch({
-    query: fetchFooter,
-  });
 
   // Breadcrumb hierarchy (Home › <Page>) so this page is understood as part of
   // the site rather than a standalone URL.
@@ -103,7 +94,7 @@ export default async function Page({
             />
           );
         })}
-        <Footer footer={footer} />
+        <Footer />
       </main>
     </>
   );

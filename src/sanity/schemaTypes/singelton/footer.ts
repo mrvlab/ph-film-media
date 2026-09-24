@@ -1,4 +1,5 @@
 import { DoubleChevronDownIcon } from '@sanity/icons/DoubleChevronDown';
+import { LinkIcon } from '@sanity/icons/Link';
 import { defineField, defineType } from 'sanity';
 
 export const footer = defineType({
@@ -12,43 +13,99 @@ export const footer = defineType({
       title: 'Text',
     },
     {
-      name: 'socialMedia',
-      title: 'Social Media',
+      name: 'contact',
+      title: 'Contact',
     },
   ],
   fields: [
     defineField({
-      name: 'title',
-      title: 'Title',
-      type: 'string',
+      name: 'ctaText',
+      title: 'Medlemskapstext',
+      type: 'text',
+      rows: 4,
+      description:
+        'Texten ovanför medlemskapsknappen i sidfoten. Lämnas den tom används en standardtext.',
       group: 'text',
+    }),
+    defineField({
+      name: 'ctaLabel',
+      title: 'Knapptext',
+      type: 'string',
+      initialValue: 'Bli medlem',
+      description: 'Texten på medlemskapsknappen i sidfoten.',
+      group: 'text',
+    }),
+    defineField({
+      name: 'contactLinks',
+      title: 'Kontaktlänkar',
+      description:
+        'Raderna längst ner i sidfoten, t.ex. e-post, Instagram, nyhetsbrev och YouTube.',
+      group: 'contact',
+      type: 'array',
+      of: [
+        defineField({
+          name: 'footerContactLink',
+          title: 'Kontaktlänk',
+          type: 'object',
+          fields: [
+            defineField({
+              name: 'label',
+              title: 'Label',
+              type: 'string',
+              validation: (Rule) => Rule.required(),
+            }),
+            defineField({
+              name: 'link',
+              title: 'Link',
+              type: 'linkType',
+            }),
+          ],
+          preview: {
+            select: {
+              label: 'label',
+              linkType: 'link.linkType',
+              externalLink: 'link.externalLink',
+              internalLink: 'link.internalLink',
+              pageTitle: 'link.internalLink.pageTitle',
+            },
+            prepare(selection) {
+              const { label, linkType, externalLink, internalLink, pageTitle } =
+                selection;
+              const title = label || 'Kontaktlänk';
+              let subtitle = '';
+
+              if (linkType === 'externalLink' && externalLink) {
+                subtitle = `Link to: ${externalLink}`;
+              } else if (linkType === 'internalLink' && internalLink) {
+                subtitle = `Link to page: ${pageTitle}`;
+              } else {
+                subtitle = 'No link configured';
+              }
+
+              return {
+                title,
+                subtitle,
+                media: LinkIcon,
+              };
+            },
+          },
+        }),
+      ],
     }),
     defineField({
       name: 'email',
-      title: 'Email',
+      title: 'Kontakt-e-post (support)',
       type: 'string',
-      group: 'text',
-    }),
-    defineField({
-      name: 'socialMediaLinks',
-      title: 'Social Media Links',
-      description: 'The links to the social media pages.',
-      group: 'socialMedia',
-      type: 'array',
-      of: [{ type: 'linkType' }],
-      validation: (Rule) => Rule.max(3),
-    }),
-    defineField({
-      name: 'text',
-      type: 'richText',
-      description: 'The text to display underneath the email address.',
-      group: 'text',
+      description:
+        'Visas inte i sidfoten. Används som supportadress i medlemsrutan när ett medlemskap är spärrat.',
+      group: 'contact',
     }),
     defineField({
       name: 'rights',
       title: 'Rights',
       type: 'string',
-      description: 'The rights text to display in the footer.',
+      description:
+        'Visas efter årtalet i sidfotens copyright-rad, t.ex. "PH Media. All rights reserved."',
       group: 'text',
     }),
   ],

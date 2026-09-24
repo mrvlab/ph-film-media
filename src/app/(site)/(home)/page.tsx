@@ -33,13 +33,17 @@ export default async function HomePage() {
 
   const baseUrl = getSiteUrl();
 
-  // Extract social media links for Organization schema
+  // Extract social media links for Organization schema. mailto:/tel: rows are
+  // skipped — `sameAs` is for profile pages, and the address is passed as `email`.
   const socialLinks =
-    footer?.socialMediaLinks
-      ?.map((link) => {
-        if (link.linkType === 'externalLink') return link.externalLink;
+    footer?.contactLinks
+      ?.map(({ link }) => {
+        if (link?.linkType === 'externalLink') {
+          const href = link.externalLink;
+          return href && /^https?:\/\//.test(href) ? href : null;
+        }
         if (
-          link.linkType === 'internalLink' &&
+          link?.linkType === 'internalLink' &&
           link.internalLink?.slug?.current
         ) {
           return `${baseUrl}/${link.internalLink.slug.current}`;

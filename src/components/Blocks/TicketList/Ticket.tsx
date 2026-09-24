@@ -2,7 +2,7 @@ import Image from 'next/image';
 
 import { urlFor } from '@/sanity/lib/image';
 import { BuyTicketCard } from './BuyTicketCard';
-import { TicketGate } from './TicketGate';
+import { TicketGate } from '@/components/Membership/TicketGate';
 import { toTicketItem } from './analyticsItem';
 import type { ITicketListBlock, TicketLabels } from '.';
 
