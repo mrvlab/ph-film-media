@@ -46,7 +46,7 @@ const FooterContactRow = ({ link, index, total }: IFooterContactRow) => {
     </>
   );
 
-  const className = `flex items-center justify-between gap-4 py-4 pl-8 pr-4 text-white transition-opacity hover:opacity-70 ${mobileBorderClass} ${dividerClass}`;
+  const className = `flex items-center justify-between gap-4 py-4 lg:pl-8 pr-4 text-white transition-opacity hover:opacity-70 ${mobileBorderClass} ${dividerClass}`;
 
   return (
     <li className='contents'>
