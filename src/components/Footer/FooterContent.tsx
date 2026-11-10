@@ -80,7 +80,7 @@ const FooterContent = ({
   );
 
   return (
-    <footer className='page-x-spacing flex flex-col gap-8 pt-8 pb-10 lg:gap-0 lg:pt-20'>
+    <footer className='page-x-spacing flex flex-col gap-8 pt-8 pb-10 lg:gap-0 lg:pt-20 lg:pb-0'>
       <div className='flex flex-col gap-8 lg:grid lg:grid-cols-4 lg:gap-0 lg:border-b lg:border-white/20'>
         {links.length > 0 ? (
           <div className='flex flex-col gap-4 lg:col-span-2 lg:p-8'>
