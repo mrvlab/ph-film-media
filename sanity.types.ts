@@ -217,7 +217,19 @@ export type Member = {
   email?: string;
   status?: "active" | "disabled";
   newsletterConsent?: boolean;
+  validUntil?: string;
   joinedAt?: string;
+  membershipHistory?: Array<{
+    season?: string;
+    amount?: number;
+    currency?: string;
+    paidAt?: string;
+    source?: "stripe" | "existing";
+    stripeSessionId?: string;
+    stripePaymentIntentId?: string;
+    _type: "membershipPeriod";
+    _key: string;
+  }>;
   amount?: number;
   currency?: string;
   paidAt?: string;

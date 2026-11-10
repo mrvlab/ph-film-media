@@ -1,5 +1,11 @@
+import { CalendarIcon } from '@sanity/icons/Calendar';
+import { CheckmarkCircleIcon } from '@sanity/icons/CheckmarkCircle';
+import { ClockIcon } from '@sanity/icons/Clock';
+import { CloseCircleIcon } from '@sanity/icons/CloseCircle';
 import { UsersIcon } from '@sanity/icons/Users';
-import { defineField, defineType } from 'sanity';
+import { defineArrayMember, defineField, defineType } from 'sanity';
+
+import { seasonLabel, seasonOf } from '@/lib/members/seasons';
 
 export const member = defineType({
   name: 'member',
@@ -7,38 +13,32 @@ export const member = defineType({
   type: 'document',
   icon: UsersIcon,
   groups: [
+    { name: 'member', title: 'Member', default: true },
     { name: 'membership', title: 'Membership' },
-    { name: 'payment', title: 'Payment' },
   ],
-  fieldsets: [
-    { name: 'name', title: 'Name', options: { columns: 2 } },
-    { name: 'amountPaid', title: 'Amount paid', options: { columns: 2 } },
-  ],
+  fieldsets: [{ name: 'name', title: 'Name', options: { columns: 2 } }],
   fields: [
-    // ----- Membership -----
+    // ----- Member -----
     defineField({
       name: 'firstName',
       title: 'First name',
       type: 'string',
-      group: 'membership',
+      group: 'member',
       fieldset: 'name',
-      description: 'Entered when the member joins.',
       validation: (Rule) => Rule.required(),
     }),
     defineField({
       name: 'lastName',
-      title: 'Last name (optional)',
+      title: 'Last name',
       type: 'string',
-      group: 'membership',
+      group: 'member',
       fieldset: 'name',
     }),
     defineField({
       name: 'email',
       title: 'Email',
       type: 'string',
-      group: 'membership',
-      description:
-        'Filmklubben member. This is the key used to confirm membership at ticket checkout.',
+      group: 'member',
       validation: (Rule) =>
         Rule.required()
           .email()
@@ -65,91 +65,140 @@ export const member = defineType({
       name: 'status',
       title: 'Status',
       type: 'string',
-      group: 'membership',
+      group: 'member',
       options: {
         list: [
           { title: 'Active', value: 'active' },
           { title: 'Disabled', value: 'disabled' },
         ],
         layout: 'radio',
+        direction: 'horizontal',
       },
       description:
-        'Set to "active" 🟢 automatically once the membership payment completes. Only "active" members can buy tickets. Set to "disabled" 🔴 to revoke access manually.',
+        'Set to "active" 🟢 automatically when the membership is paid. Set to "disabled" 🔴 to revoke access manually.',
     }),
     defineField({
       name: 'newsletterConsent',
       title: 'Newsletter consent',
       type: 'boolean',
-      group: 'membership',
+      group: 'member',
       initialValue: true,
       readOnly: true,
       description:
         'Read-only. Members consent to the newsletter when they join via the membership form.',
     }),
+    // ----- Membership -----
     defineField({
-      name: 'joinedAt',
-      title: 'Joined at',
+      name: 'validUntil',
+      title: 'Paid through',
       type: 'datetime',
       group: 'membership',
       readOnly: true,
       description:
-        'Read-only. Set automatically when the membership payment completes.',
-    }),
-    // ----- Payment (initial membership fee) -----
-    defineField({
-      name: 'amount',
-      title: 'Amount paid (major units, e.g. SEK)',
-      type: 'number',
-      group: 'payment',
-      fieldset: 'amountPaid',
-      readOnly: true,
-      description:
-        'Read-only. The initial membership fee. This can be changed for upcoming memberships under settings here in Sanity.',
+        'Read-only. End of the last paid season. Seasons end on 30 June and 31 December.',
     }),
     defineField({
-      name: 'currency',
-      title: 'Currency',
-      type: 'string',
-      group: 'payment',
-      fieldset: 'amountPaid',
-      readOnly: true,
-    }),
-    defineField({
-      name: 'paidAt',
-      title: 'Paid at',
+      name: 'joinedAt',
+      title: 'Member since',
       type: 'datetime',
-      group: 'payment',
+      group: 'membership',
       readOnly: true,
+      description: 'Read-only. Set when the first membership payment completes.',
     }),
-    // Stamped by the "Mark as existing member" document action when an admin
-    // grandfathers in a member who joined before online payments existed. Its
-    // presence both records that the fee was bypassed (not paid via Stripe) and
-    // locks the action so it can only be applied once. Hidden until set.
+    defineField({
+      name: 'membershipHistory',
+      title: 'History',
+      type: 'array',
+      group: 'membership',
+      readOnly: true,
+      description: 'Read-only. One entry per paid season, newest first.',
+      of: [
+        defineArrayMember({
+          name: 'membershipPeriod',
+          title: 'Season',
+          type: 'object',
+          fields: [
+            defineField({ name: 'season', title: 'Season', type: 'string' }),
+            defineField({ name: 'amount', title: 'Amount', type: 'number' }),
+            defineField({ name: 'currency', title: 'Currency', type: 'string' }),
+            defineField({ name: 'paidAt', title: 'Paid at', type: 'datetime' }),
+            defineField({
+              name: 'source',
+              title: 'Source',
+              type: 'string',
+              options: {
+                list: [
+                  { title: 'Stripe', value: 'stripe' },
+                  { title: 'Existing member', value: 'existing' },
+                ],
+              },
+            }),
+            defineField({
+              name: 'stripeSessionId',
+              title: 'Stripe Checkout Session ID',
+              type: 'string',
+              hidden: true,
+            }),
+            defineField({
+              name: 'stripePaymentIntentId',
+              title: 'Stripe PaymentIntent ID',
+              type: 'string',
+              hidden: true,
+            }),
+          ],
+          preview: {
+            select: {
+              season: 'season',
+              amount: 'amount',
+              currency: 'currency',
+              paidAt: 'paidAt',
+              source: 'source',
+            },
+            prepare({ season, amount, currency, paidAt, source }) {
+              const paid =
+                amount != null
+                  ? `${amount} ${(currency || '').toUpperCase()}`.trim()
+                  : '—';
+              const when = paidAt
+                ? new Date(paidAt).toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                  })
+                : 'unknown date';
+              const via = source === 'existing' ? 'Existing member' : 'Stripe';
+              return {
+                title: season ? `Säsong ${seasonLabel(season)}` : 'Unknown season',
+                subtitle: `${paid} · Paid ${when} · ${via}`,
+                media: CalendarIcon,
+              };
+            },
+          },
+        }),
+      ],
+    }),
+    // ----- Hidden -----
+    // The latest payment, mirrored from the newest history entry. Kept for the
+    // Stripe audit trail and the "Mark as existing member" lock; the History
+    // list is what admins read.
+    defineField({ name: 'amount', type: 'number', readOnly: true, hidden: true }),
+    defineField({ name: 'currency', type: 'string', readOnly: true, hidden: true }),
+    defineField({ name: 'paidAt', type: 'datetime', readOnly: true, hidden: true }),
     defineField({
       name: 'paymentBypassedAt',
-      title: 'Payment bypassed at',
       type: 'datetime',
-      group: 'payment',
       readOnly: true,
-      hidden: ({ value }) => !value,
-      description:
-        'Read-only. Set when this member was marked as an existing member (payment bypassed) instead of paying online.',
+      hidden: true,
     }),
-    // Hidden from the Studio UI — kept only as an audit trail linking a member
-    // to their initial payment in the Stripe dashboard (written by the webhook).
     defineField({
       name: 'stripeSessionId',
-      title: 'Stripe Checkout Session ID',
       type: 'string',
-      group: 'payment',
       readOnly: true,
       hidden: true,
     }),
     defineField({
       name: 'stripePaymentIntentId',
-      title: 'Stripe PaymentIntent ID',
       type: 'string',
-      group: 'payment',
       readOnly: true,
       hidden: true,
     }),
@@ -160,6 +209,11 @@ export const member = defineType({
       name: 'joinedAtDesc',
       by: [{ field: 'joinedAt', direction: 'desc' }],
     },
+    {
+      title: 'Paid through (latest first)',
+      name: 'validUntilDesc',
+      by: [{ field: 'validUntil', direction: 'desc' }],
+    },
   ],
   preview: {
     select: {
@@ -167,42 +221,52 @@ export const member = defineType({
       lastName: 'lastName',
       email: 'email',
       joinedAt: 'joinedAt',
-      amount: 'amount',
-      currency: 'currency',
       status: 'status',
       paymentBypassedAt: 'paymentBypassedAt',
+      validUntil: 'validUntil',
+      history: 'membershipHistory',
     },
     prepare({
       firstName,
       lastName,
       email,
       joinedAt,
-      amount,
-      currency,
       status,
       paymentBypassedAt,
+      validUntil,
+      history,
     }) {
       const name = [firstName, lastName].filter(Boolean).join(' ');
-      // Members grandfathered in before online payments read "Existing member"
-      // rather than a join date.
-      const when = paymentBypassedAt
-        ? 'Existing member'
+      // Leads with the membership state so the list can be scanned at a glance:
+      // "🟢 Paid through Jul–Dec 2026 · since Nov 2026 · 3 seasons".
+      const season = validUntil ? seasonLabel(seasonOf(validUntil)) : null;
+      const isCurrent = !!validUntil && validUntil >= new Date().toISOString();
+      const state =
+        status === 'disabled'
+          ? { dot: '🔴', text: 'Disabled', icon: CloseCircleIcon }
+          : !season
+            ? { dot: '⚪', text: 'No payment yet', icon: UsersIcon }
+            : isCurrent
+              ? { dot: '🟢', text: `Paid through ${season}`, icon: CheckmarkCircleIcon }
+              : { dot: '🟠', text: `Expired, last paid ${season}`, icon: ClockIcon };
+      // Members grandfathered in before online payments have no real join date.
+      const since = paymentBypassedAt
+        ? 'existing member'
         : joinedAt
-          ? `Joined: ${new Date(joinedAt).toLocaleDateString('en-US', {
+          ? `since ${new Date(joinedAt).toLocaleDateString('en-US', {
               month: 'short',
-              day: 'numeric',
               year: 'numeric',
             })}`
-          : 'Not joined yet';
-      const paid =
-        amount != null
-          ? `${amount} ${(currency || '').toUpperCase()}`.trim()
-          : '—';
-      const dot = status === 'active' ? '🟢' : '🔴';
+          : null;
+      const count = Array.isArray(history) ? history.length : 0;
+      const seasons = count ? `${count} season${count === 1 ? '' : 's'}` : null;
       return {
         title: name || email || 'Untitled member',
-        subtitle: `${when} · ${paid} ${dot}`,
-        media: UsersIcon,
+        subtitle: [`${state.dot} ${state.text}`, since, seasons]
+          .filter(Boolean)
+          .join(' · '),
+        description: email,
+        media: state.icon,
       };
     },
   },
