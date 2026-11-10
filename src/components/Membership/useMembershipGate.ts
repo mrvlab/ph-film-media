@@ -30,6 +30,8 @@ function checkoutErrorMessage(code: unknown, status: number): string {
       return "Du är inte medlem ännu.";
     case "sold_out":
       return "Slutsåld.";
+    case "screening_passed":
+      return "Den här visningen har redan varit.";
     case "missing_fields":
     case "invalid_email":
       return "Fyll i alla fält.";

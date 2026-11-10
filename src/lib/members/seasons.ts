@@ -67,3 +67,12 @@ export function laterValidUntil(
 ): string {
   return current && current > candidate ? current : candidate;
 }
+
+// Every season from `from` up to and including `to`, oldest first.
+export function seasonRange(from: string, to: string): SeasonId[] {
+  const seasons: SeasonId[] = [];
+  for (let s = from as SeasonId; seasonEnd(s) <= seasonEnd(to); s = nextSeason(s)) {
+    seasons.push(s);
+  }
+  return seasons;
+}

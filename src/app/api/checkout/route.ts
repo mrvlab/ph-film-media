@@ -11,6 +11,8 @@ import {
   isValidEmail,
   normalizeEmail,
 } from "@/lib/members/members";
+import { seasonOf } from "@/lib/members/seasons";
+import { isPastScreening } from "@/lib/tickets/isPastScreening";
 import { clientIp, rateLimit } from "@/lib/rateLimit";
 
 export const runtime = "nodejs";
@@ -38,7 +40,7 @@ type TicketSummary = {
   totalSeats: number;
   seatsSold: number | null;
   venue: string | null;
-  accessCode: string | null;
+  screeningCode: string | null;
   poster: SanityMedia;
   banner: SanityMedia;
 };
@@ -88,7 +90,8 @@ export async function POST(request: Request) {
 
   const ticket = await client.fetch<TicketSummary | null>(
     `*[_type == "ticket" && _id == $id][0]{
-      _id, title, date, price, currency, totalSeats, seatsSold, venue, accessCode,
+      _id, title, date, price, currency, totalSeats, seatsSold, venue,
+      "screeningCode": accessCodeOverride->code,
       poster{ _type, media{ _type, alt, crop, hotspot, asset->{ ... } } },
       banner{ _type, media{ _type, alt, crop, hotspot, asset->{ ... } } }
     }`,
@@ -110,15 +113,33 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "not_member" }, { status: 403 });
   }
 
-  // Gate 2: the shared per-screening access code must match.
-  const storedCode = ticket.accessCode?.trim();
+  // Gate 2: the ticket's screening code, or else the code for the season of
+  // its screening date, must match. No date means no season, which is treated
+  // like a missing code.
+  const season = ticket.date ? seasonOf(ticket.date) : null;
+  const storedCode = ticket.screeningCode?.trim()
+    ? ticket.screeningCode.trim()
+    : season
+      ? (
+          await client.fetch<string | null>(
+            `*[_type == "seasonAccessCode" && scope != "screening" && season == $season] | order(_updatedAt desc)[0].code`,
+            { season },
+          )
+        )?.trim()
+      : null;
   if (!storedCode) {
-    // Misconfigured ticket — admin forgot to set a code.
-    console.error(`[checkout] ticket ${ticket._id} has no accessCode set`);
+    // Misconfigured season — an editor hasn't added its access code yet.
+    console.error(
+      `[checkout] no access code for season ${season ?? "(no date)"} (ticket ${ticket._id})`,
+    );
     return NextResponse.json({ error: "no_access_code" }, { status: 500 });
   }
   if (normalizeCode(rawCode) !== normalizeCode(storedCode)) {
     return NextResponse.json({ error: "invalid_code" }, { status: 403 });
+  }
+
+  if (isPastScreening(ticket)) {
+    return NextResponse.json({ error: "screening_passed" }, { status: 400 });
   }
 
   const sold = ticket.seatsSold ?? 0;

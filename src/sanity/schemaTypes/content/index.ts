@@ -9,3 +9,4 @@ export { lounge } from './lounge';
 export { ticket } from './ticket';
 export { product } from './product';
 export { member } from './member';
+export { seasonAccessCode } from './seasonAccessCode';

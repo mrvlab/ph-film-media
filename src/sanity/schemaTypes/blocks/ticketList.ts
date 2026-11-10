@@ -11,10 +11,13 @@ export const ticketList = defineType({
       name: 'tickets',
       title: 'Tickets',
       type: 'array',
+      description:
+        'Only upcoming screenings. Past ones are removed automatically each night.',
       of: [
         defineArrayMember({
           type: 'reference',
           to: [{ type: 'ticket' }],
+          options: { filter: '!(date < now())' },
         }),
       ],
     }),

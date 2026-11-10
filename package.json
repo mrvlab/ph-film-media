@@ -36,6 +36,7 @@
     "rss-parser": "^3.13.0",
     "sanity-image": "^1.0.0",
     "sanity-plugin-media": "^6.0.9",
+    "server-only": "^0.0.1",
     "stripe": "^22.2.2",
     "styled-components": "^6.1.16",
     "yarn-upgrade-all": "^0.7.5"

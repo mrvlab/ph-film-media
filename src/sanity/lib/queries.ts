@@ -227,7 +227,7 @@ export const fetchHome = defineQuery(`
         _type,
         showTitle,
         bottomSpacing,
-        tickets[]->{
+        tickets[!(@->date < now())]->{
           _id,
           title,
           slug,
@@ -557,7 +557,7 @@ export const fetchPage = defineQuery(`
         _type,
         showTitle,
         bottomSpacing,
-        tickets[]->{
+        tickets[!(@->date < now())]->{
           _id,
           title,
           slug,

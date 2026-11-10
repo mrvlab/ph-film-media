@@ -1541,6 +1541,36 @@
     }
   },
   {
+    "type": "type",
+    "name": "seasonAccessCode.reference",
+    "value": {
+      "type": "object",
+      "attributes": {
+        "_ref": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "string"
+          }
+        },
+        "_type": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "string",
+            "value": "reference"
+          }
+        },
+        "_weak": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "boolean"
+          },
+          "optional": true
+        }
+      },
+      "dereferencesTo": "seasonAccessCode"
+    }
+  },
+  {
     "name": "ticket",
     "type": "document",
     "attributes": {
@@ -1604,13 +1634,6 @@
         },
         "optional": true
       },
-      "accessCode": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "string"
-        },
-        "optional": true
-      },
       "price": {
         "type": "objectAttribute",
         "value": {
@@ -1639,6 +1662,21 @@
         },
         "optional": true
       },
+      "accessCodeOverride": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "inline",
+          "name": "seasonAccessCode.reference"
+        },
+        "optional": true
+      },
+      "accessCode": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        },
+        "optional": true
+      },
       "poster": {
         "type": "objectAttribute",
         "value": {
@@ -1652,6 +1690,100 @@
         "value": {
           "type": "inline",
           "name": "mediaType"
+        },
+        "optional": true
+      }
+    }
+  },
+  {
+    "name": "seasonAccessCode",
+    "type": "document",
+    "attributes": {
+      "_id": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        }
+      },
+      "_type": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string",
+          "value": "seasonAccessCode"
+        }
+      },
+      "_createdAt": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        }
+      },
+      "_updatedAt": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        }
+      },
+      "_rev": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        }
+      },
+      "scope": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "union",
+          "of": [
+            {
+              "type": "string",
+              "value": "season"
+            },
+            {
+              "type": "string",
+              "value": "screening"
+            }
+          ]
+        },
+        "optional": true
+      },
+      "season": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "union",
+          "of": [
+            {
+              "type": "string",
+              "value": "2027-H2"
+            },
+            {
+              "type": "string",
+              "value": "2027-H1"
+            },
+            {
+              "type": "string",
+              "value": "2026-H2"
+            },
+            {
+              "type": "string",
+              "value": "2026-H1"
+            },
+            {
+              "type": "string",
+              "value": "2025-H2"
+            },
+            {
+              "type": "string",
+              "value": "2025-H1"
+            }
+          ]
+        },
+        "optional": true
+      },
+      "code": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
         },
         "optional": true
       }

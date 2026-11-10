@@ -7,6 +7,7 @@ import { BasketIcon } from '@sanity/icons/Basket';
 import { CloseCircleIcon } from '@sanity/icons/CloseCircle';
 import { CheckmarkCircleIcon } from '@sanity/icons/CheckmarkCircle';
 import { ClockIcon } from '@sanity/icons/Clock';
+import { LockIcon } from '@sanity/icons/Lock';
 import { UsersIcon } from '@sanity/icons/Users';
 
 import { apiVersion } from './env';
@@ -22,7 +23,7 @@ const singletonSchemas = Object.values(singelton);
 // Document types that live together under the "Shop" sub-folder.
 const SHOP_TYPES = ['ticket', 'product'];
 
-const TOP_LEVEL_TYPES = ['member'];
+const TOP_LEVEL_TYPES = ['member', 'seasonAccessCode'];
 
 const referenceSchemas = contentSchemas.filter(
   (schema) =>
@@ -103,6 +104,16 @@ const membersListItem = (S: StructureBuilder, context: StructureResolverContext)
                   .defaultOrdering([{ field: 'validUntil', direction: 'desc' }]),
               ),
           ),
+          S.divider(),
+          S.listItem()
+            .id('access-codes')
+            .title('Access codes')
+            .icon(LockIcon)
+            .child(
+              S.documentTypeList('seasonAccessCode')
+                .title('Access codes')
+                .defaultOrdering([{ field: 'season', direction: 'desc' }]),
+            ),
         ]);
     });
 

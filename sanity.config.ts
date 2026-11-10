@@ -16,6 +16,23 @@ import { schema } from './src/sanity/schemaTypes';
 import { structure } from './src/sanity/structure';
 import { resolve } from './src/sanity/presentation/resolve';
 import { MarkExistingMemberAction } from './src/sanity/actions/markExistingMember';
+import { lockAction } from './src/sanity/actions/lockActions';
+import { isPastSeasonCode } from './src/sanity/schemaTypes/content/seasonAccessCode';
+import { isPastScreening } from './src/lib/tickets/isPastScreening';
+
+const LOCKS: Record<
+  string,
+  { isLocked: (doc: Record<string, unknown> | null) => boolean; reason: string }
+> = {
+  seasonAccessCode: {
+    isLocked: isPastSeasonCode,
+    reason: 'Past season codes are kept as history.',
+  },
+  ticket: {
+    isLocked: isPastScreening,
+    reason: 'Past screenings are kept as sales history.',
+  },
+};
 
 export default defineConfig({
   basePath: '/studio',
@@ -24,11 +41,21 @@ export default defineConfig({
   // Add and edit the content schema in the './sanity/schemaTypes' folder
   schema,
   document: {
-    // Add the "Mark as existing member" action to member documents only.
-    actions: (prev, context) =>
-      context.schemaType === 'member'
-        ? [...prev, MarkExistingMemberAction]
-        : prev,
+    // Add the "Mark as existing member" action to member documents only, and
+    // keep past season access codes and past screenings from being deleted or
+    // unpublished: they're the record of what was used and sold.
+    actions: (prev, context) => {
+      if (context.schemaType === 'member') {
+        return [...prev, MarkExistingMemberAction];
+      }
+      const lock = LOCKS[context.schemaType];
+      if (!lock) return prev;
+      return prev.map((action) =>
+        action.action === 'delete' || action.action === 'unpublish'
+          ? lockAction(action, lock.isLocked, lock.reason)
+          : action,
+      );
+    },
   },
   plugins: [
     structureTool({ structure }),
