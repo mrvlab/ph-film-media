@@ -13,6 +13,7 @@ import {
   DEFAULT_MEMBERSHIP_CURRENCY,
   DEFAULT_MEMBERSHIP_FEE,
 } from '@/lib/members/membershipFee';
+import { seasonEnd, seasonOf } from '@/lib/members/seasons';
 
 /**
  * "Mark as existing member" — a one-time document action for grandfathering in
@@ -57,9 +58,10 @@ export const MarkExistingMemberAction: DocumentActionComponent = (
       settings?.membership?.currency ?? DEFAULT_MEMBERSHIP_CURRENCY
     ).toLowerCase();
     const now = new Date().toISOString();
+    const season = seasonOf(now);
 
     // Mirrors registerMemberFromSession, minus the Stripe IDs — `paymentBypassedAt`
-    // is the audit marker in their place.
+    // is the audit marker in their place. Covers the current season only.
     patch.execute([
       {
         set: {
@@ -68,9 +70,32 @@ export const MarkExistingMemberAction: DocumentActionComponent = (
           paidAt: now,
           status: 'active',
           paymentBypassedAt: now,
+          validUntil: seasonEnd(season),
         },
       },
-      { setIfMissing: { joinedAt: now, newsletterConsent: true } },
+      {
+        setIfMissing: {
+          joinedAt: now,
+          newsletterConsent: true,
+          membershipHistory: [],
+        },
+      },
+      {
+        insert: {
+          before: 'membershipHistory[0]',
+          items: [
+            {
+              _key: season,
+              _type: 'membershipPeriod',
+              season,
+              amount: fee,
+              currency,
+              paidAt: now,
+              source: 'existing',
+            },
+          ],
+        },
+      },
     ]);
     publish.execute();
     setDialogOpen(false);
@@ -99,7 +124,7 @@ export const MarkExistingMemberAction: DocumentActionComponent = (
       tone: 'positive',
       message:
         'Mark this person as an existing member (joined before online payments)? ' +
-        'This records the current membership fee, activates them, and publishes. ' +
+        'This records the current membership fee for this season, activates them, and publishes. ' +
         'It can only be done once.',
       onCancel: () => setDialogOpen(false),
       onConfirm: handleConfirm,

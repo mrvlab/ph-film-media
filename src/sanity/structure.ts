@@ -1,6 +1,15 @@
-import type { StructureBuilder, StructureResolver } from 'sanity/structure';
+import type {
+  StructureBuilder,
+  StructureResolver,
+  StructureResolverContext,
+} from 'sanity/structure';
 import { BasketIcon } from '@sanity/icons/Basket';
+import { CloseCircleIcon } from '@sanity/icons/CloseCircle';
+import { CheckmarkCircleIcon } from '@sanity/icons/CheckmarkCircle';
+import { ClockIcon } from '@sanity/icons/Clock';
 import { UsersIcon } from '@sanity/icons/Users';
+
+import { apiVersion } from './env';
 
 // Schema imports
 
@@ -23,7 +32,81 @@ const shopSchemas = contentSchemas.filter((schema) =>
   SHOP_TYPES.includes(schema.name),
 );
 
-export const structure: StructureResolver = (S: StructureBuilder) =>
+// A membership lapses when its season ends (30 June / 31 December), so these
+// lists re-sort themselves at each season change with no job flipping statuses.
+const MEMBER_LISTS = [
+  {
+    id: 'members-current',
+    title: 'Paid this season',
+    icon: CheckmarkCircleIcon,
+    filter: '_type == "member" && status == "active" && validUntil >= now()',
+  },
+  {
+    id: 'members-expired',
+    title: 'Expired (needs renewal)',
+    icon: ClockIcon,
+    filter:
+      '_type == "member" && status == "active" && (!defined(validUntil) || validUntil < now())',
+  },
+  {
+    id: 'members-disabled',
+    title: 'Disabled',
+    icon: CloseCircleIcon,
+    filter: '_type == "member" && status == "disabled"',
+  },
+];
+
+const ALL_MEMBERS_FILTER = '_type == "member"';
+
+// Published members only, so an open draft doesn't count someone twice.
+const countQuery = `{${[
+  { id: 'all', filter: ALL_MEMBERS_FILTER },
+  ...MEMBER_LISTS,
+]
+  .map(
+    ({ id, filter }) =>
+      `"${id}": count(*[${filter} && !(_id in path("drafts.**"))])`,
+  )
+  .join(', ')}}`;
+
+const withCount = (title: string, count: number | undefined) =>
+  count == null ? title : `${title} (${count})`;
+
+// Counts are fetched each time the Members folder opens.
+const membersListItem = (S: StructureBuilder, context: StructureResolverContext) =>
+  S.listItem()
+    .title('Members')
+    .icon(UsersIcon)
+    .child(async () => {
+      const counts = await context
+        .getClient({ apiVersion })
+        .fetch<Record<string, number>>(countQuery)
+        .catch(() => ({}) as Record<string, number>);
+      return S.list()
+        .title('Members')
+        .items([
+          S.documentTypeListItem('member').title(
+            withCount('All members', counts.all),
+          ),
+          S.divider(),
+          ...MEMBER_LISTS.map(({ id, title, icon, filter }) =>
+            S.listItem()
+              .id(id)
+              .title(withCount(title, counts[id]))
+              .icon(icon)
+              .child(
+                S.documentList()
+                  .id(id)
+                  .title(title)
+                  .schemaType('member')
+                  .filter(filter)
+                  .defaultOrdering([{ field: 'validUntil', direction: 'desc' }]),
+              ),
+          ),
+        ]);
+    });
+
+export const structure: StructureResolver = (S, context) =>
   S.list()
     .title('PH Film & Media 2.0')
     .items([
@@ -32,7 +115,7 @@ export const structure: StructureResolver = (S: StructureBuilder) =>
 
       S.divider(),
       // Members — Filmklubben members (their own top-level section)
-      S.documentTypeListItem('member').title('Members').icon(UsersIcon),
+      membersListItem(S, context),
 
       // Content
       S.listItem()

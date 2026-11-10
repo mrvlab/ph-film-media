@@ -3,6 +3,7 @@ import type Stripe from "stripe";
 
 import { writeClient } from "@/sanity/lib/writeClient";
 import { memberDocId, normalizeEmail } from "./members";
+import { laterValidUntil, seasonEnd, seasonOf } from "./seasons";
 
 // Registers a Filmklubben member from a completed membership Checkout Session.
 //
@@ -33,28 +34,65 @@ export async function registerMemberFromSession(
 
   const _id = memberDocId(email);
   const now = new Date().toISOString();
+  // The checkout stamps the season it charged for; older sessions predate that
+  // and paid for the season they were bought in.
+  const season = session.metadata?.season || seasonOf(now);
+
+  const existing = await writeClient.fetch<{
+    validUntil: string | null;
+    hasSeason: boolean;
+  } | null>(
+    `*[_id == $id][0]{ validUntil, "hasSeason": $season in membershipHistory[].season }`,
+    { id: _id, season },
+  );
+
+  const amount =
+    session.amount_total != null ? session.amount_total / 100 : null;
+  const currency = session.currency ?? null;
 
   // Create the doc if it's new, then patch to guarantee the membership is set
   // "active" and the payment is recorded — even if the document already existed
   // (e.g. a disabled member paying again). `setIfMissing` keeps joinedAt stable
   // across webhook retries; `set` always (re)activates on a completed payment.
+  // The history entry is skipped on retries so each season appears once.
   await writeClient
     .transaction()
     .createIfNotExists({ _id, _type: "member", email })
-    .patch(_id, (patch) =>
-      patch.setIfMissing({ joinedAt: now, newsletterConsent: true }).set({
-        email,
-        ...(firstName ? { firstName } : {}),
-        ...(lastName ? { lastName } : {}),
-        status: "active",
-        newsletterConsent: true,
-        amount:
-          session.amount_total != null ? session.amount_total / 100 : null,
-        currency: session.currency ?? null,
-        paidAt: now,
-        stripeSessionId: session.id,
-        stripePaymentIntentId: paymentIntentId,
-      }),
-    )
+    .patch(_id, (patch) => {
+      const base = patch
+        .setIfMissing({
+          joinedAt: now,
+          newsletterConsent: true,
+          membershipHistory: [],
+        })
+        .set({
+          email,
+          ...(firstName ? { firstName } : {}),
+          ...(lastName ? { lastName } : {}),
+          status: "active",
+          newsletterConsent: true,
+          amount,
+          currency,
+          paidAt: now,
+          validUntil: laterValidUntil(existing?.validUntil, seasonEnd(season)),
+          stripeSessionId: session.id,
+          stripePaymentIntentId: paymentIntentId,
+        });
+      return existing?.hasSeason
+        ? base
+        : base.prepend("membershipHistory", [
+            {
+              _key: season,
+              _type: "membershipPeriod",
+              season,
+              amount,
+              currency,
+              paidAt: now,
+              source: "stripe",
+              stripeSessionId: session.id,
+              stripePaymentIntentId: paymentIntentId,
+            },
+          ]);
+    })
     .commit();
 }
