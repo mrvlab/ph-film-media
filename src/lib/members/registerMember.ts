@@ -2,7 +2,7 @@ import "server-only";
 import type Stripe from "stripe";
 
 import { writeClient } from "@/sanity/lib/writeClient";
-import { memberDocId, normalizeEmail } from "./members";
+import { findMemberByEmail, memberDocId, normalizeEmail } from "./members";
 import { laterValidUntil, seasonEnd, seasonOf } from "./seasons";
 
 // Registers a Filmklubben member from a completed membership Checkout Session.
@@ -32,7 +32,9 @@ export async function registerMemberFromSession(
       ? session.payment_intent
       : (session.payment_intent?.id ?? null);
 
-  const _id = memberDocId(email);
+  // Members added in the Studio have other ids, so renew the existing document
+  // rather than creating a second one for the same email.
+  const _id = (await findMemberByEmail(email))?._id ?? memberDocId(email);
   const now = new Date().toISOString();
   // The checkout stamps the season it charged for; older sessions predate that
   // and paid for the season they were bought in.

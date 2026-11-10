@@ -70,7 +70,7 @@ for (const [season, group] of bySeason) {
   } else {
     console.log(`  ${label}: create code, clear ${group.length} tickets`);
     tx.createIfNotExists({
-      _id: `seasonAccessCode-${season}`,
+      _id: `seasonAccessCode.${season}`,
       _type: 'seasonAccessCode',
       scope: 'season',
       season,

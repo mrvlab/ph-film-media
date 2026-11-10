@@ -48,8 +48,9 @@ export type JoinOutcome = "is_member" | "redirecting" | "disabled" | null;
 
 /**
  * Drives the two-step members-only ticket gate:
- *  - checkOrJoin: is this email a member? If yes → caller shows the code step;
- *    if no → redirect to the 29 kr membership Stripe Checkout.
+ *  - checkOrJoin: is this email a member paid for the screening's season? If
+ *    yes → caller shows the code step; if no → redirect to the membership
+ *    Stripe Checkout (also used to renew an expired membership).
  *  - buyTicket: validate member + access code, then redirect to ticket Checkout.
  */
 export function useMembershipGate(
@@ -87,6 +88,8 @@ export function useMembershipGate(
           firstName,
           lastName,
           email,
+          // Decides which season the membership has to cover.
+          ticketId,
           cancelPath: cancelPath(),
         }),
       });
@@ -175,8 +178,11 @@ export function useMembershipGate(
           item_id: ticketId,
           item_name: item?.item_name,
         });
-        // Revoked members get a dedicated support view, not an inline error.
-        if (json?.error !== "membership_disabled") {
+        // Revoked and expired members get their own view, not an inline error.
+        if (
+          json?.error !== "membership_disabled" &&
+          json?.error !== "membership_expired"
+        ) {
           setError(checkoutErrorMessage(json?.error, res.status));
         }
         return json?.error ?? "error";
@@ -204,5 +210,11 @@ export function useMembershipGate(
     }
   }
 
-  return { loading, error, setError, checkOrJoin, buyTicket };
+  // Renews an expired membership: the server takes the name from the member's
+  // record, so only the email is needed.
+  function renew(email: string): Promise<JoinOutcome> {
+    return checkOrJoin("", "", email);
+  }
+
+  return { loading, error, setError, checkOrJoin, buyTicket, renew };
 }

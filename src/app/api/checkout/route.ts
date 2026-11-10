@@ -8,6 +8,7 @@ import {
   findMemberByEmail,
   isActiveMember,
   isDisabledMember,
+  isExpiredMember,
   isValidEmail,
   normalizeEmail,
 } from "@/lib/members/members";
@@ -102,21 +103,31 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "ticket_not_found" }, { status: 404 });
   }
 
-  // Gate 1: buyer must be an active member. Uses the no-CDN client so a
-  // just-registered member is never missed.
+  if (isPastScreening(ticket)) {
+    return NextResponse.json({ error: "screening_passed" }, { status: 400 });
+  }
+
+  // No date means no season, which is treated like a missing access code.
+  const season = ticket.date ? seasonOf(ticket.date) : null;
+
+  // Gate 1: buyer must be a member who has paid for the screening's season.
+  // Uses the no-CDN client so a just-registered member is never missed.
   const member = await findMemberByEmail(rawEmail);
   if (isDisabledMember(member)) {
     // Access revoked by an admin — distinct from "never a member".
     return NextResponse.json({ error: "membership_disabled" }, { status: 403 });
   }
-  if (!isActiveMember(member)) {
+  const memberSeason = season ?? seasonOf();
+  if (isExpiredMember(member, memberSeason)) {
+    // Paid for an earlier season; the gate offers to renew.
+    return NextResponse.json({ error: "membership_expired" }, { status: 403 });
+  }
+  if (!isActiveMember(member, memberSeason)) {
     return NextResponse.json({ error: "not_member" }, { status: 403 });
   }
 
   // Gate 2: the ticket's screening code, or else the code for the season of
-  // its screening date, must match. No date means no season, which is treated
-  // like a missing code.
-  const season = ticket.date ? seasonOf(ticket.date) : null;
+  // its screening date, must match.
   const storedCode = ticket.screeningCode?.trim()
     ? ticket.screeningCode.trim()
     : season
@@ -136,10 +147,6 @@ export async function POST(request: Request) {
   }
   if (normalizeCode(rawCode) !== normalizeCode(storedCode)) {
     return NextResponse.json({ error: "invalid_code" }, { status: 403 });
-  }
-
-  if (isPastScreening(ticket)) {
-    return NextResponse.json({ error: "screening_passed" }, { status: 400 });
   }
 
   const sold = ticket.seatsSold ?? 0;

@@ -76,3 +76,13 @@ export function seasonRange(from: string, to: string): SeasonId[] {
   }
   return seasons;
 }
+
+// The season a membership payment should cover: the screening's season, or
+// the current one if the screening is earlier or unknown. Paying for a later
+// season also covers the ones before it (see coversSeason).
+export function seasonToCover(screeningDate?: string | null): SeasonId {
+  const current = seasonOf();
+  if (!screeningDate) return current;
+  const screening = seasonOf(screeningDate);
+  return seasonEnd(screening) > seasonEnd(current) ? screening : current;
+}

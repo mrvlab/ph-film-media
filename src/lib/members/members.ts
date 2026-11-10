@@ -2,6 +2,7 @@ import "server-only";
 import { createHash } from "crypto";
 
 import { writeClient } from "@/sanity/lib/writeClient";
+import { coversSeason } from "./seasons";
 
 // Normalizes an email for storage and lookup (the member key).
 export function normalizeEmail(email: string): string {
@@ -20,20 +21,42 @@ export function memberDocId(email: string): string {
   return `member.${hash.slice(0, 32)}`;
 }
 
-export type MemberLookup = { _id: string; status: string | null } | null;
+export type MemberLookup = {
+  _id: string;
+  status: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  validUntil: string | null;
+} | null;
 
 // Looks up a member by email using the no-CDN write client, so a just-registered
 // member (written by the webhook) is never missed due to CDN staleness.
 export async function findMemberByEmail(email: string): Promise<MemberLookup> {
   return writeClient.fetch<MemberLookup>(
     // lower(email) so admin-created members with mixed-case emails still match.
-    `*[_type == "member" && lower(email) == $email][0]{ _id, status }`,
+    `*[_type == "member" && lower(email) == $email && !(_id in path("drafts.**"))][0]{
+      _id, status, firstName, lastName, validUntil
+    }`,
     { email: normalizeEmail(email) },
   );
 }
 
-export function isActiveMember(member: MemberLookup): boolean {
-  return !!member && member.status === "active";
+// Active and paid for the given season.
+export function isActiveMember(member: MemberLookup, season: string): boolean {
+  return (
+    !!member &&
+    member.status === "active" &&
+    coversSeason(member.validUntil, season)
+  );
+}
+
+// Was a member, but hasn't paid for the given season.
+export function isExpiredMember(member: MemberLookup, season: string): boolean {
+  return (
+    !!member &&
+    member.status === "active" &&
+    !coversSeason(member.validUntil, season)
+  );
 }
 
 // An admin has explicitly revoked this member's access.
