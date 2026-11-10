@@ -14,8 +14,28 @@ export default defineCliConfig({
   // root postcss.config.mjs (Tailwind v4) and fail to load it. The Studio has
   // its own styling and needs no PostCSS plugins, so pass an empty inline
   // config to stop Vite searching the filesystem.
+  //
+  // The shared config in src/sanity/env.ts reads NEXT_PUBLIC_* variables, which
+  // Vite doesn't expose (only SANITY_STUDIO_*), so inline them for the hosted
+  // Studio build.
   vite: (config) => ({
     ...config,
     css: { ...config.css, postcss: {} },
+    define: {
+      ...config.define,
+      ...Object.fromEntries(
+        [
+          'NEXT_PUBLIC_SANITY_PROJECT_ID',
+          'NEXT_PUBLIC_SANITY_DATASET',
+          'NEXT_PUBLIC_SANITY_API_VERSION',
+          'NEXT_PUBLIC_SANITY_STUDIO_PREVIEW_URL',
+        ]
+          .filter((name) => process.env[name] !== undefined)
+          .map((name) => [
+            `process.env.${name}`,
+            JSON.stringify(process.env[name]),
+          ]),
+      ),
+    },
   }),
 })
