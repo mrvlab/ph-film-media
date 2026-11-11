@@ -17,6 +17,7 @@ import { structure } from './src/sanity/structure';
 import { resolve } from './src/sanity/presentation/resolve';
 import { MarkExistingMemberAction } from './src/sanity/actions/markExistingMember';
 import { lockAction } from './src/sanity/actions/lockActions';
+import { recordSeatChange } from './src/sanity/actions/recordSeatChange';
 import { isPastSeasonCode } from './src/sanity/schemaTypes/content/seasonAccessCode';
 import { isPastScreening } from './src/lib/tickets/isPastScreening';
 
@@ -43,7 +44,8 @@ export default defineConfig({
   document: {
     // Add the "Mark as existing member" action to member documents only, and
     // keep past season access codes and past screenings from being deleted or
-    // unpublished: they're the record of what was used and sold.
+    // unpublished: they're the record of what was used and sold. Publishing a
+    // ticket also records any change to its seat total.
     actions: (prev, context) => {
       if (context.schemaType === 'member') {
         return [...prev, MarkExistingMemberAction];
@@ -53,7 +55,9 @@ export default defineConfig({
       return prev.map((action) =>
         action.action === 'delete' || action.action === 'unpublish'
           ? lockAction(action, lock.isLocked, lock.reason)
-          : action,
+          : action.action === 'publish' && context.schemaType === 'ticket'
+            ? recordSeatChange(action)
+            : action,
       );
     },
   },
