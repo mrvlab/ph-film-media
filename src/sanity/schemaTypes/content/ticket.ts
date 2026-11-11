@@ -1,8 +1,11 @@
 import { TagIcon } from '@sanity/icons/Tag';
 import { defineField, defineType } from 'sanity';
 
+import { formatScreening } from '@/lib/tickets/formatScreening';
 import { isPastScreening } from '@/lib/tickets/isPastScreening';
+import { seatStats } from '@/lib/tickets/seatStats';
 import { SeasonAccessCodeInput } from '../../components/SeasonAccessCodeInput';
+import { SeatsInput } from '../../components/SeatsInput';
 
 export const ticket = defineType({
   name: 'ticket',
@@ -19,7 +22,6 @@ export const ticket = defineType({
   ],
   fieldsets: [
     { name: 'pricing', title: 'Price', options: { columns: 2 } },
-    { name: 'seats', title: 'Seats', options: { columns: 2 } },
   ],
   fields: [
     // ----- Details -----
@@ -71,21 +73,49 @@ export const ticket = defineType({
     }),
     defineField({
       name: 'totalSeats',
-      title: 'Total',
+      title: 'Seats',
       type: 'number',
       group: 'sales',
-      fieldset: 'seats',
+      description: 'Sales update automatically from Stripe.',
       validation: (Rule) => Rule.required().integer().min(1),
+      components: { input: SeatsInput },
     }),
+    // Shown in the Seats panel above, so the fields themselves stay hidden.
     defineField({
       name: 'seatsSold',
       title: 'Sold',
       type: 'number',
-      group: 'sales',
-      fieldset: 'seats',
       initialValue: 0,
       readOnly: true,
-      description: 'Read-only. Updated automatically from Stripe.',
+      hidden: true,
+    }),
+    // Set the first time sales reach the seat total.
+    defineField({
+      name: 'soldOutAt',
+      title: 'Sold out at',
+      type: 'datetime',
+      readOnly: true,
+      hidden: true,
+    }),
+    // Added on publish when the seat total changes (see recordSeatChange).
+    defineField({
+      name: 'seatChanges',
+      title: 'Seat changes',
+      type: 'array',
+      readOnly: true,
+      hidden: true,
+      of: [
+        {
+          type: 'object',
+          name: 'seatChange',
+          fields: [
+            { name: 'from', type: 'number' },
+            { name: 'to', type: 'number' },
+            { name: 'soldAtChange', type: 'number' },
+            { name: 'changedAt', type: 'datetime' },
+          ],
+        },
+      ],
     }),
     // Empty means the season code applies (looked up from the date at
     // checkout); a picked screening code replaces it for this ticket.
@@ -132,51 +162,39 @@ export const ticket = defineType({
       venue: 'venue',
       sold: 'seatsSold',
       total: 'totalSeats',
+      soldOutAt: 'soldOutAt',
+      seatChanges: 'seatChanges',
       poster: 'poster.media',
       banner: 'banner.media',
     },
-    prepare({ title, date, venue, sold, total, poster, banner }) {
+    prepare({ title, date, venue, sold, total, soldOutAt, seatChanges, poster, banner }) {
       // Leads with the sales state so the list can be scanned at a glance:
-      // "🟢 Tue 1 Dec, 17:30 · 12/40 sold".
-      const soldNum = sold ?? 0;
-      const seats = `${soldNum}/${total ?? '?'} sold`;
-      const past = isPastScreening({ date });
-      const soldOut = !!total && soldNum >= total;
-      const nearlyFull = !!total && soldNum >= total * 0.8;
-      const dot = past ? '⚪' : soldOut ? '🔴' : nearlyFull ? '🟠' : '🟢';
-      const sales = past
-        ? `Past · ${seats}`
-        : soldOut
-          ? `Sold out (${seats.replace(' sold', '')})`
-          : seats;
+      // "🟢 Tue 1 Dec, 17:30 · 12/40 sold". Past screenings only say so; their
+      // sales history is in the Seats panel.
+      const when = date ? formatScreening(date) : 'No date';
+      if (isPastScreening({ date })) {
+        return {
+          title: title || 'Untitled ticket',
+          subtitle: `${when} · Past`,
+          description: venue,
+          media: poster || banner || TagIcon,
+        };
+      }
+      const stats = seatStats({ totalSeats: total, seatsSold: sold, soldOutAt, seatChanges });
+      const dot = stats.soldOut ? '🔴' : stats.nearlyFull ? '🟠' : '🟢';
+      const seats = `${stats.sold}/${total ?? '?'}`;
+      const sales = [
+        stats.soldOut ? `Sold out ${seats}` : `${seats} sold`,
+        stats.initialSeats !== stats.total ? `from ${stats.initialSeats}` : null,
+      ]
+        .filter(Boolean)
+        .join(' · ');
       return {
         title: title || 'Untitled ticket',
-        subtitle: `${dot} ${date ? formatScreening(date) : 'No date'} · ${sales}`,
+        subtitle: `${dot} ${when} · ${sales}`,
         description: venue,
         media: poster || banner || TagIcon,
       };
     },
   },
 });
-
-const screeningParts = new Intl.DateTimeFormat('en-GB', {
-  timeZone: 'Europe/Stockholm',
-  weekday: 'short',
-  day: 'numeric',
-  month: 'short',
-  year: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit',
-});
-
-// "Tue 1 Dec, 17:30" in Stockholm time, with the year only when it isn't this
-// year's: "Wed 11 Aug 2027, 17:30".
-function formatScreening(date: string): string {
-  const get = (d: Date) =>
-    Object.fromEntries(
-      screeningParts.formatToParts(d).map((p) => [p.type, p.value]),
-    );
-  const p = get(new Date(date));
-  const year = p.year === get(new Date()).year ? '' : ` ${p.year}`;
-  return `${p.weekday} ${p.day} ${p.month}${year}, ${p.hour}:${p.minute}`;
-}
