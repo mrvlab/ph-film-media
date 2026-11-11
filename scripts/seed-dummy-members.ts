@@ -1,5 +1,6 @@
 // Seeds dummy Filmklubben members covering every membership state, for testing
-// the season-based membership lists and history in the Studio.
+// the season-based membership lists and history in the Studio. Refuses to run
+// against production.
 //
 //   bun scripts/seed-dummy-members.ts           create or replace the dummies
 //   bun scripts/seed-dummy-members.ts --clean   delete them again
@@ -18,6 +19,7 @@ if (!projectId || !dataset || !token) {
     'Set NEXT_PUBLIC_SANITY_PROJECT_ID, NEXT_PUBLIC_SANITY_DATASET and SANITY_WRITE_TOKEN',
   );
 }
+if (dataset === 'production') throw new Error('Refusing to seed production.');
 
 const client = createClient({
   projectId,
