@@ -7,7 +7,14 @@ import { motion, easeInOut } from 'framer-motion';
 import { trackEvent, type AnalyticsItem } from '@/lib/analytics/gtag';
 import { useMembershipGate } from './useMembershipGate';
 
-type GateView = 'choice' | 'join' | 'code' | 'joined' | 'already' | 'disabled';
+type GateView =
+  | 'choice'
+  | 'join'
+  | 'code'
+  | 'joined'
+  | 'already'
+  | 'expired'
+  | 'disabled';
 
 /**
  * "ticket" gates a screening: join or redeem an access code, then buy a ticket.
@@ -72,7 +79,7 @@ export function TicketGateModal({
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState(initialEmail);
   const [code, setCode] = useState('');
-  const { loading, error, setError, checkOrJoin, buyTicket } =
+  const { loading, error, setError, checkOrJoin, buyTicket, renew } =
     useMembershipGate(ticketId, item, currency);
 
   // Lock body scroll and wire Escape-to-close while mounted (i.e. open).
@@ -114,7 +121,15 @@ export function TicketGateModal({
     e.preventDefault();
     const errorCode = await buyTicket(email, code);
     if (errorCode === 'membership_disabled') goTo('disabled');
+    else if (errorCode === 'membership_expired') goTo('expired');
     // null → redirecting to Stripe; 'not_member'/'invalid_code' → inline error.
+  }
+
+  async function handleRenew() {
+    const outcome = await renew(email);
+    if (outcome === 'is_member') goTo('code');
+    else if (outcome === 'disabled') goTo('disabled');
+    // 'redirecting' → navigating to Stripe; null → error already shown.
   }
 
   const feeLabel = membershipFeeLabel || DEFAULT_FEE_LABEL;
@@ -130,7 +145,9 @@ export function TicketGateModal({
             ? 'Välkommen!'
             : view === 'already'
               ? 'Du är redan medlem'
-              : 'Något gick fel';
+              : view === 'expired'
+                ? 'Förnya ditt medlemskap'
+                : 'Något gick fel';
 
   const joinDisabled =
     loading || firstName.trim() === '' || email.trim() === '';
@@ -364,6 +381,36 @@ export function TicketGateModal({
                   Stäng
                 </button>
               </div>
+            </>
+          ) : null}
+
+          {view === 'expired' ? (
+            <>
+              <p className='mt-5 text-b-16 leading-snug text-black/80 lg:text-b-21'>
+                Ditt medlemskap gäller inte för den här visningen. Medlemskapet
+                gäller en säsong i taget, januari–juni eller juli–december.
+                Förnya det för att köpa biljetter till säsongens visningar.
+              </p>
+              <div className='mt-8 flex flex-col gap-3'>
+                <button
+                  type='button'
+                  onClick={handleRenew}
+                  disabled={loading}
+                  className={primaryBtn}
+                >
+                  {loading ? <Spinner /> : `Förnya medlemskap (${feeLabel})`}
+                </button>
+                <button
+                  type='button'
+                  onClick={onClose}
+                  className={secondaryBtn}
+                >
+                  Stäng
+                </button>
+              </div>
+              {error ? (
+                <p className='mt-4 text-b-14 text-red-700'>{error}</p>
+              ) : null}
             </>
           ) : null}
 

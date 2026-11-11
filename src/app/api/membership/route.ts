@@ -15,6 +15,7 @@ import {
   DEFAULT_MEMBERSHIP_CURRENCY,
   membershipUnitAmount,
 } from "@/lib/members/membershipFee";
+import { seasonLabelSv, seasonToCover } from "@/lib/members/seasons";
 import { clientIp, rateLimit } from "@/lib/rateLimit";
 
 export const runtime = "nodejs";
@@ -28,6 +29,7 @@ export async function POST(request: Request) {
     firstName?: string;
     lastName?: string;
     email?: string;
+    ticketId?: string;
     cancelPath?: string;
   };
   try {
@@ -36,32 +38,49 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "invalid_json" }, { status: 400 });
   }
 
-  const firstName = (
-    typeof body.firstName === "string" ? body.firstName : ""
-  ).trim();
-  if (!firstName) {
-    return NextResponse.json({ error: "missing_name" }, { status: 400 });
-  }
-  const lastName = (
-    typeof body.lastName === "string" ? body.lastName : ""
-  ).trim();
-
   const rawEmail = typeof body.email === "string" ? body.email : "";
   if (!isValidEmail(rawEmail)) {
     return NextResponse.json({ error: "invalid_email" }, { status: 400 });
   }
   const email = normalizeEmail(rawEmail);
-
-  // Already a member → let the client switch straight to the code modal. No charge.
   const existing = await findMemberByEmail(email);
-  if (isActiveMember(existing)) {
-    return NextResponse.json({ isMember: true });
-  }
 
   // Access revoked by an admin — don't let them re-pay; surface a support message.
   if (isDisabledMember(existing)) {
     return NextResponse.json({ error: "membership_disabled" }, { status: 403 });
   }
+
+  // The membership has to cover the season of the screening being bought, so
+  // a member paid for this season still renews for a ticket in the next one.
+  const ticketDate =
+    typeof body.ticketId === "string" && body.ticketId
+      ? await client.fetch<string | null>(
+          `*[_type == "ticket" && _id == $id][0].date`,
+          { id: body.ticketId },
+        )
+      : null;
+  const season = seasonToCover(ticketDate);
+
+  // Already paid for that season → let the client switch straight to the code
+  // modal. No charge.
+  if (isActiveMember(existing, season)) {
+    return NextResponse.json({ isMember: true });
+  }
+
+  // A renewing member only needs their email; the name comes from their record.
+  const firstName = (
+    (typeof body.firstName === "string" ? body.firstName : "").trim() ||
+    existing?.firstName ||
+    ""
+  ).trim();
+  if (!firstName) {
+    return NextResponse.json({ error: "missing_name" }, { status: 400 });
+  }
+  const lastName = (
+    (typeof body.lastName === "string" ? body.lastName : "").trim() ||
+    existing?.lastName ||
+    ""
+  ).trim();
 
   // Only accept same-origin relative paths to avoid open-redirect abuse.
   const cancelPath =
@@ -90,7 +109,9 @@ export async function POST(request: Request) {
     email,
     firstName,
     ...(lastName ? { lastName } : {}),
+    season,
   };
+  const productName = `Medlemskap Filmklubben ${seasonLabelSv(season)}`;
 
   let session: Stripe.Checkout.Session;
   try {
@@ -109,9 +130,8 @@ export async function POST(request: Request) {
             currency,
             unit_amount: unitAmount,
             product_data: {
-              name: "Medlemskap Filmklubben",
-              description:
-                "Engångsavgift för medlemskap i Filmklubben. Ger tillgång till exklusiva visningar.",
+              name: productName,
+              description: `Medlemskap i Filmklubben för ${seasonLabelSv(season)}. Ger tillgång till exklusiva visningar.`,
             },
           },
         },
@@ -121,7 +141,7 @@ export async function POST(request: Request) {
       // the Stripe dashboard, and the webhook can route refunds correctly.
       payment_intent_data: {
         metadata: membershipMetadata,
-        description: "Medlemskap Filmklubben",
+        description: productName,
       },
       success_url: `${origin}${returnPath}`,
       cancel_url: `${origin}${cancelPath}`,
