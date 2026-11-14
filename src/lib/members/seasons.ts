@@ -40,10 +40,10 @@ export function nextSeason(season: string): SeasonId {
   return half === 1 ? `${year}-H2` : `${year + 1}-H1`;
 }
 
-// Studio label, e.g. "Jul–Dec 2026".
+// Studio label, e.g. "Jul–Dec 2026 (HT)".
 export function seasonLabel(season: string): string {
   const { year, half } = parseSeason(season);
-  return `${half === 1 ? 'Jan–Jun' : 'Jul–Dec'} ${year}`;
+  return half === 1 ? `Jan–Jun ${year} (VT)` : `Jul–Dec ${year} (HT)`;
 }
 
 // Customer-facing Swedish label, e.g. "HT 2026" (hösttermin) or "VT 2027".
