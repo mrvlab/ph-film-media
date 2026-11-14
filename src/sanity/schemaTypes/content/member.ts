@@ -238,7 +238,7 @@ export const member = defineType({
     }) {
       const name = [firstName, lastName].filter(Boolean).join(' ');
       // Leads with the membership state so the list can be scanned at a glance:
-      // "🟢 Paid through Jul–Dec 2026 · since Nov 2026 · 3 seasons".
+      // "🟢 Paid through Jul–Dec 2026 (HT) · since Nov 2026 · 3 seasons".
       const season = validUntil ? seasonLabel(seasonOf(validUntil)) : null;
       const isCurrent = !!validUntil && validUntil >= new Date().toISOString();
       const state =
