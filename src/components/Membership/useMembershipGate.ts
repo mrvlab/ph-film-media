@@ -8,43 +8,39 @@ import {
   type AnalyticsItem,
 } from "@/lib/analytics/gtag";
 
-// Swedish, user-facing messages for the API error envelope.
-function membershipErrorMessage(code: unknown, status: number): string {
+// Swedish, user-facing messages for the API error envelope, shared by the
+// join and ticket steps. Each says what happened and what to do next.
+function errorMessage(code: unknown, status: number): string {
   switch (code) {
     case "missing_name":
-      return "Ange ditt namn.";
+      return "Ange ditt förnamn.";
     case "invalid_email":
       return "Ange en giltig e-postadress.";
-    case "rate_limited":
-      return "För många försök. Vänta en stund och försök igen.";
-    default:
-      return `Något gick fel (${code ?? status}). Försök igen.`;
-  }
-}
-
-function checkoutErrorMessage(code: unknown, status: number): string {
-  switch (code) {
+    case "missing_fields":
+      return "Fyll i e-post och kod.";
     case "invalid_code":
-      return "Fel kod. Kontrollera och försök igen.";
+      return "Koden stämmer inte. Du hittar den i vårt senaste nyhetsbrev.";
     case "not_member":
-      return "Du är inte medlem ännu.";
+      return "Vi hittar inget medlemskap för den e-postadressen. Kontrollera stavningen eller bli medlem nedan.";
     case "sold_out":
-      return "Slutsåld.";
+      return "Visningen är slutsåld.";
     case "screening_passed":
       return "Den här visningen har redan varit.";
-    case "missing_fields":
-    case "invalid_email":
-      return "Fyll i alla fält.";
     case "no_access_code":
-      return "Den här visningen saknar en kod ännu. Kontakta oss.";
+      return "Något gick fel hos oss och biljetten kan inte köpas just nu. Försök igen senare.";
     case "rate_limited":
-      return "För många försök. Vänta en stund och försök igen.";
+      return "För många försök. Vänta en minut och försök igen.";
     default:
       return `Något gick fel (${code ?? status}). Försök igen.`;
   }
 }
 
-export type JoinOutcome = "is_member" | "redirecting" | "disabled" | null;
+export type JoinOutcome =
+  | "is_member"
+  | "redirecting"
+  | "disabled"
+  | "expired"
+  | null;
 
 /**
  * Drives the two-step members-only ticket gate:
@@ -60,6 +56,12 @@ export function useMembershipGate(
 ) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // For an expired member: the season a renewal buys, and the season of the
+  // screening (they differ when a renewal late in a season buys the next one).
+  const [renewal, setRenewal] = useState<{
+    season: string;
+    screeningSeason: string | null;
+  } | null>(null);
 
   // Reset loading if the page is restored from bfcache (back from Stripe).
   useEffect(() => {
@@ -76,6 +78,9 @@ export function useMembershipGate(
     firstName: string,
     lastName: string,
     email: string,
+    // Set when renewing: the code is remembered so the buyer comes back to a
+    // filled-in code step.
+    renewCode?: string,
   ): Promise<JoinOutcome> {
     if (loading) return null;
     setLoading(true);
@@ -91,6 +96,7 @@ export function useMembershipGate(
           // Decides which season the membership has to cover.
           ticketId,
           cancelPath: cancelPath(),
+          renew: renewCode !== undefined,
         }),
       });
       const json = await res.json();
@@ -101,12 +107,20 @@ export function useMembershipGate(
         });
         // Revoked members get a dedicated support view, not an inline error.
         if (json?.error === "membership_disabled") return "disabled";
-        setError(membershipErrorMessage(json?.error, res.status));
+        setError(errorMessage(json?.error, res.status));
         return null;
       }
       if (json.isMember) {
         setLoading(false);
         return "is_member";
+      }
+      if (json.expired) {
+        setLoading(false);
+        setRenewal({
+          season: json.season,
+          screeningSeason: json.screeningSeason ?? null,
+        });
+        return "expired";
       }
       if (json.url) {
         // Remember who is joining (and for which ticket) so that when Stripe
@@ -116,7 +130,13 @@ export function useMembershipGate(
         try {
           sessionStorage.setItem(
             "phmedia:pendingJoin",
-            JSON.stringify({ ticketId, email }),
+            JSON.stringify({
+              ticketId,
+              email,
+              season: json.season ?? null,
+              renewed: renewCode !== undefined,
+              code: renewCode ?? "",
+            }),
           );
         } catch {
           // Ignore storage failures (private mode, etc.) — the join still works.
@@ -178,12 +198,18 @@ export function useMembershipGate(
           item_id: ticketId,
           item_name: item?.item_name,
         });
+        if (json?.error === "membership_expired") {
+          setRenewal({
+            season: json.season,
+            screeningSeason: json.screeningSeason ?? null,
+          });
+        }
         // Revoked and expired members get their own view, not an inline error.
         if (
           json?.error !== "membership_disabled" &&
           json?.error !== "membership_expired"
         ) {
-          setError(checkoutErrorMessage(json?.error, res.status));
+          setError(errorMessage(json?.error, res.status));
         }
         return json?.error ?? "error";
       }
@@ -212,9 +238,17 @@ export function useMembershipGate(
 
   // Renews an expired membership: the server takes the name from the member's
   // record, so only the email is needed.
-  function renew(email: string): Promise<JoinOutcome> {
-    return checkOrJoin("", "", email);
+  function renew(email: string, code: string): Promise<JoinOutcome> {
+    return checkOrJoin("", "", email, code);
   }
 
-  return { loading, error, setError, checkOrJoin, buyTicket, renew };
+  return {
+    loading,
+    error,
+    setError,
+    renewal,
+    checkOrJoin,
+    buyTicket,
+    renew,
+  };
 }

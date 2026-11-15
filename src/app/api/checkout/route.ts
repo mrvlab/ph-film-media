@@ -12,7 +12,8 @@ import {
   isValidEmail,
   normalizeEmail,
 } from "@/lib/members/members";
-import { seasonOf } from "@/lib/members/seasons";
+import { seasonOf, seasonToCover } from "@/lib/members/seasons";
+import { ticketAccessCode } from "@/lib/tickets/accessCode";
 import { isPastScreening } from "@/lib/tickets/isPastScreening";
 import { clientIp, rateLimit } from "@/lib/rateLimit";
 
@@ -110,7 +111,8 @@ export async function POST(request: Request) {
   // No date means no season, which is treated like a missing access code.
   const season = ticket.date ? seasonOf(ticket.date) : null;
 
-  // Gate 1: buyer must be a member who has paid for the screening's season.
+  // Every check that can fail on its own runs before the season check, so an
+  // expired member is only asked to renew when the ticket can then be bought.
   // Uses the no-CDN client so a just-registered member is never missed.
   const member = await findMemberByEmail(rawEmail);
   if (isDisabledMember(member)) {
@@ -118,32 +120,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "membership_disabled" }, { status: 403 });
   }
   const memberSeason = season ?? seasonOf();
-  if (isExpiredMember(member, memberSeason)) {
-    // Paid for an earlier season; the gate offers to renew.
-    return NextResponse.json({ error: "membership_expired" }, { status: 403 });
-  }
-  if (!isActiveMember(member, memberSeason)) {
+  const expired = isExpiredMember(member, memberSeason);
+  if (!expired && !isActiveMember(member, memberSeason)) {
     return NextResponse.json({ error: "not_member" }, { status: 403 });
   }
 
-  // Gate 2: the ticket's screening code, or else the code for the season of
-  // its screening date, must match.
-  const storedCode = ticket.screeningCode?.trim()
-    ? ticket.screeningCode.trim()
-    : season
-      ? (
-          await client.fetch<string | null>(
-            `*[_type == "seasonAccessCode" && scope != "screening" && season == $season] | order(_updatedAt desc)[0].code`,
-            { season },
-          )
-        )?.trim()
-      : null;
+  const storedCode = await ticketAccessCode(ticket.screeningCode, season);
   if (!storedCode) {
     // Misconfigured season — an editor hasn't added its access code yet.
     console.error(
       `[checkout] no access code for season ${season ?? "(no date)"} (ticket ${ticket._id})`,
     );
-    return NextResponse.json({ error: "no_access_code" }, { status: 500 });
+    return NextResponse.json({ error: "no_access_code" }, { status: 409 });
   }
   if (normalizeCode(rawCode) !== normalizeCode(storedCode)) {
     return NextResponse.json({ error: "invalid_code" }, { status: 403 });
@@ -152,6 +140,19 @@ export async function POST(request: Request) {
   const sold = ticket.seatsSold ?? 0;
   if (sold >= ticket.totalSeats) {
     return NextResponse.json({ error: "sold_out" }, { status: 400 });
+  }
+
+  if (expired) {
+    // Paid for an earlier season; the gate offers to renew. `season` is what a
+    // renewal buys, which can run past the screening's own season.
+    return NextResponse.json(
+      {
+        error: "membership_expired",
+        season: seasonToCover(ticket.date),
+        screeningSeason: memberSeason,
+      },
+      { status: 403 },
+    );
   }
 
   const origin = request.headers.get("origin") ?? new URL(request.url).origin;
