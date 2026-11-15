@@ -2,12 +2,14 @@ import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 
 import { client } from "@/sanity/lib/client";
+import { writeClient } from "@/sanity/lib/writeClient";
 import { settingsQuery } from "@/sanity/lib/queries";
 import { stripe } from "@/lib/stripe";
 import {
   findMemberByEmail,
   isActiveMember,
   isDisabledMember,
+  isExpiredMember,
   isValidEmail,
   normalizeEmail,
 } from "@/lib/members/members";
@@ -15,7 +17,9 @@ import {
   DEFAULT_MEMBERSHIP_CURRENCY,
   membershipUnitAmount,
 } from "@/lib/members/membershipFee";
-import { seasonLabelSv, seasonToCover } from "@/lib/members/seasons";
+import { seasonLabelSv, seasonOf, seasonToCover } from "@/lib/members/seasons";
+import { ticketAccessCode } from "@/lib/tickets/accessCode";
+import { isPastScreening } from "@/lib/tickets/isPastScreening";
 import { clientIp, rateLimit } from "@/lib/rateLimit";
 
 export const runtime = "nodejs";
@@ -31,6 +35,8 @@ export async function POST(request: Request) {
     email?: string;
     ticketId?: string;
     cancelPath?: string;
+    // Set when an expired member confirmed the renewal step.
+    renew?: boolean;
   };
   try {
     body = await request.json();
@@ -52,19 +58,53 @@ export async function POST(request: Request) {
 
   // The membership has to cover the season of the screening being bought, so
   // a member paid for this season still renews for a ticket in the next one.
-  const ticketDate =
+  const ticket =
     typeof body.ticketId === "string" && body.ticketId
-      ? await client.fetch<string | null>(
-          `*[_type == "ticket" && _id == $id][0].date`,
+      ? // No CDN: seats and codes decide whether someone may pay.
+        await writeClient.fetch<{
+          date: string | null;
+          totalSeats: number;
+          seatsSold: number | null;
+          screeningCode: string | null;
+        } | null>(
+          `*[_type == "ticket" && _id == $id][0]{
+            date, totalSeats, seatsSold,
+            "screeningCode": accessCodeOverride->code
+          }`,
           { id: body.ticketId },
         )
       : null;
+  const ticketDate = ticket?.date ?? null;
   const season = seasonToCover(ticketDate);
+  const screeningSeason = ticketDate ? seasonOf(ticketDate) : null;
 
-  // Already paid for that season → let the client switch straight to the code
-  // modal. No charge.
-  if (isActiveMember(existing, season)) {
+  // Nobody pays for a membership to buy a ticket that can't be bought.
+  if (ticket) {
+    if (isPastScreening(ticket)) {
+      return NextResponse.json({ error: "screening_passed" }, { status: 400 });
+    }
+    if ((ticket.seatsSold ?? 0) >= ticket.totalSeats) {
+      return NextResponse.json({ error: "sold_out" }, { status: 400 });
+    }
+    if (!(await ticketAccessCode(ticket.screeningCode, screeningSeason))) {
+      return NextResponse.json({ error: "no_access_code" }, { status: 409 });
+    }
+  }
+
+  // Already paid for the screening's season (or, without a ticket, the season
+  // being sold) → let the client switch straight to the code modal. No charge.
+  if (isActiveMember(existing, screeningSeason ?? season)) {
     return NextResponse.json({ isMember: true });
+  }
+
+  // A returning member who picked "Bli medlem" sees the renewal step first, so
+  // they know which season they're paying for.
+  if (
+    ticket &&
+    isExpiredMember(existing, screeningSeason ?? season) &&
+    !body.renew
+  ) {
+    return NextResponse.json({ expired: true, season, screeningSeason });
   }
 
   // A renewing member only needs their email; the name comes from their record.
@@ -131,7 +171,7 @@ export async function POST(request: Request) {
             unit_amount: unitAmount,
             product_data: {
               name: productName,
-              description: `Medlemskap i Filmklubben för ${seasonLabelSv(season)}. Ger tillgång till exklusiva visningar.`,
+              description: `Medlemskap i Filmklubben till och med ${seasonLabelSv(season)}. Ger tillgång till exklusiva visningar.`,
             },
           },
         },
@@ -159,5 +199,5 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "no_session_url" }, { status: 500 });
   }
 
-  return NextResponse.json({ url: session.url });
+  return NextResponse.json({ url: session.url, season });
 }

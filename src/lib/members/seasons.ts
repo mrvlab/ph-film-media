@@ -46,10 +46,10 @@ export function seasonLabel(season: string): string {
   return half === 1 ? `Jan–Jun ${year} (VT)` : `Jul–Dec ${year} (HT)`;
 }
 
-// Customer-facing Swedish label, e.g. "HT 2026" (hösttermin) or "VT 2027".
+// Customer-facing Swedish label, e.g. "Hösttermin 2026" or "Vårtermin 2027".
 export function seasonLabelSv(season: string): string {
   const { year, half } = parseSeason(season);
-  return `${half === 1 ? 'VT' : 'HT'} ${year}`;
+  return `${half === 1 ? 'Vårtermin' : 'Hösttermin'} ${year}`;
 }
 
 // Whether a membership paid through `validUntil` covers the given season.
@@ -71,18 +71,30 @@ export function laterValidUntil(
 // Every season from `from` up to and including `to`, oldest first.
 export function seasonRange(from: string, to: string): SeasonId[] {
   const seasons: SeasonId[] = [];
-  for (let s = from as SeasonId; seasonEnd(s) <= seasonEnd(to); s = nextSeason(s)) {
+  for (
+    let s = from as SeasonId;
+    seasonEnd(s) <= seasonEnd(to);
+    s = nextSeason(s)
+  ) {
     seasons.push(s);
   }
   return seasons;
 }
 
 // The season a membership payment should cover: the screening's season, or
-// the current one if the screening is earlier or unknown. Paying for a later
-// season also covers the ones before it (see coversSeason).
+// the current one if the screening is earlier or unknown. In a season's last
+// month the current one is nearly over, so a payment covers the next one
+// instead. Paying for a later season also covers the ones before it (see
+// coversSeason), so the rest of the current season is included either way.
 export function seasonToCover(screeningDate?: string | null): SeasonId {
-  const current = seasonOf();
-  if (!screeningDate) return current;
+  const now = new Date();
+  const current = seasonOf(now);
+  const month = Number(
+    yearMonthFormatter.formatToParts(now).find((p) => p.type === 'month')
+      ?.value,
+  );
+  const base = month === 6 || month === 12 ? nextSeason(current) : current;
+  if (!screeningDate) return base;
   const screening = seasonOf(screeningDate);
-  return seasonEnd(screening) > seasonEnd(current) ? screening : current;
+  return seasonEnd(screening) > seasonEnd(base) ? screening : base;
 }

@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
 import { motion, easeInOut } from 'framer-motion';
 
 import { trackEvent, type AnalyticsItem } from '@/lib/analytics/gtag';
+import { seasonLabelSv, seasonToCover } from '@/lib/members/seasons';
 import { useMembershipGate } from './useMembershipGate';
 
 type GateView =
@@ -37,6 +38,13 @@ type TicketGateModalProps = {
   initialView?: GateView;
   // Prefills the code step's email after a member returns from joining.
   initialEmail?: string;
+  // Prefills the code after a renewal, if the buyer had typed one.
+  initialCode?: string;
+  // Set when returning from a paid membership: the season it runs through,
+  // and whether it was a renewal (which reopens straight on the code step).
+  paid?: { season: string | null; renewed: boolean } | null;
+  // The screening's date, which decides the season a new membership covers.
+  ticketDate?: string | null;
   onClose: () => void;
 };
 
@@ -71,6 +79,9 @@ export function TicketGateModal({
   membershipFeeLabel,
   initialView = 'choice',
   initialEmail = '',
+  initialCode = '',
+  paid = null,
+  ticketDate = null,
   onClose,
 }: TicketGateModalProps) {
   const isMembership = mode === 'membership';
@@ -78,8 +89,8 @@ export function TicketGateModal({
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState(initialEmail);
-  const [code, setCode] = useState('');
-  const { loading, error, setError, checkOrJoin, buyTicket, renew } =
+  const [code, setCode] = useState(initialCode);
+  const { loading, error, setError, renewal, checkOrJoin, buyTicket, renew } =
     useMembershipGate(ticketId, item, currency);
 
   // Lock body scroll and wire Escape-to-close while mounted (i.e. open).
@@ -114,6 +125,7 @@ export function TicketGateModal({
     const outcome = await checkOrJoin(firstName, lastName, email);
     if (outcome === 'is_member') goTo('already');
     else if (outcome === 'disabled') goTo('disabled');
+    else if (outcome === 'expired') goTo('expired');
     // 'redirecting' → navigating to Stripe; null → error already shown.
   }
 
@@ -121,18 +133,32 @@ export function TicketGateModal({
     e.preventDefault();
     const errorCode = await buyTicket(email, code);
     if (errorCode === 'membership_disabled') goTo('disabled');
+    // Just paid: the webhook hasn't recorded the payment yet.
+    else if (
+      paid &&
+      (errorCode === 'membership_expired' || errorCode === 'not_member')
+    )
+      setError('Vi bekräftar din betalning. Försök igen om en liten stund.');
     else if (errorCode === 'membership_expired') goTo('expired');
     // null → redirecting to Stripe; 'not_member'/'invalid_code' → inline error.
   }
 
   async function handleRenew() {
-    const outcome = await renew(email);
+    const outcome = await renew(email, code);
     if (outcome === 'is_member') goTo('code');
     else if (outcome === 'disabled') goTo('disabled');
     // 'redirecting' → navigating to Stripe; null → error already shown.
   }
 
   const feeLabel = membershipFeeLabel || DEFAULT_FEE_LABEL;
+  // The season a new membership runs through, named on the join step.
+  const joinSeason = seasonLabelSv(seasonToCover(ticketDate));
+  const paidSeason = paid?.season ? seasonLabelSv(paid.season) : null;
+  const renewSeason = renewal ? seasonLabelSv(renewal.season) : null;
+  const renewScreening =
+    renewal?.screeningSeason && renewal.screeningSeason !== renewal.season
+      ? seasonLabelSv(renewal.screeningSeason)
+      : null;
 
   const heading =
     view === 'choice'
@@ -140,14 +166,16 @@ export function TicketGateModal({
       : view === 'join'
         ? 'Bli medlem'
         : view === 'code'
-          ? 'Lös in din kod'
+          ? paid?.renewed
+            ? 'Medlemskapet är förnyat'
+            : 'Lös in din kod'
           : view === 'joined'
             ? 'Välkommen!'
             : view === 'already'
               ? 'Du är redan medlem'
               : view === 'expired'
                 ? 'Förnya ditt medlemskap'
-                : 'Något gick fel';
+                : 'Kontakta oss';
 
   const joinDisabled =
     loading || firstName.trim() === '' || email.trim() === '';
@@ -222,9 +250,10 @@ export function TicketGateModal({
           {view === 'join' ? (
             <>
               <p className='mt-5 text-b-16 leading-snug text-black/80 lg:text-b-21'>
+                {`Medlemskapet gäller till och med ${joinSeason}. `}
                 {isMembership
-                  ? 'Fyll i dina uppgifter för att bli medlem i Filmklubben.'
-                  : 'Fyll i dina uppgifter för att bli medlem i Filmklubben. Koden till visningen skickas till din mejl.'}
+                  ? 'Koderna till visningarna skickas i vårt nyhetsbrev.'
+                  : 'Koden till visningen skickas i vårt nyhetsbrev.'}
               </p>
               <form onSubmit={handleJoinSubmit} className='mt-8'>
                 <div className='flex flex-col gap-6'>
@@ -279,8 +308,9 @@ export function TicketGateModal({
           {view === 'code' ? (
             <>
               <p className='mt-5 text-b-16 leading-snug text-black/80 lg:text-b-21'>
-                Ange din e-post och koden för visningen för att köpa din
-                biljett.
+                {paid?.renewed && paidSeason
+                  ? `Du är medlem till och med ${paidSeason}. Ange koden för visningen för att köpa biljetten.`
+                  : 'Ange din e-post och koden för visningen för att köpa din biljett.'}
               </p>
               <form onSubmit={handleCodeSubmit} className='mt-8'>
                 <div className='flex flex-col gap-6'>
@@ -331,9 +361,12 @@ export function TicketGateModal({
           {view === 'joined' ? (
             <>
               <p className='mt-5 text-b-16 leading-snug text-black/80 lg:text-b-21'>
+                {paidSeason
+                  ? `Du är medlem till och med ${paidSeason}. `
+                  : 'Du är nu medlem i Filmklubben. '}
                 {isMembership
-                  ? 'Du är nu medlem i Filmklubben. Håll utkik i din e-post — koderna till våra visningar skickas via vårt nyhetsbrev.'
-                  : 'Du är nu medlem i Filmklubben. Håll utkik i din e-post — koden till visningen skickas via vårt nyhetsbrev. Har du redan koden kan du lösa in den nedan.'}
+                  ? 'Koderna till visningarna skickas i vårt nyhetsbrev.'
+                  : 'Koden till visningen skickas i vårt nyhetsbrev. Har du redan koden kan du köpa biljetten nu.'}
               </p>
               <div className='mt-8 flex flex-col gap-3'>
                 {isMembership ? null : (
@@ -387,9 +420,12 @@ export function TicketGateModal({
           {view === 'expired' ? (
             <>
               <p className='mt-5 text-b-16 leading-snug text-black/80 lg:text-b-21'>
-                Ditt medlemskap gäller inte för den här visningen. Medlemskapet
-                gäller en säsong i taget, januari–juni eller juli–december.
-                Förnya det för att köpa biljetter till säsongens visningar.
+                {renewScreening
+                  ? `Visningen är under ${renewScreening}. Ditt medlemskap gäller inte den terminen. Förnyar du nu gäller det till och med ${renewSeason}.`
+                  : renewSeason
+                    ? `Visningen är under ${renewSeason}. Ditt medlemskap gäller inte den terminen.`
+                    : 'Ditt medlemskap gäller inte för den här visningen.'}{' '}
+                Efter betalningen kommer du tillbaka hit och köper biljetten.
               </p>
               <div className='mt-8 flex flex-col gap-3'>
                 <button
@@ -398,7 +434,13 @@ export function TicketGateModal({
                   disabled={loading}
                   className={primaryBtn}
                 >
-                  {loading ? <Spinner /> : `Förnya medlemskap (${feeLabel})`}
+                  {loading ? (
+                    <Spinner />
+                  ) : renewSeason ? (
+                    `Förnya för ${renewSeason} (${feeLabel})`
+                  ) : (
+                    `Förnya medlemskap (${feeLabel})`
+                  )}
                 </button>
                 <button
                   type='button'
@@ -418,17 +460,17 @@ export function TicketGateModal({
             <p className='mt-5 text-b-16 leading-snug text-black/80 lg:text-b-21'>
               {contactEmail ? (
                 <>
-                  Hör av dig till mig på{' '}
+                  Har du problem med ditt köp? Hör av dig till{' '}
                   <a
                     href={`mailto:${contactEmail}`}
                     className='underline underline-offset-2 hover:opacity-70'
                   >
                     {contactEmail}
                   </a>{' '}
-                  vid problem. Eller försök igen om en liten stund.
+                  så hjälper vi dig.
                 </>
               ) : (
-                'Hör av dig till oss vid problem. Eller försök igen om en liten stund.'
+                'Har du problem med ditt köp? Hör av dig till oss så hjälper vi dig.'
               )}
             </p>
           ) : null}
