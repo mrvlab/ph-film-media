@@ -18,6 +18,7 @@ if (!projectId || !dataset) {
 export default defineCliConfig({
   api: { projectId, dataset },
   studioHost: 'ph-film-media-2',
+  deployment: { appId: 't4d8ivvbt1c2v8z09iebupyl' },
   // The Studio is built with Vite, which would otherwise auto-discover the
   // root postcss.config.mjs (Tailwind v4) and fail to load it. The Studio has
   // its own styling and needs no PostCSS plugins, so pass an empty inline
