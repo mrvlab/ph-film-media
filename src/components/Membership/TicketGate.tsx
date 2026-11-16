@@ -82,7 +82,8 @@ export function TicketGate({
   // were stashed in sessionStorage before the redirect. Deferred to a frame so
   // the state update isn't synchronous inside the effect body.
   useEffect(() => {
-    const frame = requestAnimationFrame(() => {
+    let cancelled = false;
+    const frame = requestAnimationFrame(async () => {
       const params = new URLSearchParams(window.location.search);
       if (params.get("membership") !== "joined") return;
 
@@ -100,6 +101,22 @@ export function TicketGate({
         pending = null;
       }
       if (!pending || pending.ticketId !== gateId) return;
+
+      // Record the paid season before the code step can reach checkout, which
+      // would otherwise turn the buyer away if the webhook hasn't landed yet.
+      const sessionId = params.get("session_id");
+      if (sessionId) {
+        try {
+          await fetch("/api/membership/confirm", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ sessionId }),
+          });
+        } catch {
+          // The webhook still registers the membership.
+        }
+      }
+      if (cancelled) return;
 
       setPrefillEmail(pending.email ?? "");
       // A renewal goes straight back to the code step to finish the purchase.
@@ -126,7 +143,10 @@ export function TicketGate({
         window.location.pathname + (qs ? `?${qs}` : "") + window.location.hash,
       );
     });
-    return () => cancelAnimationFrame(frame);
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(frame);
+    };
   }, [gateId]);
 
   // Manual opens always start fresh on the gate's first step.
